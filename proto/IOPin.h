@@ -11,7 +11,7 @@ public:
 
 	IOPin() {}
 	IOPin(GateBase *parentGate, std::string name, IO_DIRECTION direction);
-	~IOPin();
+	virtual ~IOPin();
 
 	std::string GetName() { return m_name; }
 	IO_DIRECTION GetDirection() { return m_direction; }
@@ -19,7 +19,7 @@ public:
 	virtual IO_STATE Get() { return m_state; };
 	virtual void Set(IO_STATE state);
 
-	void ConnectTo(IOPin*);
+	virtual void ConnectTo(IOPin*);
 
 protected:
 	GateBase* m_parentGate;

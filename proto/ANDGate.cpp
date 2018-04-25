@@ -9,7 +9,7 @@ ANDGate::ANDGate(int inputs/* = 2 */)
 	{
 		std::ostringstream ss;
 		ss << "in" << i;
-		AddInput(ss.str());
+		AddInput(ss.str().c_str());
 	}
 
 	AddOutput("out");

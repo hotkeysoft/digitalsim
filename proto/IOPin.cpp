@@ -31,12 +31,32 @@ void IOPin::Set(IO_STATE state)
 	}
 }
 
-void IOPin::ConnectTo(IOPin* input)
+void IOPin::ConnectTo(IOPin* target)
 {
-	assert(input != NULL);
-	assert(input->m_direction == IOPin::INPUT);
-	assert(input->m_parentGate != this->m_parentGate); // not sure
-	assert(m_connectedPins.find(input) == m_connectedPins.end());
+	GateBase* sourceParent = m_parentGate->GetParent();
+	GateBase* targetParent = target->m_parentGate;
 
-	m_connectedPins.insert(input);
+	if (target == NULL)
+	{
+		throw std::invalid_argument("Pin is NULL");
+	}
+
+	if (target->m_direction != IOPin::INPUT)
+	{
+		throw std::invalid_argument("Cannot connect to OUTPUT pin");
+	}
+
+	// TODO:Not sure
+	if (target->m_parentGate == this->m_parentGate)
+	{
+		throw std::invalid_argument("Cannot connect to self");
+	}
+
+	// TODO:Hi-Z
+	if (m_connectedPins.find(target) != m_connectedPins.end())
+	{
+		throw std::invalid_argument("Already connected to target pin");
+	}
+
+	m_connectedPins.insert(target);
 }

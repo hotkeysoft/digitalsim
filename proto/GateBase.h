@@ -3,25 +3,41 @@
 #include <map>
 #include "IOPin.h"
 
+typedef std::map<std::string, GateBase*> GateMapType;
 typedef std::map<std::string, IOPin*> IOPinMapType;
 
 class GateBase
 {
 public:
 	GateBase();
+	GateBase(const char* name) : m_name(name), m_parent(NULL) {}
 	virtual ~GateBase();
 
-	void AddInput(std::string name, int8_t width = 1);
-	void AddOutput(std::string name, int8_t width = 1);
+	virtual void AddInput(const char*  name, int8_t width = 1);
+	virtual void AddOutput(const char*  name, int8_t width = 1);
+	virtual void AddGate(const char* name, GateBase * gate);
 
-	IOPin* GetPin(std::string name);
+	virtual GateBase* GetGate(const char*  name);
+	virtual IOPin* GetPin(const char*  name);
 
-	virtual void ComputeState() = 0;
+	GateBase* GetParent() { return m_parent; }
+	virtual void SetParent(GateBase* parent);
+
+	virtual void ComputeState() {};
 
 	virtual void Clock() {};
 
 protected:
+	std::string m_name;
+	GateBase* m_parent;
+
+	GateMapType m_internalGates;
+
 	IOPinMapType m_inputPins;
 	IOPinMapType m_outputPins;
+
+	bool IsValidPinName(const char* name);
+	void ValidatePinName(const char* name);
+	void ValidatePinWidth(int8_t width);
 };
 
