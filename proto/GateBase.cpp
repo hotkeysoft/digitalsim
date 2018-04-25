@@ -33,7 +33,15 @@ void GateBase::AddOutput(const char* name, int8_t width)
 
 void GateBase::AddGate(const char* name, GateBase * gate)
 {
-	assert(m_internalGates.find(name) == m_internalGates.end());
+	ValidateGateName(name);
+	if (gate == NULL)
+	{
+		throw std::invalid_argument("Cannot add null gate");
+	} 
+	else if (gate == this)
+	{
+		throw std::invalid_argument("Cannot add self");
+	}
 
 	gate->SetParent(this);
 	m_internalGates[name] = gate;
@@ -70,7 +78,11 @@ IOPin* GateBase::GetPin(const char* name)
 
 void GateBase::SetParent(GateBase * parent)
 {
-	assert(m_parent == NULL);
+	if (m_parent != NULL)
+	{
+		throw std::invalid_argument("gate already has a parent");
+	}
+
 	m_parent = parent;
 }
 
@@ -118,5 +130,39 @@ void GateBase::ValidatePinWidth(int8_t width)
 	else if (width > 1)
 	{
 		throw std::out_of_range("width >1 not supported yet");
+	}
+}
+
+bool GateBase::IsValidGateName(const char* name)
+{
+	if (name == NULL)
+	{
+		return false;
+	}
+
+	if (!std::regex_match(name, std::regex("^[A-Za-z](\\w){0,31}$")))
+	{
+		return false;
+	}
+
+	size_t len = strlen(name);
+	if (len < 1 || len > 32)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void GateBase::ValidateGateName(const char * name)
+{
+	if (!IsValidPinName(name))
+	{
+		throw std::invalid_argument("invalid gate name");
+	}
+
+	if (m_internalGates.find(name) != m_internalGates.end())
+	{
+		throw std::invalid_argument("duplicate gate name");
 	}
 }
