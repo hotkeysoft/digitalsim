@@ -14,6 +14,7 @@ public:
 	virtual ~IOPin();
 
 	std::string GetName() { return m_name; }
+	std::string GetFullName();
 	IO_DIRECTION GetDirection() { return m_direction; }
 
 	virtual IO_STATE Get() { return m_state; };

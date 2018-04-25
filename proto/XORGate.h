@@ -2,14 +2,12 @@
 
 #include "GateBase.h"
 
-class NANDGate : public GateBase
+class XORGate : public GateBase
 {
 public:
-	NANDGate(int inputs = 2);
-	virtual ~NANDGate();
+	XORGate();
+	virtual ~XORGate();
 
 	virtual void ComputeState();
 
 };
-
-

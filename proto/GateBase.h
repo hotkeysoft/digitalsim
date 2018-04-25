@@ -13,6 +13,9 @@ public:
 	GateBase(const char* name) : m_name(name), m_parent(NULL) {}
 	virtual ~GateBase();
 
+	std::string GetName() { return m_name; }
+	std::string GetFullName();
+
 	virtual void AddInput(const char*  name, int8_t width = 1);
 	virtual void AddOutput(const char*  name, int8_t width = 1);
 	virtual void AddGate(const char* name, GateBase * gate);
@@ -30,6 +33,9 @@ public:
 	size_t GetGateCount() { return m_internalGates.size(); }
 	size_t GetInputCount() { return m_inputPins.size(); }
 	size_t GetOutputCount() { return m_outputPins.size(); }
+
+	IOPinMapType GetInputPins() { return m_inputPins;  }
+	IOPinMapType GetOutputPins() { return m_outputPins; }
 
 protected:
 	std::string m_name;

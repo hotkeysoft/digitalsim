@@ -12,6 +12,13 @@ IOPin::~IOPin()
 {
 }
 
+std::string IOPin::GetFullName()
+{
+	std::ostringstream os;
+	os << m_parentGate->GetFullName() << "." << m_name;
+	return os.str();
+}
+
 void IOPin::Set(IO_STATE state) 
 {
 	//if (m_direction == IO_DIRECTION::OUTPUT)

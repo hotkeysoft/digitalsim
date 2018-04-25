@@ -5,7 +5,7 @@
 class ORGate : public GateBase
 {
 public:
-	ORGate();
+	ORGate(int inputs = 2);
 	virtual ~ORGate();
 
 	virtual void ComputeState();

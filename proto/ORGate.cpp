@@ -2,10 +2,16 @@
 #include "ORGate.h"
 
 
-ORGate::ORGate()
+ORGate::ORGate(int inputs/* = 2 */)
 {
-	AddInput("in1");
-	AddInput("in2");
+	assert(inputs > 1);
+	for (int i = 1; i <= inputs; ++i)
+	{
+		std::ostringstream ss;
+		ss << "in" << i;
+		AddInput(ss.str().c_str());
+	}
+
 	AddOutput("out");
 }
 
@@ -16,14 +22,14 @@ ORGate::~ORGate()
 
 void ORGate::ComputeState()
 {
-	if (GetPin("in1")->Get() == IOPin::HI ||
-		GetPin("in2")->Get() == IOPin::HI)
+	for (auto pin : m_inputPins)
 	{
-		GetPin("out")->Set(IOPin::HI);
-	}
-	else
-	{
-		GetPin("out")->Set(IOPin::LOW);
+		if (pin.second->Get() == IOPin::HI)
+		{
+			GetPin("out")->Set(IOPin::HI);
+			return;
+		}
 	}
 
+	GetPin("out")->Set(IOPin::LOW);
 }

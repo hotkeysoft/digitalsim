@@ -39,6 +39,15 @@
     <ClInclude Include="WireGate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LogicTools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XORGate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NANDGate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -69,6 +78,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestGateBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestGates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XORGate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

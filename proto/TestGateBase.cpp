@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "GateBase.h"
+
 #include "NOTGate.h"
+#include "ANDGate.h"
+#include "NANDGate.h"
+#include "ORGate.h"
+#include "WireGate.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -265,6 +270,10 @@ namespace UnitTests
 			Assert::AreEqual(IOPin::HI, not7->GetPin("out")->Get());
 			gate->GetPin("in")->Set(IOPin::LOW);
 			Assert::AreEqual(IOPin::LOW, not7->GetPin("out")->Get());
+		}
+
+		TEST_METHOD(TestFullName)
+		{
 
 		}
 	};

@@ -11,6 +11,18 @@ GateBase::~GateBase()
 {
 }
 
+std::string GateBase::GetFullName()
+{
+	std::ostringstream os;
+	if (m_parent)
+	{
+		os << m_parent->GetFullName() << ".";
+	}
+	os << m_name;
+
+	return os.str();
+}
+
 void GateBase::AddInput(const char* name, int8_t width)
 {
 	ValidatePinName(name);
