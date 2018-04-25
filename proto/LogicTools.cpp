@@ -11,7 +11,7 @@ LogicTools::~LogicTools()
 {
 }
 
-void LogicTools::PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs, std::initializer_list<IOPin*> const& outputs)
+void LogicTools::PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs)
 {
 	if (level <= inputs.size() - 1)
 	{
@@ -36,15 +36,8 @@ void LogicTools::PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs
 	}
 }
 
-void LogicTools::PrintTruthTable(std::initializer_list<IOPin*> const& inputs, std::initializer_list<IOPin*> const& outputs)
+void LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector<IOPin*> const & outputs)
 {
-	std::vector<IOPin*> inputsVect;
-
-	for (auto pin : inputs)
-	{
-		inputsVect.push_back(pin);
-	}
-
 	for (auto pin : inputs)
 	{
 		std::cout << pin->GetName() << "\t";
@@ -56,7 +49,29 @@ void LogicTools::PrintTruthTable(std::initializer_list<IOPin*> const& inputs, st
 	}
 	std::cout << std::endl;
 
-	PrintTruthTable(0, inputsVect, outputs);
+	PrintTruthTable(0, inputs, outputs);
+	std::cout << std::endl;
+}
+
+void LogicTools::PrintTruthTable(GateBase* gate)
+{
+	std::vector<IOPin*> inputsVect;
+	std::vector<IOPin*> outputsVect;
+		
+	for (auto pin : gate->GetInputPins())
+	{
+		inputsVect.push_back(pin.second);
+		std::cout << pin.first << "\t";
+	}
+
+	for (auto pin : gate->GetOutputPins())
+	{
+		outputsVect.push_back(pin.second);
+		std::cout << pin.first << "\t";
+	}
+	std::cout << std::endl;
+
+	PrintTruthTable(0, inputsVect, outputsVect);
 	std::cout << std::endl;
 }
 
@@ -81,7 +96,6 @@ void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, 
 
 LogicTools::IOStateList LogicTools::GetTruthTable(GateBase * gate)
 {
-
 	IOPinMapType inputs = gate->GetInputPins();
 	IOPinMapType outputs = gate->GetOutputPins();
 	IOStateList outputList;

@@ -160,5 +160,64 @@ namespace UnitTests
 			delete gate;
 		}
 
+
+		TEST_METHOD(TestCustomDecoder)
+		{
+			GateBase * component = new GateBase("DECODER");
+			component->AddInput("EN");
+			component->AddInput("I0");
+			component->AddInput("I1");
+			component->AddOutput("Y0");
+			component->AddOutput("Y1");
+			component->AddOutput("Y2");
+			component->AddOutput("Y3");
+
+			component->AddGate("NOTI0", new NOTGate());
+			component->AddGate("NOTI1", new NOTGate());
+			component->AddGate("AND0", new ANDGate(3));
+			component->AddGate("AND1", new ANDGate(3));
+			component->AddGate("AND2", new ANDGate(3));
+			component->AddGate("AND3", new ANDGate(3));
+
+			component->GetGate("AND0")->GetPin("out")->ConnectTo(component->GetPin("Y0"));
+			component->GetGate("AND1")->GetPin("out")->ConnectTo(component->GetPin("Y1"));
+			component->GetGate("AND2")->GetPin("out")->ConnectTo(component->GetPin("Y2"));
+			component->GetGate("AND3")->GetPin("out")->ConnectTo(component->GetPin("Y3"));
+
+			component->GetPin("EN")->ConnectTo(component->GetGate("AND0")->GetPin("in3"));
+			component->GetPin("EN")->ConnectTo(component->GetGate("AND1")->GetPin("in3"));
+			component->GetPin("EN")->ConnectTo(component->GetGate("AND2")->GetPin("in3"));
+			component->GetPin("EN")->ConnectTo(component->GetGate("AND3")->GetPin("in3"));
+
+			component->GetPin("I0")->ConnectTo(component->GetGate("NOTI0")->GetPin("in"));
+			component->GetPin("I0")->ConnectTo(component->GetGate("AND1")->GetPin("in1"));
+			component->GetPin("I0")->ConnectTo(component->GetGate("AND3")->GetPin("in1"));
+
+			component->GetPin("I1")->ConnectTo(component->GetGate("NOTI1")->GetPin("in"));
+			component->GetPin("I1")->ConnectTo(component->GetGate("AND2")->GetPin("in2"));
+			component->GetPin("I1")->ConnectTo(component->GetGate("AND3")->GetPin("in2"));
+
+			component->GetGate("NOTI0")->GetPin("out")->ConnectTo(component->GetGate("AND0")->GetPin("in1"));
+			component->GetGate("NOTI0")->GetPin("out")->ConnectTo(component->GetGate("AND2")->GetPin("in1"));
+
+			component->GetGate("NOTI1")->GetPin("out")->ConnectTo(component->GetGate("AND0")->GetPin("in2"));
+			component->GetGate("NOTI1")->GetPin("out")->ConnectTo(component->GetGate("AND1")->GetPin("in2"));
+
+			LogicTools::IOStateList out = LogicTools::GetTruthTable(component);
+			LogicTools::IOStateList compare = {
+				IOPin::LOW, IOPin::LOW, IOPin::LOW, IOPin::LOW,
+				IOPin::LOW, IOPin::LOW, IOPin::LOW, IOPin::LOW,
+				IOPin::LOW, IOPin::LOW, IOPin::LOW, IOPin::LOW,
+				IOPin::LOW, IOPin::LOW, IOPin::LOW, IOPin::LOW,
+				IOPin::HI, IOPin::LOW, IOPin::LOW, IOPin::LOW,
+				IOPin::LOW, IOPin::LOW, IOPin::HI, IOPin::LOW,
+				IOPin::LOW, IOPin::HI, IOPin::LOW, IOPin::LOW,
+				IOPin::LOW, IOPin::LOW, IOPin::LOW, IOPin::HI,
+			};
+			Assert::AreEqual(compare, out);
+			delete component;
+		}
+
+
 	};
 }
