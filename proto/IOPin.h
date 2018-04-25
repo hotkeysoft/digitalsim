@@ -10,7 +10,7 @@ public:
 	enum IO_DIRECTION { INPUT, OUTPUT };
 
 	IOPin() {}
-	IOPin(GateBase *parentGate, std::string name, IO_DIRECTION direction);
+	IOPin(GateBase *parentGate, const char * name, IO_DIRECTION direction);
 	virtual ~IOPin();
 
 	std::string GetName() { return m_name; }
@@ -31,4 +31,3 @@ protected:
 	
 	std::set<IOPin*> m_connectedPins;
 };
-

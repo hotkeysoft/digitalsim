@@ -5,6 +5,24 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+namespace Microsoft{
+	namespace VisualStudio {
+		namespace CppUnitTestFramework {
+			template<> std::wstring ToString<IOPin::IO_DIRECTION>(const IOPin::IO_DIRECTION& t) { return t == IOPin::INPUT?L"INPUT":L"OUTPUT"; }
+			template<> std::wstring ToString<IOPin::IO_STATE>(const IOPin::IO_STATE& t) 
+			{ 
+				switch (t)
+				{
+				case IOPin::HI: return L"HI";
+				case IOPin::LOW: return L"LOW";
+				case IOPin::UNDEF: return L"UNDEF";
+				}
+				return L"undefined state";
+			}
+		}
+	}
+}
+
 namespace UnitTests
 {		
 	TEST_CLASS(TestGateBase)
@@ -120,7 +138,7 @@ namespace UnitTests
 			gate2->GetPin("out")->ConnectTo(gate->GetPin("in"));
 
 			//gate->GetPin("in")->Set(IOPin::LOW);
-			Assert::Fail(L"test");
+			Assert::Fail(L"TODO");
 
 			delete gate;
 			delete gate2;
@@ -164,9 +182,90 @@ namespace UnitTests
 
 			Logger::WriteMessage("TestAddGate: Self");
 			Assert::ExpectException<std::exception>([&] { gate->AddGate("not2", gate); });
+		}
+		
+		TEST_METHOD(TestComponentToComponentTopLevel)
+		{
+			Logger::WriteMessage("TestComponentToComponentTopLevel: Outside->Outside");
+			GateBase * gate = new GateBase("test");
+			gate->AddOutput("out");
+			GateBase * gate2 = new GateBase("test2");
+			gate2->AddInput("in");
 
+			gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 		}
 
+		TEST_METHOD(TestInnerComponentToComponent)
+		{
+			GateBase * gate = new GateBase("test");
+			gate->AddInput("in");
+			gate->AddOutput("out");
+			NOTGate * not1 = new NOTGate();
+			NOTGate * not2 = new NOTGate();
+			NOTGate * not3 = new NOTGate();
+			NOTGate * not4 = new NOTGate();
+			NOTGate * not5 = new NOTGate();
+			gate->AddGate("not1", not1);
+			gate->AddGate("not2", not2);
+			gate->AddGate("not3", not3);
+			gate->AddGate("not4", not4);
+			gate->AddGate("not5", not5);
+			Assert::AreEqual(5, (int)gate->GetGateCount());
 
+			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Inside");
+			not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
+			Assert::AreEqual(IOPin::UNDEF, not2->GetPin("out")->Get());
+			not1->GetPin("in")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::HI, not2->GetPin("out")->Get());
+			not1->GetPin("in")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::LOW, not2->GetPin("out")->Get());
+
+			// Outside gate
+			GateBase * outsideNot = new NOTGate();
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Input pin (not allowed)");			
+			Assert::ExpectException<std::exception>([&] { not3->GetPin("out")->ConnectTo(gate->GetPin("in")); });
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Output pin (ok)");
+			gate->GetPin("in")->ConnectTo(not4->GetPin("in"));
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Input pin->Inside (ok)");
+			not4->GetPin("out")->ConnectTo(gate->GetPin("out"));
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Validate inner gate working");
+			gate->GetPin("in")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::LOW, gate->GetPin("out")->Get());
+			gate->GetPin("in")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::HI, gate->GetPin("out")->Get());
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Output pin->inside (not allowed)");
+			Assert::ExpectException<std::exception>([&] { gate->GetPin("out")->ConnectTo(not5->GetPin("in")); });
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Outside gate (not allowed)");
+			Assert::ExpectException<std::exception>([&] { not5->GetPin("out")->ConnectTo(outsideNot->GetPin("in")); });
+
+			Logger::WriteMessage("TestInnerComponentToComponent: Outside gate->Inside (not allowed)");
+			Assert::ExpectException<std::exception>([&] { outsideNot->GetPin("out")->ConnectTo(not5->GetPin("in")); });
+
+
+			NOTGate * not6 = new NOTGate();
+			Logger::WriteMessage("TestInnerComponentToComponent: Outside gate->Outside pin (ok)");
+			not6->GetPin("out")->ConnectTo(gate->GetPin("in"));
+			Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside gate->Outside pin");
+			not6->GetPin("in")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::HI, gate->GetPin("out")->Get());
+			not6->GetPin("in")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::LOW, gate->GetPin("out")->Get());
+
+			NOTGate * not7 = new NOTGate();
+			Logger::WriteMessage("TestInnerComponentToComponent: Outside pin->Outside gate (ok)");
+			gate->GetPin("out")->ConnectTo(not7->GetPin("in"));
+			Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside pin->Outside gate");
+			gate->GetPin("in")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::HI, not7->GetPin("out")->Get());
+			gate->GetPin("in")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::LOW, not7->GetPin("out")->Get());
+
+		}
 	};
 }
