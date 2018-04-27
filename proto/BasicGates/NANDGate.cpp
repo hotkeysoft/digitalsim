@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "ORGate.h"
+#include "NANDGate.h"
 
 
-ORGate::ORGate(int inputs/* = 2 */)
+NANDGate::NANDGate(int inputs/* = 2 */)
 {
 	assert(inputs > 1);
 	for (int i = 1; i <= inputs; ++i)
@@ -15,16 +15,11 @@ ORGate::ORGate(int inputs/* = 2 */)
 	AddOutput("out");
 }
 
-
-ORGate::~ORGate()
-{
-}
-
-void ORGate::ComputeState()
+void NANDGate::ComputeState()
 {
 	for (auto pin : m_inputPins)
 	{
-		if (pin.second->Get() == IOPin::HI)
+		if (pin.second->Get() == IOPin::LOW)
 		{
 			GetPin("out")->Set(IOPin::HI);
 			return;

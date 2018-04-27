@@ -1,32 +1,16 @@
 #include "stdafx.h"
-#include "CppUnitTest.h"
+#include <CppUnitTest.h>
+#include "TestCommon.h"
 #include "GateBase.h"
-
-#include "NOTGate.h"
-#include "ANDGate.h"
-#include "NANDGate.h"
-#include "ORGate.h"
-#include "WireGate.h"
+#include "BasicGates\NOTGate.h"
+#include "BasicGates\ANDGate.h"
+#include "BasicGates\NANDGate.h"
+#include "BasicGates\ORGate.h"
+#include "BasicGates\XORGate.h"
+#include "BasicGates\WireGate.h"
+#include "LogicTools.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-
-namespace Microsoft{
-	namespace VisualStudio {
-		namespace CppUnitTestFramework {
-			template<> std::wstring ToString<IOPin::IO_DIRECTION>(const IOPin::IO_DIRECTION& t) { return t == IOPin::INPUT?L"INPUT":L"OUTPUT"; }
-			template<> std::wstring ToString<IOPin::IO_STATE>(const IOPin::IO_STATE& t) 
-			{ 
-				switch (t)
-				{
-				case IOPin::HI: return L"HI";
-				case IOPin::LOW: return L"LOW";
-				case IOPin::UNDEF: return L"UNDEF";
-				}
-				return L"undefined state";
-			}
-		}
-	}
-}
 
 namespace UnitTests
 {		
@@ -189,9 +173,9 @@ namespace UnitTests
 			Assert::ExpectException<std::exception>([&] { gate->AddGate("not2", gate); });
 		}
 		
-		TEST_METHOD(TestComponentToComponentTopLevel)
+		TEST_METHOD(TestComponentToTopLevel)
 		{
-			Logger::WriteMessage("TestComponentToComponentTopLevel: Outside->Outside");
+			Logger::WriteMessage("TestComponentToTopLevel: Outside->Outside");
 			GateBase * gate = new GateBase("test");
 			gate->AddOutput("out");
 			GateBase * gate2 = new GateBase("test2");
@@ -200,7 +184,7 @@ namespace UnitTests
 			gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 		}
 
-		TEST_METHOD(TestInnerComponentToComponent)
+		TEST_METHOD(TestInnerToComponent)
 		{
 			GateBase * gate = new GateBase("test");
 			gate->AddInput("in");
@@ -217,7 +201,7 @@ namespace UnitTests
 			gate->AddGate("not5", not5);
 			Assert::AreEqual(5, (int)gate->GetGateCount());
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Inside");
+			Logger::WriteMessage("TestInnerToComponent: Inside->Inside");
 			not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 			Assert::AreEqual(IOPin::UNDEF, not2->GetPin("out")->Get());
 			not1->GetPin("in")->Set(IOPin::HI);
@@ -228,28 +212,28 @@ namespace UnitTests
 			// Outside gate
 			GateBase * outsideNot = new NOTGate();
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Input pin (not allowed)");			
+			Logger::WriteMessage("TestInnerToComponent: Inside->Input pin (not allowed)");			
 			Assert::ExpectException<std::exception>([&] { not3->GetPin("out")->ConnectTo(gate->GetPin("in")); });
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Output pin (ok)");
+			Logger::WriteMessage("TestInnerToComponent: Inside->Output pin (ok)");
 			gate->GetPin("in")->ConnectTo(not4->GetPin("in"));
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Input pin->Inside (ok)");
+			Logger::WriteMessage("TestInnerToComponent: Input pin->Inside (ok)");
 			not4->GetPin("out")->ConnectTo(gate->GetPin("out"));
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Validate inner gate working");
+			Logger::WriteMessage("TestInnerToComponent: Validate inner gate working");
 			gate->GetPin("in")->Set(IOPin::HI);
 			Assert::AreEqual(IOPin::LOW, gate->GetPin("out")->Get());
 			gate->GetPin("in")->Set(IOPin::LOW);
 			Assert::AreEqual(IOPin::HI, gate->GetPin("out")->Get());
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Output pin->inside (not allowed)");
+			Logger::WriteMessage("TestInnerToComponent: Output pin->inside (not allowed)");
 			Assert::ExpectException<std::exception>([&] { gate->GetPin("out")->ConnectTo(not5->GetPin("in")); });
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Inside->Outside gate (not allowed)");
+			Logger::WriteMessage("TestInnerToComponent: Inside->Outside gate (not allowed)");
 			Assert::ExpectException<std::exception>([&] { not5->GetPin("out")->ConnectTo(outsideNot->GetPin("in")); });
 
-			Logger::WriteMessage("TestInnerComponentToComponent: Outside gate->Inside (not allowed)");
+			Logger::WriteMessage("TestInnerToComponent: Outside gate->Inside (not allowed)");
 			Assert::ExpectException<std::exception>([&] { outsideNot->GetPin("out")->ConnectTo(not5->GetPin("in")); });
 
 
@@ -274,7 +258,23 @@ namespace UnitTests
 
 		TEST_METHOD(TestFullName)
 		{
+			// TODO 
+		}
 
+		TEST_METHOD(TestClone)
+		{
+			GateBase* base = BuildDecoder();
+			GateBase* cloned = base->Clone("clone");
+
+			Assert::IsNotNull(cloned);
+			Assert::AreNotEqual(base, cloned);
+
+			Assert::AreEqual(std::string("clone"), cloned->GetName());
+			Assert::AreEqual(base->GetInputCount(), cloned->GetInputCount());
+			Assert::AreEqual(base->GetOutputCount(), cloned->GetOutputCount());
+			Assert::AreEqual(base->GetGateCount(), cloned->GetGateCount());
+
+			// TODO
 		}
 	};
 }

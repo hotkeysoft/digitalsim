@@ -154,6 +154,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,6 +169,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -202,6 +204,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -211,27 +214,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ANDGate.h" />
+    <ClInclude Include="BasicGates\ANDGate.h" />
+    <ClInclude Include="BasicGates\NANDGate.h" />
+    <ClInclude Include="BasicGates\NOTGate.h" />
+    <ClInclude Include="BasicGates\ORGate.h" />
+    <ClInclude Include="BasicGates\WireGate.h" />
+    <ClInclude Include="BasicGates\XORGate.h" />
     <ClInclude Include="GateBase.h" />
     <ClInclude Include="IOPin.h" />
     <ClInclude Include="LogicTools.h" />
-    <ClInclude Include="NANDGate.h" />
-    <ClInclude Include="NOTGate.h" />
-    <ClInclude Include="ORGate.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="WireGate.h" />
-    <ClInclude Include="XORGate.h" />
+    <ClInclude Include="UnitTests\TestCommon.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ANDGate.cpp" />
+    <ClCompile Include="BasicGates\ANDGate.cpp" />
+    <ClCompile Include="BasicGates\NANDGate.cpp" />
+    <ClCompile Include="BasicGates\NOTGate.cpp" />
+    <ClCompile Include="BasicGates\ORGate.cpp" />
+    <ClCompile Include="BasicGates\WireGate.cpp" />
+    <ClCompile Include="BasicGates\XORGate.cpp" />
     <ClCompile Include="GateBase.cpp" />
     <ClCompile Include="IOPin.cpp" />
     <ClCompile Include="LogicTools.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="NANDGate.cpp" />
-    <ClCompile Include="NOTGate.cpp" />
-    <ClCompile Include="ORGate.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">Create</PrecompiledHeader>
@@ -240,14 +249,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TestGateBase.cpp">
+    <ClCompile Include="UnitTests\TestGateBase.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="TestGates.cpp">
+    <ClCompile Include="UnitTests\TestGates.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="WireGate.cpp" />
-    <ClCompile Include="XORGate.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

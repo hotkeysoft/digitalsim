@@ -8,11 +8,6 @@ NOTGate::NOTGate()
 	AddOutput("out");
 }
 
-
-NOTGate::~NOTGate()
-{
-}
-
 void NOTGate::ComputeState()
 {
 	if (GetPin("in")->Get() == IOPin::HI)

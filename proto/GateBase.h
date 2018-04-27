@@ -10,11 +10,13 @@ class GateBase
 {
 public:
 	GateBase();
-	GateBase(const char* name) : m_name(name), m_parent(NULL) {}
+	GateBase(const char* name);
 	virtual ~GateBase();
 
 	std::string GetName() { return m_name; }
 	std::string GetFullName();
+
+	virtual GateBase* Clone(const char* name);
 
 	virtual void AddInput(const char*  name, int8_t width = 1);
 	virtual void AddOutput(const char*  name, int8_t width = 1);

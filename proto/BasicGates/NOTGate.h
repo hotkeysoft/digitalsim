@@ -6,7 +6,7 @@ class NOTGate : public GateBase
 {
 public:
 	NOTGate();
-	virtual ~NOTGate();
+	virtual ~NOTGate() {}
 
 	virtual void ComputeState();
 

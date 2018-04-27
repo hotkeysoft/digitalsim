@@ -2,12 +2,13 @@
 
 #include "GateBase.h"
 
-class XORGate : public GateBase
+class ANDGate : public GateBase
 {
 public:
-	XORGate();
-	virtual ~XORGate();
+	ANDGate(int inputs = 2);
+	virtual ~ANDGate() {}
 
 	virtual void ComputeState();
 
 };
+

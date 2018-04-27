@@ -7,6 +7,11 @@ GateBase::GateBase() : m_parent(NULL)
 {
 }
 
+GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL)
+{
+	ValidateGateName(name);
+}
+
 GateBase::~GateBase()
 {
 }
@@ -21,6 +26,19 @@ std::string GateBase::GetFullName()
 	os << m_name;
 
 	return os.str();
+}
+
+GateBase * GateBase::Clone(const char* name)
+{
+	ValidateGateName(name);
+	GateBase* clone = new GateBase(name);
+	clone->m_parent = NULL;
+
+	for (auto pin : m_inputPins)
+	{
+	}
+
+	return clone;
 }
 
 void GateBase::AddInput(const char* name, int8_t width)

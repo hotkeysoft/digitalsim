@@ -2,11 +2,11 @@
 
 #include "GateBase.h"
 
-class WireGate : public GateBase
+class ORGate : public GateBase
 {
 public:
-	WireGate();
-	virtual ~WireGate();
+	ORGate(int inputs = 2);
+	virtual ~ORGate() {}
 
 	virtual void ComputeState();
 

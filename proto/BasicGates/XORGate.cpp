@@ -1,17 +1,11 @@
 #include "stdafx.h"
 #include "XORGate.h"
 
-
 XORGate::XORGate()
 {
 	AddInput("in1");
 	AddInput("in2");
 	AddOutput("out");
-}
-
-
-XORGate::~XORGate()
-{
 }
 
 void XORGate::ComputeState()
