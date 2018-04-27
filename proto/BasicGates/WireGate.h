@@ -8,7 +8,8 @@ public:
 	WireGate();
 	virtual ~WireGate() {}
 
-	virtual void ComputeState();
+	virtual GateBase* Clone(const char* name);
 
+	virtual void ComputeState();
 };
 

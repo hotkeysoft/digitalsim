@@ -16,6 +16,12 @@ GateBase::~GateBase()
 {
 }
 
+void GateBase::SetName(const char *name)
+{
+	ValidateGateName(name);
+	this->m_name = name;
+}
+
 std::string GateBase::GetFullName()
 {
 	std::ostringstream os;
@@ -26,19 +32,6 @@ std::string GateBase::GetFullName()
 	os << m_name;
 
 	return os.str();
-}
-
-GateBase * GateBase::Clone(const char* name)
-{
-	ValidateGateName(name);
-	GateBase* clone = new GateBase(name);
-	clone->m_parent = NULL;
-
-	for (auto pin : m_inputPins)
-	{
-	}
-
-	return clone;
 }
 
 void GateBase::AddInput(const char* name, int8_t width)
@@ -61,34 +54,6 @@ void GateBase::AddOutput(const char* name, int8_t width)
 	m_outputPins[name] = pin;
 }
 
-void GateBase::AddGate(const char* name, GateBase * gate)
-{
-	ValidateGateName(name);
-	if (gate == NULL)
-	{
-		throw std::invalid_argument("Cannot add null gate");
-	} 
-	else if (gate == this)
-	{
-		throw std::invalid_argument("Cannot add self");
-	}
-
-	gate->SetParent(this);
-	m_internalGates[name] = gate;
-}
-
-
-GateBase * GateBase::GetGate(const char* name)
-{
-	GateMapType::iterator it = m_internalGates.find(name);
-	if (it != m_internalGates.end())
-	{
-		return it->second;
-	}
-
-	throw std::exception("Gate not found");
-}
-
 IOPin* GateBase::GetPin(const char* name)
 {
 	IOPinMapType::iterator it = m_inputPins.find(name);
@@ -106,6 +71,21 @@ IOPin* GateBase::GetPin(const char* name)
 	throw std::exception("Pin not found");
 }
 
+PinConnectionsType& GateBase::GetConnectedPins(const char * source)
+{
+	return GetConnectedPins(GetPin(source));
+}
+
+PinConnectionsType& GateBase::GetConnectedPins(IOPin * source)
+{
+	if (source == nullptr)
+	{
+		throw std::invalid_argument("source pin not set");
+	}
+
+	return m_connectedPins[source];
+}
+
 void GateBase::SetParent(GateBase * parent)
 {
 	if (m_parent != NULL)
@@ -114,6 +94,82 @@ void GateBase::SetParent(GateBase * parent)
 	}
 
 	m_parent = parent;
+}
+
+void GateBase::ConnectPins(IOPin * source, IOPin * target)
+{
+	if (source == NULL && target == NULL)
+	{
+		throw std::invalid_argument("source or target is null");
+	}
+
+	//TODO validate source
+
+	if (target == NULL)
+	{
+		throw std::invalid_argument("Pin is NULL");
+	}
+
+	if (target->GetParent() == this)
+	{
+		throw std::invalid_argument("Cannot connect to self");
+	}
+
+	bool insideInside = (GetParent() == target->GetParent()->GetParent());
+	bool insideToParent = (GetParent() == target->GetParent());
+	bool parentToInside = (this == target->GetParent()->GetParent());
+
+	if (insideInside)
+	{
+		if (source->GetDirection() != IOPin::OUTPUT)
+		{
+			throw std::invalid_argument("Cannot connect from INPUT pin");
+		}
+
+		if (target->GetDirection() != IOPin::INPUT)
+		{
+			throw std::invalid_argument("Cannot connect to OUTPUT pin");
+		}
+	}
+	else if (insideToParent)
+	{
+		if (source->GetDirection() != IOPin::OUTPUT)
+		{
+			throw std::invalid_argument("Cannot connect from INPUT pin");
+		}
+
+		if (target->GetDirection() != IOPin::OUTPUT)
+		{
+			throw std::invalid_argument("Must connect to parent OUTPUT pin");
+		}
+	}
+	else if (parentToInside)
+	{
+		if (source->GetDirection() != IOPin::INPUT)
+		{
+			throw std::invalid_argument("Must connect from parent from INPUT pin");
+		}
+
+		if (target->GetDirection() != IOPin::INPUT)
+		{
+			throw std::invalid_argument("Must connect to parent INPUT pin");
+		}
+	}
+	else
+	{
+		throw std::invalid_argument("Unsupported connection type");
+	}
+
+	// TODO:Hi-Z
+	IOConnection connection(source, target);
+	auto& connectedPins = m_connectedPins[source];
+	auto found = connectedPins.find(connection);
+	if (found != connectedPins.end())
+	{
+		throw std::invalid_argument("Connection already exists");
+	}
+
+	m_connectedPins[source].insert(connection);
 }
 
 bool GateBase::IsValidPinName(const char* name)
@@ -189,10 +245,5 @@ void GateBase::ValidateGateName(const char * name)
 	if (!IsValidPinName(name))
 	{
 		throw std::invalid_argument("invalid gate name");
-	}
-
-	if (m_internalGates.find(name) != m_internalGates.end())
-	{
-		throw std::invalid_argument("duplicate gate name");
 	}
 }

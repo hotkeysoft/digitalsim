@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "ORGate.h"
 
-ORGate::ORGate(int inputs/* = 2 */)
+ORGate::ORGate(size_t inputs/* = 2 */)
 {
 	assert(inputs > 1);
-	for (int i = 1; i <= inputs; ++i)
+	for (size_t i = 1; i <= inputs; ++i)
 	{
 		std::ostringstream ss;
 		ss << "in" << i;
@@ -12,6 +12,11 @@ ORGate::ORGate(int inputs/* = 2 */)
 	}
 
 	AddOutput("out");
+}
+
+GateBase * ORGate::Clone(const char * name)
+{
+	return new ORGate(this->GetInputCount());
 }
 
 void ORGate::ComputeState()

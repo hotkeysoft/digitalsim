@@ -5,8 +5,10 @@
 class ANDGate : public GateBase
 {
 public:
-	ANDGate(int inputs = 2);
+	ANDGate(size_t inputs = 2);
 	virtual ~ANDGate() {}
+
+	virtual GateBase* Clone(const char* name);
 
 	virtual void ComputeState();
 

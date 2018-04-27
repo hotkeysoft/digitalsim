@@ -2,6 +2,7 @@
 #include <CppUnitTest.h>
 #include "TestCommon.h"
 #include "GateBase.h"
+#include "CompositeGate.h"
 #include "BasicGates\NOTGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\NANDGate.h"
@@ -19,7 +20,7 @@ namespace UnitTests
 	public:
 		TEST_METHOD(TestAddInput)
 		{
-			GateBase* gate = new GateBase("test");
+			CompositeGate* gate = new CompositeGate("test");
 
 			Logger::WriteMessage("TestAddInput: Bad input");
 			Assert::ExpectException<std::exception>([gate] { gate->AddInput(NULL); });
@@ -54,7 +55,7 @@ namespace UnitTests
 
 		TEST_METHOD(TestAddOutput)
 		{
-			GateBase* gate = new GateBase("test");
+			CompositeGate* gate = new CompositeGate("test");
 
 			Logger::WriteMessage("TestAddOutput: Bad Input");
 			Assert::ExpectException<std::exception>([gate] { gate->AddOutput(NULL); });
@@ -89,11 +90,11 @@ namespace UnitTests
 
 		TEST_METHOD(TestConnectTo)
 		{
-			GateBase* gate = new GateBase("test");
+			CompositeGate* gate = new CompositeGate("test");
 			gate->AddInput("in");
 			gate->AddOutput("out");
 
-			GateBase* gate2 = new GateBase("test2");
+			CompositeGate* gate2 = new CompositeGate("test2");
 			gate2->AddInput("in");
 			gate2->AddOutput("out");
 
@@ -135,7 +136,7 @@ namespace UnitTests
 
 		TEST_METHOD(TestAddGate)
 		{
-			GateBase * gate = new GateBase("test");
+			CompositeGate * gate = new CompositeGate("test");
 			GateBase * notGate = new NOTGate();
 			GateBase * notGate2 = new NOTGate();
 
@@ -176,9 +177,9 @@ namespace UnitTests
 		TEST_METHOD(TestComponentToTopLevel)
 		{
 			Logger::WriteMessage("TestComponentToTopLevel: Outside->Outside");
-			GateBase * gate = new GateBase("test");
+			CompositeGate * gate = new CompositeGate("test");
 			gate->AddOutput("out");
-			GateBase * gate2 = new GateBase("test2");
+			CompositeGate * gate2 = new CompositeGate("test2");
 			gate2->AddInput("in");
 
 			gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
@@ -186,7 +187,7 @@ namespace UnitTests
 
 		TEST_METHOD(TestInnerToComponent)
 		{
-			GateBase * gate = new GateBase("test");
+			CompositeGate * gate = new CompositeGate("test");
 			gate->AddInput("in");
 			gate->AddOutput("out");
 			NOTGate * not1 = new NOTGate();
@@ -261,10 +262,19 @@ namespace UnitTests
 			// TODO 
 		}
 
+		void AssertEqualOutputs(GateBase* g1, GateBase* g2)
+		{
+			Assert::AreEqual(g1->GetPin("Y0")->Get(), g2->GetPin("Y0")->Get());
+			Assert::AreEqual(g1->GetPin("Y1")->Get(), g2->GetPin("Y1")->Get());
+			Assert::AreEqual(g1->GetPin("Y2")->Get(), g2->GetPin("Y2")->Get());
+			Assert::AreEqual(g1->GetPin("Y3")->Get(), g2->GetPin("Y3")->Get());
+		}
+
 		TEST_METHOD(TestClone)
 		{
-			GateBase* base = BuildDecoder();
-			GateBase* cloned = base->Clone("clone");
+			CompositeGate* base = BuildDecoder();
+			GateBase* clonedBase = base->Clone("clone");
+			CompositeGate* cloned = dynamic_cast<CompositeGate*>(clonedBase);
 
 			Assert::IsNotNull(cloned);
 			Assert::AreNotEqual(base, cloned);
@@ -274,7 +284,26 @@ namespace UnitTests
 			Assert::AreEqual(base->GetOutputCount(), cloned->GetOutputCount());
 			Assert::AreEqual(base->GetGateCount(), cloned->GetGateCount());
 
-			// TODO
-		}
+			// Compare behavior
+			base->GetPin("EN")->Set(IOPin::LOW);
+			base->GetPin("I0")->Set(IOPin::LOW);
+			base->GetPin("I1")->Set(IOPin::LOW);
+
+			cloned->GetPin("EN")->Set(IOPin::LOW);
+			cloned->GetPin("I0")->Set(IOPin::LOW);
+			cloned->GetPin("I1")->Set(IOPin::LOW);
+
+			AssertEqualOutputs(base, cloned);
+
+			base->GetPin("EN")->Set(IOPin::HI);
+			cloned->GetPin("EN")->Set(IOPin::HI);
+
+			AssertEqualOutputs(base, cloned);
+
+			base->GetPin("I0")->Set(IOPin::HI);
+			cloned->GetPin("I0")->Set(IOPin::HI);
+
+			AssertEqualOutputs(base, cloned);
+		}	
 	};
 }

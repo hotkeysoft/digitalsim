@@ -8,8 +8,9 @@ public:
 	NOTGate();
 	virtual ~NOTGate() {}
 
-	virtual void ComputeState();
+	virtual GateBase* Clone(const char* name);
 
+	virtual void ComputeState();
 };
 
 

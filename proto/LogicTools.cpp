@@ -2,6 +2,7 @@
 #include "LogicTools.h"
 #include "IOPin.h"
 #include "GateBase.h"
+#include "CompositeGate.h"
 
 LogicTools::LogicTools()
 {
@@ -51,6 +52,34 @@ void LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector
 
 	PrintTruthTable(0, inputs, outputs);
 	std::cout << std::endl;
+}
+
+void LogicTools::PrintInternalConnections(GateBase * gate)
+{
+	for (auto input : gate->GetInputPins())
+	{
+		for (auto connection : gate->GetConnectedPins(input.second))
+		{
+			std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
+		}
+	}
+
+	for (auto output : gate->GetOutputPins())
+	{
+		for (auto connection : gate->GetConnectedPins(output.second))
+		{
+			std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
+		}
+	}
+
+	CompositeGate* composite = dynamic_cast<CompositeGate*>(gate);
+	if (composite)
+	{
+		for (auto subGate : composite->GetInternalGates())
+		{
+			PrintInternalConnections(subGate.second);
+		}
+	}
 }
 
 void LogicTools::PrintTruthTable(GateBase* gate)

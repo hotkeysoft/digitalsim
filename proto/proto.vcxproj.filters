@@ -57,6 +57,12 @@
     <ClInclude Include="BasicGates\XORGate.h">
       <Filter>BasicGates</Filter>
     </ClInclude>
+    <ClInclude Include="IOConnection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CompositeGate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -97,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="BasicGates\XORGate.cpp">
       <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="IOConnection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CompositeGate.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

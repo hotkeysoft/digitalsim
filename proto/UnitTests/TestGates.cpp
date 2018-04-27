@@ -2,6 +2,7 @@
 #include <CppUnitTest.h>
 #include "TestCommon.h"
 #include "GateBase.h"
+#include "CompositeGate.h"
 #include "BasicGates\NOTGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\NANDGate.h"
@@ -14,9 +15,9 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTests
 {
-	GateBase* BuildDecoder()
+	CompositeGate* BuildDecoder()
 	{
-		GateBase * component = new GateBase("DECODER");
+		CompositeGate * component = new CompositeGate("DECODER");
 		component->AddInput("EN");
 		component->AddInput("I0");
 		component->AddInput("I1");
@@ -189,7 +190,7 @@ namespace UnitTests
 
 			NOTGate *notI1 = new NOTGate();
 
-			GateBase * decoder3to8 = new GateBase("Decoder3to8");
+			CompositeGate * decoder3to8 = new CompositeGate("Decoder3to8");
 			decoder3to8->AddInput("I0");
 			decoder3to8->AddInput("I1");
 			decoder3to8->AddInput("I2");

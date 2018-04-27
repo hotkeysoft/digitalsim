@@ -2,6 +2,7 @@
 
 #include <CppUnitTest.h>
 #include "GateBase.h"
+#include "CompositeGate.h"
 #include "LogicTools.h"
 
 namespace Microsoft {
@@ -20,6 +21,10 @@ namespace Microsoft {
 			}
 			template<> std::wstring ToString<GateBase>(GateBase* q) 
 			{ 
+				RETURN_WIDE_STRING(q);
+			}
+			template<> std::wstring ToString<CompositeGate>(CompositeGate* q)
+			{
 				RETURN_WIDE_STRING(q);
 			}
 			template<> std::wstring ToString<LogicTools::IOStateList>(const LogicTools::IOStateList& t)
@@ -56,5 +61,5 @@ namespace Microsoft {
 
 namespace UnitTests
 {
-	GateBase* BuildDecoder();
+	CompositeGate* BuildDecoder();
 }

@@ -2,10 +2,10 @@
 #include "NANDGate.h"
 
 
-NANDGate::NANDGate(int inputs/* = 2 */)
+NANDGate::NANDGate(size_t inputs/* = 2 */)
 {
 	assert(inputs > 1);
-	for (int i = 1; i <= inputs; ++i)
+	for (size_t i = 1; i <= inputs; ++i)
 	{
 		std::ostringstream ss;
 		ss << "in" << i;
@@ -13,6 +13,11 @@ NANDGate::NANDGate(int inputs/* = 2 */)
 	}
 
 	AddOutput("out");
+}
+
+GateBase * NANDGate::Clone(const char * name)
+{
+	return new NANDGate(this->GetInputCount());
 }
 
 void NANDGate::ComputeState()

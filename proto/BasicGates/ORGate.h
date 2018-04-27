@@ -5,10 +5,11 @@
 class ORGate : public GateBase
 {
 public:
-	ORGate(int inputs = 2);
+	ORGate(size_t inputs = 2);
 	virtual ~ORGate() {}
 
-	virtual void ComputeState();
+	virtual GateBase* Clone(const char* name);
 
+	virtual void ComputeState();
 };
 

@@ -7,6 +7,11 @@ WireGate::WireGate()
 	AddOutput("out");
 }
 
+GateBase * WireGate::Clone(const char * name)
+{
+	return new WireGate();
+}
+
 void WireGate::ComputeState()
 {
 	GetPin("out")->Set(GetPin("in")->Get());

@@ -8,6 +8,11 @@ NOTGate::NOTGate()
 	AddOutput("out");
 }
 
+GateBase * NOTGate::Clone(const char * name)
+{
+	return new NOTGate();
+}
+
 void NOTGate::ComputeState()
 {
 	if (GetPin("in")->Get() == IOPin::HI)

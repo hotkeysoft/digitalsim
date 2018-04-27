@@ -1,10 +1,13 @@
 #pragma once
 
+#include <set>
 #include <map>
 #include "IOPin.h"
+#include "IOConnection.h"
 
-typedef std::map<std::string, GateBase*> GateMapType;
 typedef std::map<std::string, IOPin*> IOPinMapType;
+typedef std::set<IOConnection> PinConnectionsType;
+typedef std::map<IOPin*, PinConnectionsType> ConnectedPinsType;
 
 class GateBase
 {
@@ -15,15 +18,15 @@ public:
 
 	std::string GetName() { return m_name; }
 	std::string GetFullName();
+	virtual void SetName(const char*);
 
-	virtual GateBase* Clone(const char* name);
+	virtual GateBase* Clone(const char* name) = 0;
 
-	virtual void AddInput(const char*  name, int8_t width = 1);
-	virtual void AddOutput(const char*  name, int8_t width = 1);
-	virtual void AddGate(const char* name, GateBase * gate);
-	
-	virtual GateBase* GetGate(const char*  name);
 	virtual IOPin* GetPin(const char*  name);
+
+	virtual PinConnectionsType& GetConnectedPins(const char* source);
+	virtual PinConnectionsType& GetConnectedPins(IOPin* source);
+	virtual ConnectedPinsType& GetConnectedPins() { return m_connectedPins; }
 
 	GateBase* GetParent() { return m_parent; }
 	virtual void SetParent(GateBase* parent);
@@ -32,19 +35,23 @@ public:
 
 	virtual void Clock() {};
 
-	size_t GetGateCount() { return m_internalGates.size(); }
 	size_t GetInputCount() { return m_inputPins.size(); }
 	size_t GetOutputCount() { return m_outputPins.size(); }
 
 	IOPinMapType GetInputPins() { return m_inputPins;  }
 	IOPinMapType GetOutputPins() { return m_outputPins; }
 
+	void ConnectPins(IOPin* source, IOPin* target);
+
 protected:
+	virtual void AddInput(const char*  name, int8_t width = 1);
+	virtual void AddOutput(const char*  name, int8_t width = 1);
+
 	std::string m_name;
 	GateBase* m_parent;
 
-	GateMapType m_internalGates;
-
+	ConnectedPinsType m_connectedPins;
+	
 	IOPinMapType m_inputPins;
 	IOPinMapType m_outputPins;
 

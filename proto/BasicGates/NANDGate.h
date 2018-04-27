@@ -5,8 +5,10 @@
 class NANDGate : public GateBase
 {
 public:
-	NANDGate(int inputs = 2);
+	NANDGate(size_t inputs = 2);
 	virtual ~NANDGate() {}
+
+	virtual GateBase* Clone(const char* name);
 
 	virtual void ComputeState();
 

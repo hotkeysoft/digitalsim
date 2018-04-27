@@ -15,6 +15,7 @@ public:
 
 	std::string GetName() { return m_name; }
 	std::string GetFullName();
+	GateBase* GetParent() { return m_parentGate; }
 	IO_DIRECTION GetDirection() { return m_direction; }
 
 	virtual IO_STATE Get() { return m_state; };
@@ -29,6 +30,4 @@ protected:
 	IO_DIRECTION m_direction;
 
 	IO_STATE m_state;
-	
-	std::set<IOPin*> m_connectedPins;
 };

@@ -2,10 +2,10 @@
 #include "ANDGate.h"
 #include <sstream>
 
-ANDGate::ANDGate(int inputs/* = 2 */)
+ANDGate::ANDGate(size_t inputs/* = 2 */)
 {
 	assert(inputs > 1);
-	for (int i = 1; i <= inputs; ++i)
+	for (size_t i = 1; i <= inputs; ++i)
 	{
 		std::ostringstream ss;
 		ss << "in" << i;
@@ -13,6 +13,11 @@ ANDGate::ANDGate(int inputs/* = 2 */)
 	}
 
 	AddOutput("out");
+}
+
+GateBase * ANDGate::Clone(const char * name)
+{
+	return new ANDGate(this->GetInputCount());
 }
 
 void ANDGate::ComputeState()

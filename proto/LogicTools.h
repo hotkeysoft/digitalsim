@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "GateBase.h"
 #include "IOPin.h"
+#include "GateBase.h"
 
 class LogicTools
 {
@@ -16,6 +16,8 @@ public:
 
 	static void PrintTruthTable(GateBase* gate);
 	static void PrintTruthTable(std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs);
+
+	static void PrintInternalConnections(GateBase* gate);
 
 private:
 	static void PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs);

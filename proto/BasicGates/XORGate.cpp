@@ -8,6 +8,11 @@ XORGate::XORGate()
 	AddOutput("out");
 }
 
+GateBase * XORGate::Clone(const char * name)
+{
+	return new XORGate();
+}
+
 void XORGate::ComputeState()
 {
 	if ((GetPin("in1")->Get() == IOPin::LOW && GetPin("in2")->Get() == IOPin::HI) || 
