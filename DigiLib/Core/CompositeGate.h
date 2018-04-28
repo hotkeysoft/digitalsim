@@ -24,8 +24,6 @@ namespace DigiLib
 		{
 		public:
 			CompositeGate(const char* name);
-			virtual ~CompositeGate();
-
 			virtual void SetName(const char *name);
 
 			virtual GateBase* Clone(const char* name);
@@ -36,7 +34,7 @@ namespace DigiLib
 			virtual void AddGate(const char* name, GateBase* gate);
 			virtual size_t GetGateCount() { return m_internalGates.size(); }
 			virtual GateBase* GetGate(const char*  name);
-			virtual GateMapType& GetInternalGates() { return m_internalGates; }
+			virtual GateMapType& GetInternalGates() noexcept { return m_internalGates; }
 
 		protected:
 			GateMapType m_internalGates;

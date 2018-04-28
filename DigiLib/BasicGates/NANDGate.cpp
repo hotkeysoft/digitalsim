@@ -6,7 +6,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		NANDGate::NANDGate(size_t inputs/* = 2 */)
+		NANDGate::NANDGate(size_t inputs/* = 2 */) noexcept : GateBase("nand")
 		{
 			assert(inputs > 1);
 			for (size_t i = 1; i <= inputs; ++i)

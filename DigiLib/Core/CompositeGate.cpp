@@ -11,10 +11,6 @@ namespace DigiLib
 			ValidateGateName(name, false);
 		}
 
-		CompositeGate::~CompositeGate()
-		{
-		}
-
 		void CompositeGate::SetName(const char *name)
 		{
 			ValidateGateName(name, false);
@@ -69,7 +65,7 @@ namespace DigiLib
 
 		void CompositeGate::ValidateGateName(const char * name, bool checkDuplicate)
 		{
-			if (!IsValidPinName(name))
+			if (!IsValidGateName(name))
 			{
 				throw std::invalid_argument("invalid gate name");
 			}
@@ -140,7 +136,7 @@ namespace DigiLib
 
 			for (auto connections : source->GetConnectedPins())
 			{
-				IOPin* currentPin = connections.first;
+				const IOPin* currentPin = connections.first;
 
 				for (auto links : connections.second)
 				{

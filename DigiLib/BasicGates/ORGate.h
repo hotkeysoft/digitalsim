@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport ORGate : public Core::GateBase
 		{
 		public:
-			ORGate(size_t inputs = 2);
-			virtual ~ORGate() {}
+			ORGate(size_t inputs = 2) noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

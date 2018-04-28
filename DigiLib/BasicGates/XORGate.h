@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport XORGate : public Core::GateBase
 		{
 		public:
-			XORGate();
-			virtual ~XORGate() {}
+			XORGate() noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

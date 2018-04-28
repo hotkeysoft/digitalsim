@@ -6,7 +6,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		XORGate::XORGate()
+		XORGate::XORGate() noexcept : GateBase("xor")
 		{
 			AddInput("in1");
 			AddInput("in2");

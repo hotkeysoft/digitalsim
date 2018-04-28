@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport WireGate : public Core::GateBase
 		{
 		public:
-			WireGate();
-			virtual ~WireGate() {}
+			WireGate() noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

@@ -7,7 +7,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		ANDGate::ANDGate(size_t inputs/* = 2 */)
+		ANDGate::ANDGate(size_t inputs/* = 2 */) noexcept : GateBase("and")
 		{
 			assert(inputs > 1);
 			for (size_t i = 1; i <= inputs; ++i)

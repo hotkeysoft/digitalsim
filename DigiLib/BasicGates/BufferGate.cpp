@@ -7,7 +7,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		BufferGate::BufferGate()
+		BufferGate::BufferGate() noexcept : GateBase("buffer")
 		{
 			AddInput("in");
 			AddInput("en");

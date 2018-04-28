@@ -16,7 +16,7 @@ namespace DigiLib {
 		class DllExport BufferGate : public Core::GateBase
 		{
 		public:
-			BufferGate();
+			BufferGate() noexcept;
 			virtual ~BufferGate() {}
 
 			virtual GateBase* Clone(const char* name);

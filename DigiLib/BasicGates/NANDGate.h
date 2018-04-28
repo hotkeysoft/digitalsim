@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport NANDGate : public Core::GateBase
 		{
 		public:
-			NANDGate(size_t inputs = 2);
-			virtual ~NANDGate() {}
+			NANDGate(size_t inputs = 2) noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

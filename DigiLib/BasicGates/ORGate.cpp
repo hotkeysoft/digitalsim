@@ -6,7 +6,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		ORGate::ORGate(size_t inputs/* = 2 */)
+		ORGate::ORGate(size_t inputs/* = 2 */) noexcept : GateBase("or")
 		{
 			assert(inputs > 1);
 			for (size_t i = 1; i <= inputs; ++i)

@@ -47,6 +47,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="TestGates.cpp" />
+    <ClCompile Include="TestLogicTools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigiLib\DigiLib.vcxproj">

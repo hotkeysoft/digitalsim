@@ -6,7 +6,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		WireGate::WireGate()
+		WireGate::WireGate() noexcept : GateBase("wire")
 		{
 			AddInput("in");
 			AddOutput("out");

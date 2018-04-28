@@ -35,6 +35,11 @@ namespace DigiLib {
 
 		void LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector<IOPin*> const & outputs)
 		{
+			if (inputs.size() == 0 || outputs.size() == 0)
+			{
+				return;
+			}
+
 			for (auto pin : inputs)
 			{
 				std::cout << pin->GetName() << "    ";

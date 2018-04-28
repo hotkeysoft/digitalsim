@@ -14,13 +14,13 @@ namespace DigiLib
 			}
 		}
 
-		bool IOConnection::operator==(const IOConnection & rhs) const
+		bool IOConnection::operator==(const IOConnection & rhs) const noexcept
 		{
 			return this->m_source == rhs.m_source &&
 				this->m_target == rhs.m_target;
 		}
 
-		bool IOConnection::operator<(const IOConnection & rhs) const
+		bool IOConnection::operator<(const IOConnection & rhs) const noexcept
 		{
 			// TODO : Sort by fully qualified name?
 			if (m_source == rhs.m_source)

@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport ANDGate : public Core::GateBase
 		{
 		public:
-			ANDGate(size_t inputs = 2);
-			virtual ~ANDGate() {}
+			ANDGate(size_t inputs = 2) noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

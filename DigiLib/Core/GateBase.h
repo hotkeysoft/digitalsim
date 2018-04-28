@@ -25,9 +25,12 @@ namespace DigiLib
 		class DllExport GateBase
 		{
 		public:
-			GateBase();
 			GateBase(const char* name);
-			virtual ~GateBase();
+			virtual ~GateBase() = default;
+			GateBase(const GateBase&) = delete;
+			GateBase& operator=(const GateBase&) = delete;
+			GateBase(GateBase&&) = delete;
+			GateBase& operator=(GateBase&&) = delete;
 
 			std::string GetName() { return m_name; }
 			std::string GetFullName();
@@ -37,17 +40,17 @@ namespace DigiLib
 
 			virtual IOPin* GetPin(const char*  name);
 
-			virtual PinConnectionsType& GetConnectedPins(const char* source);
-			virtual PinConnectionsType& GetConnectedPins(IOPin* source);
-			virtual ConnectedPinsType& GetConnectedPins() { return m_connectedPins; }
+			virtual PinConnectionsType& GetConnectedPins(const char* sourcePin);
+			virtual PinConnectionsType& GetConnectedPins(IOPin* sourcePin);
+			virtual ConnectedPinsType& GetConnectedPins() noexcept { return m_connectedPins; }
 
-			GateBase* GetParent() { return m_parent; }
+			GateBase* GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateBase* parent);
 
 			virtual void ComputeState() {};
 
-			size_t GetInputCount() { return m_inputPins.size(); }
-			size_t GetOutputCount() { return m_outputPins.size(); }
+			size_t GetInputCount() noexcept { return m_inputPins.size(); }
+			size_t GetOutputCount() noexcept { return m_outputPins.size(); }
 
 			IOPinMapType GetInputPins() { return m_inputPins; }
 			IOPinMapType GetOutputPins() { return m_outputPins; }
@@ -75,8 +78,8 @@ namespace DigiLib
 			void ValidatePinName(const char* name);
 			void ValidatePinWidth(int8_t width);
 
-			bool IsValidGateName(const char* name);
-			void ValidateGateName(const char* name);
+			virtual bool IsValidGateName(const char* name);
+			virtual void ValidateGateName(const char* name);
 		};
 	}
 }

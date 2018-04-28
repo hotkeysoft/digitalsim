@@ -16,8 +16,7 @@ namespace DigiLib {
 		class DllExport NOTGate : public Core::GateBase
 		{
 		public:
-			NOTGate();
-			virtual ~NOTGate() {}
+			NOTGate() noexcept;
 
 			virtual GateBase* Clone(const char* name);
 

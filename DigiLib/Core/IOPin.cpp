@@ -12,6 +12,7 @@ namespace DigiLib
 			assert(parentGate != NULL);
 			assert(name != NULL);
 		}
+
 		std::string IOPin::GetFullName()
 		{
 			std::ostringstream os;

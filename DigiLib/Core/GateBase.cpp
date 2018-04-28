@@ -11,18 +11,11 @@ namespace DigiLib
 		AllowedConnectionMapType GateBase::m_insideParentMap;
 		AllowedConnectionMapType GateBase::m_parentInsideMap;
 
-		GateBase::GateBase() : m_parent(NULL)
-		{
-		}
-
 		GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL)
 		{
 			ValidateGateName(name);
 		}
 
-		GateBase::~GateBase()
-		{
-		}
 
 		void GateBase::SetName(const char *name)
 		{
@@ -75,6 +68,11 @@ namespace DigiLib
 
 		IOPin* GateBase::GetPin(const char* name)
 		{
+			if (name == nullptr)
+			{
+				throw std::invalid_argument("name is null");
+			}
+
 			IOPinMapType::iterator it = m_inputPins.find(name);
 			if (it != m_inputPins.end())
 			{
@@ -87,22 +85,38 @@ namespace DigiLib
 				return it->second;
 			}
 
-			throw std::exception("Pin not found");
+			return nullptr;
 		}
 
-		PinConnectionsType& GateBase::GetConnectedPins(const char * source)
+		PinConnectionsType& GateBase::GetConnectedPins(const char * sourcePin)
 		{
-			return GetConnectedPins(GetPin(source));
-		}
-
-		PinConnectionsType& GateBase::GetConnectedPins(IOPin * source)
-		{
-			if (source == nullptr)
+			if (sourcePin == nullptr)
 			{
 				throw std::invalid_argument("source pin is null");
 			}
 
-			return m_connectedPins[source];
+			const IOPin* pin = GetPin(sourcePin);
+			if (pin == nullptr)
+			{
+				throw std::invalid_argument("source pin not found");
+			}
+
+			return GetConnectedPins(GetPin(sourcePin));
+		}
+
+		PinConnectionsType& GateBase::GetConnectedPins(IOPin * sourcePin)
+		{
+			if (sourcePin == nullptr)
+			{
+				throw std::invalid_argument("source pin is null");
+			}
+
+			if (sourcePin->GetParent() != this)
+			{
+				throw std::invalid_argument("pin belongs to another gate");
+			}
+
+			return m_connectedPins[sourcePin];
 		}
 
 		void GateBase::SetParent(GateBase * parent)
@@ -127,9 +141,9 @@ namespace DigiLib
 				throw std::invalid_argument("Cannot connect to self");
 			}
 
-			bool insideInside = (GetParent() == target->GetParent()->GetParent());
-			bool insideToParent = (GetParent() == target->GetParent());
-			bool parentToInside = (this == target->GetParent()->GetParent());
+			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
+			const bool insideToParent = (GetParent() == target->GetParent());
+			const bool parentToInside = (this == target->GetParent()->GetParent());
 
 			InitAllowedConnectionMaps();
 			if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||
@@ -141,7 +155,7 @@ namespace DigiLib
 			}
 
 			// TODO:Hi-Z
-			IOConnection connection(source, target);
+			const IOConnection connection(source, target);
 			auto& connectedPins = m_connectedPins[source];
 			auto found = connectedPins.find(connection);
 			if (found != connectedPins.end())
@@ -213,12 +227,6 @@ namespace DigiLib
 				return false;
 			}
 
-			size_t len = strlen(name);
-			if (len < 1 || len > 32)
-			{
-				return false;
-			}
-
 			return true;
 		}
 
@@ -256,12 +264,6 @@ namespace DigiLib
 			}
 
 			if (!std::regex_match(name, std::regex("^[A-Za-z](\\w){0,31}$")))
-			{
-				return false;
-			}
-
-			size_t len = strlen(name);
-			if (len < 1 || len > 32)
 			{
 				return false;
 			}

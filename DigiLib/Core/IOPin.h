@@ -22,14 +22,13 @@ namespace DigiLib
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
 			IOPin(GateBase *parentGate, const char * name, IO_DIRECTION direction);
-			virtual ~IOPin() {}
 
 			std::string GetName() { return m_name; }
 			std::string GetFullName();
-			GateBase* GetParent() { return m_parentGate; }
-			IO_DIRECTION GetDirection() { return m_direction; }
+			GateBase* GetParent() noexcept { return m_parentGate; }
+			IO_DIRECTION GetDirection() noexcept { return m_direction; }
 
-			virtual IO_STATE Get() { return m_state; };
+			virtual IO_STATE Get() noexcept { return m_state; };
 			virtual void Set(IO_STATE state);
 
 			virtual void ConnectTo(IOPin*);

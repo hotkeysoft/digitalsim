@@ -6,7 +6,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		NOTGate::NOTGate()
+		NOTGate::NOTGate() noexcept : GateBase("not")
 		{
 			AddInput("in");
 			AddOutput("out");
