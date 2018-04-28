@@ -3,6 +3,10 @@
 #include "GateBase.h"
 #include <regex>
 
+AllowedConnectionMapType GateBase::m_insideInsideMap;
+AllowedConnectionMapType GateBase::m_insideParentMap;
+AllowedConnectionMapType GateBase::m_parentInsideMap;
+
 GateBase::GateBase() : m_parent(NULL)
 {
 }
@@ -130,45 +134,13 @@ void GateBase::ConnectPins(IOPin * source, IOPin * target)
 	bool insideToParent = (GetParent() == target->GetParent());
 	bool parentToInside = (this == target->GetParent()->GetParent());
 
-	if (insideInside)
+	InitAllowedConnectionMaps();
+	if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||
+		(insideToParent && !m_insideParentMap[source->GetDirection()][target->GetDirection()]) ||
+		(parentToInside && !m_parentInsideMap[source->GetDirection()][target->GetDirection()]) ||
+		(!insideInside && !insideToParent && !parentToInside))
 	{
-		if (source->GetDirection() != IOPin::OUTPUT)
-		{
-			throw std::invalid_argument("Cannot connect from INPUT pin");
-		}
-
-		if (target->GetDirection() != IOPin::INPUT)
-		{
-			throw std::invalid_argument("Cannot connect to OUTPUT pin");
-		}
-	}
-	else if (insideToParent)
-	{
-		if (source->GetDirection() != IOPin::OUTPUT)
-		{
-			throw std::invalid_argument("Cannot connect from INPUT pin");
-		}
-
-		if (target->GetDirection() != IOPin::OUTPUT)
-		{
-			throw std::invalid_argument("Must connect to parent OUTPUT pin");
-		}
-	}
-	else if (parentToInside)
-	{
-		if (source->GetDirection() != IOPin::INPUT)
-		{
-			throw std::invalid_argument("Must connect from parent from INPUT pin");
-		}
-
-		if (target->GetDirection() != IOPin::INPUT)
-		{
-			throw std::invalid_argument("Must connect to parent INPUT pin");
-		}
-	}
-	else
-	{
-		throw std::invalid_argument("Unsupported connection type");
+		throw std::invalid_argument("Not allowed by connection rules");
 	}
 
 	// TODO:Hi-Z
@@ -181,6 +153,55 @@ void GateBase::ConnectPins(IOPin * source, IOPin * target)
 	}
 
 	m_connectedPins[source].insert(connection);
+}
+
+void GateBase::InitAllowedConnectionMaps()
+{
+	if (m_insideInsideMap.empty())
+	{
+		m_insideInsideMap[IOPin::INPUT]			[IOPin::INPUT]			= false;
+		m_insideInsideMap[IOPin::INPUT]			[IOPin::OUTPUT]			= false;
+		m_insideInsideMap[IOPin::INPUT]			[IOPin::OUTPUT_HI_Z]	= false;
+
+		m_insideInsideMap[IOPin::OUTPUT]		[IOPin::INPUT]			= true;
+		m_insideInsideMap[IOPin::OUTPUT]		[IOPin::OUTPUT]			= false;
+		m_insideInsideMap[IOPin::OUTPUT]		[IOPin::OUTPUT_HI_Z]	= false;
+
+		m_insideInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::INPUT]			= true;
+		m_insideInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT]			= false;
+		m_insideInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT_HI_Z]	= false;
+	}
+
+	if (m_parentInsideMap.empty())
+	{
+		m_parentInsideMap[IOPin::INPUT]			[IOPin::INPUT]			= true;
+		m_parentInsideMap[IOPin::INPUT]			[IOPin::OUTPUT]			= false;
+		m_parentInsideMap[IOPin::INPUT]			[IOPin::OUTPUT_HI_Z]	= false;
+
+		m_parentInsideMap[IOPin::OUTPUT]		[IOPin::INPUT]			= false;
+		m_parentInsideMap[IOPin::OUTPUT]		[IOPin::OUTPUT]			= false;
+		m_parentInsideMap[IOPin::OUTPUT]		[IOPin::OUTPUT_HI_Z]	= false;
+
+		m_parentInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::INPUT]			= false;
+		m_parentInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT]			= false;
+		m_parentInsideMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT_HI_Z]	= false;
+	}
+
+	if (m_insideParentMap.empty())
+	{
+		m_insideParentMap[IOPin::INPUT]			[IOPin::INPUT]			= false;
+		m_insideParentMap[IOPin::INPUT]			[IOPin::OUTPUT]			= false;
+		m_insideParentMap[IOPin::INPUT]			[IOPin::OUTPUT_HI_Z]	= false;
+
+		m_insideParentMap[IOPin::OUTPUT]		[IOPin::INPUT]			= false;
+		m_insideParentMap[IOPin::OUTPUT]		[IOPin::OUTPUT]			= true;
+		m_insideParentMap[IOPin::OUTPUT]		[IOPin::OUTPUT_HI_Z]	= true;
+
+		m_insideParentMap[IOPin::OUTPUT_HI_Z]	[IOPin::INPUT]			= false;
+		m_insideParentMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT]			= true;
+		m_insideParentMap[IOPin::OUTPUT_HI_Z]	[IOPin::OUTPUT_HI_Z]	= true;
+	}
+
 }
 
 bool GateBase::IsValidPinName(const char* name)

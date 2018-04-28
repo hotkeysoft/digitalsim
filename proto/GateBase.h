@@ -8,6 +8,7 @@
 typedef std::map<std::string, IOPin*> IOPinMapType;
 typedef std::set<IOConnection> PinConnectionsType;
 typedef std::map<IOPin*, PinConnectionsType> ConnectedPinsType;
+typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
 class GateBase
 {
@@ -54,6 +55,11 @@ protected:
 	
 	IOPinMapType m_inputPins;
 	IOPinMapType m_outputPins;
+
+	static AllowedConnectionMapType m_insideInsideMap;
+	static AllowedConnectionMapType m_insideParentMap;
+	static AllowedConnectionMapType m_parentInsideMap;
+	static void InitAllowedConnectionMaps();
 
 	bool IsValidPinName(const char* name);
 	void ValidatePinName(const char* name);

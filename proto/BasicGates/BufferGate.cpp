@@ -16,7 +16,7 @@ GateBase * BufferGate::Clone(const char * name)
 
 void BufferGate::ComputeState()
 {
-	if (GetPin("en")->Get() == IOPin::HI)
+	if (GetPin("en")->Get() == IOPin::LOW)
 	{
 		GetPin("out")->Set(IOPin::HI_Z);
 	}

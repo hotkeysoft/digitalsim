@@ -43,7 +43,7 @@ void IOPin::Set(IO_STATE state)
 		m_parentGate->ComputeState();
 	}
 
-	if (m_direction == IO_DIRECTION::OUTPUT)
+	if (m_direction == IO_DIRECTION::OUTPUT || m_direction == IO_DIRECTION::OUTPUT_HI_Z)
 	{
 		for (auto connected : connectedPins)
 		{

@@ -14,6 +14,7 @@ namespace Microsoft {
 				switch (t)
 				{
 				case IOPin::HI: return L"HI";
+				case IOPin::HI_Z: return L"HI_Z";
 				case IOPin::LOW: return L"LOW";
 				case IOPin::UNDEF: return L"UNDEF";
 				}
@@ -34,6 +35,9 @@ namespace Microsoft {
 				{
 					switch (state)
 					{
+					case IOPin::HI_Z:
+						os << L"HI_Z";
+						break;
 					case IOPin::HI:
 						os << L"HI";
 						break;

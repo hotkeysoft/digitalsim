@@ -313,15 +313,35 @@ namespace UnitTests
 			buffers->AddGate("b1", new BufferGate());
 			buffers->AddGate("b2", new BufferGate());
 
-			IOPin *en = buffers->AddInput("EN");
-			en->ConnectTo(buffers->GetGate("b1")->GetPin("en"));
-			en->ConnectTo(buffers->GetGate("b2")->GetPin("en"));
+			buffers->AddInput("en1")->ConnectTo(buffers->GetGate("b1")->GetPin("en"));
+			buffers->AddInput("en2")->ConnectTo(buffers->GetGate("b2")->GetPin("en"));
 			buffers->AddInput("i1")->ConnectTo(buffers->GetGate("b1")->GetPin("in"));
 			buffers->AddInput("i2")->ConnectTo(buffers->GetGate("b2")->GetPin("in"));
 
 			IOPin* out = buffers->AddOutput("out", 1, IOPin::OUTPUT_HI_Z);
 			buffers->GetGate("b1")->GetPin("out")->ConnectTo(out);
 			buffers->GetGate("b2")->GetPin("out")->ConnectTo(out);
+
+			buffers->GetPin("en1")->Set(IOPin::LOW);
+			buffers->GetPin("en2")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::HI_Z, buffers->GetPin("out")->Get());
+
+			buffers->GetPin("i1")->Set(IOPin::HI);
+			buffers->GetPin("en1")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::HI, buffers->GetPin("out")->Get());
+			buffers->GetPin("i1")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::LOW, buffers->GetPin("out")->Get());
+			buffers->GetPin("i2")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::LOW, buffers->GetPin("out")->Get());
+			buffers->GetPin("en1")->Set(IOPin::LOW);
+			Assert::AreEqual(IOPin::HI_Z, buffers->GetPin("out")->Get());
+			buffers->GetPin("en2")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::HI, buffers->GetPin("out")->Get());
+
+			// Both output enabled
+			buffers->GetPin("en1")->Set(IOPin::HI);
+			Assert::AreEqual(IOPin::UNDEF, buffers->GetPin("out")->Get());
+
 		}
 	};
 }
