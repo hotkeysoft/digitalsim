@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="UnitTests">
-      <UniqueIdentifier>{68e59f83-26e9-4882-8281-a3c57ffb1f3d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="BasicGates">
-      <UniqueIdentifier>{8ed79a40-b706-4972-bb03-4973ba15700d}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,94 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GateBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IOPin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LogicTools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UnitTests\TestCommon.h">
-      <Filter>UnitTests</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\ANDGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\NANDGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\NOTGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\ORGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\WireGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\XORGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
-    <ClInclude Include="IOConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositeGate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicGates\BufferGate.h">
-      <Filter>BasicGates</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GateBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IOPin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LogicTools.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UnitTests\TestGateBase.cpp">
-      <Filter>UnitTests</Filter>
-    </ClCompile>
-    <ClCompile Include="UnitTests\TestGates.cpp">
-      <Filter>UnitTests</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\ANDGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\NANDGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\NOTGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\ORGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\WireGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\XORGate.cpp">
-      <Filter>BasicGates</Filter>
-    </ClCompile>
-    <ClCompile Include="IOConnection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositeGate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicGates\BufferGate.cpp">
-      <Filter>BasicGates</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

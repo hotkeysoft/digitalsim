@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{06d9ad41-9de7-40f4-b034-c86bff05f800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{ec382772-aa55-4163-8697-f9f572ea5057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BasicGates">
+      <UniqueIdentifier>{0d6454b4-34ce-49e7-a985-351e14064504}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\ANDGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\BufferGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\NANDGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\NOTGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\ORGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\WireGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\XORGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\LogicTools.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CompositeGate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GateBase.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IOConnection.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IOPin.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DigiLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\ANDGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\BufferGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\NANDGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\NOTGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\ORGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\WireGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\XORGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\LogicTools.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CompositeGate.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GateBase.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\IOConnection.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\IOPin.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
