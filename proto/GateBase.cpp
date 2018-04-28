@@ -34,7 +34,7 @@ std::string GateBase::GetFullName()
 	return os.str();
 }
 
-void GateBase::AddInput(const char* name, int8_t width)
+IOPin* GateBase::AddInput(const char* name, int8_t width)
 {
 	ValidatePinName(name);
 	ValidatePinWidth(width);
@@ -42,16 +42,27 @@ void GateBase::AddInput(const char* name, int8_t width)
 	IOPin* pin = new IOPin(this, name, IOPin::IO_DIRECTION::INPUT);
 
 	m_inputPins[name] = pin;
+	return pin;
 }
 
-void GateBase::AddOutput(const char* name, int8_t width)
+IOPin* GateBase::AddOutput(const char* name, int8_t width, IOPin::IO_DIRECTION dir)
 {
 	ValidatePinName(name);
 	ValidatePinWidth(width);
 
-	IOPin* pin = new IOPin(this, name, IOPin::IO_DIRECTION::OUTPUT);
-	
+	IOPin* pin = nullptr;
+	switch (dir)
+	{
+	case IOPin::IO_DIRECTION::OUTPUT:
+	case IOPin::IO_DIRECTION::OUTPUT_HI_Z:
+		pin = new IOPin(this, name, dir);
+		break;
+	default:
+		throw std::invalid_argument("bad output direction");
+	}
+
 	m_outputPins[name] = pin;
+	return pin;
 }
 
 IOPin* GateBase::GetPin(const char* name)

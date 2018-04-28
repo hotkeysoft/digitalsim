@@ -2,7 +2,8 @@
 #include "IOPin.h"
 #include "GateBase.h"
 
-IOPin::IOPin(GateBase *parentGate, const char* name, IO_DIRECTION direction) : m_name(name), m_direction(direction), m_state(IOPin::UNDEF), m_parentGate(parentGate)
+IOPin::IOPin(GateBase *parentGate, const char* name, IO_DIRECTION direction) : 
+	m_name(name), m_direction(direction), m_state(IOPin::UNDEF), m_parentGate(parentGate)
 {
 	assert(parentGate != NULL);
 	assert(name != NULL);

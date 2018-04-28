@@ -19,8 +19,7 @@ namespace UnitTests
 	{
 		CompositeGate * component = new CompositeGate("DECODER");
 		component->AddInput("EN");
-		component->AddInput("I0");
-		component->AddInput("I1");
+		component->AddInput("I0");		component->AddInput("I1");
 		component->AddOutput("Y0");
 		component->AddOutput("Y1");
 		component->AddOutput("Y2");
@@ -240,6 +239,5 @@ namespace UnitTests
 			Assert::AreEqual(compare, out);
 			delete decoder3to8;
 		}
-
 	};
 }

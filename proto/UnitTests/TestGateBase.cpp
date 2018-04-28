@@ -9,6 +9,7 @@
 #include "BasicGates\ORGate.h"
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
+#include "BasicGates\BufferGate.h"
 #include "LogicTools.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -305,5 +306,22 @@ namespace UnitTests
 
 			AssertEqualOutputs(base, cloned);
 		}	
+
+		TEST_METHOD(TestHiZOutput)
+		{
+			CompositeGate* buffers = new CompositeGate("buffers");
+			buffers->AddGate("b1", new BufferGate());
+			buffers->AddGate("b2", new BufferGate());
+
+			IOPin *en = buffers->AddInput("EN");
+			en->ConnectTo(buffers->GetGate("b1")->GetPin("en"));
+			en->ConnectTo(buffers->GetGate("b2")->GetPin("en"));
+			buffers->AddInput("i1")->ConnectTo(buffers->GetGate("b1")->GetPin("in"));
+			buffers->AddInput("i2")->ConnectTo(buffers->GetGate("b2")->GetPin("in"));
+
+			IOPin* out = buffers->AddOutput("out", 1, IOPin::OUTPUT_HI_Z);
+			buffers->GetGate("b1")->GetPin("out")->ConnectTo(out);
+			buffers->GetGate("b2")->GetPin("out")->ConnectTo(out);
+		}
 	};
 }

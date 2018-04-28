@@ -63,6 +63,9 @@
     <ClInclude Include="CompositeGate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BasicGates\BufferGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -109,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="CompositeGate.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\BufferGate.cpp">
+      <Filter>BasicGates</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

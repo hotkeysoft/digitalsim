@@ -215,6 +215,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BasicGates\ANDGate.h" />
+    <ClInclude Include="BasicGates\BufferGate.h" />
     <ClInclude Include="BasicGates\NANDGate.h" />
     <ClInclude Include="BasicGates\NOTGate.h" />
     <ClInclude Include="BasicGates\ORGate.h" />
@@ -234,6 +235,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BasicGates\ANDGate.cpp" />
+    <ClCompile Include="BasicGates\BufferGate.cpp" />
     <ClCompile Include="BasicGates\NANDGate.cpp" />
     <ClCompile Include="BasicGates\NOTGate.cpp" />
     <ClCompile Include="BasicGates\ORGate.cpp" />

@@ -27,11 +27,11 @@ void LogicTools::PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs
 	{
 		for (auto pin : inputs)
 		{
-			std::cout << pin->Get() << "\t";
+			std::cout << pin->Get() << "    ";
 		}
 		for (auto pin : outputs)
 		{
-			std::cout << pin->Get() << "\t";
+			std::cout << pin->Get() << "    ";
 		}
 		std::cout << std::endl;
 	}
@@ -41,12 +41,12 @@ void LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector
 {
 	for (auto pin : inputs)
 	{
-		std::cout << pin->GetName() << "\t";
+		std::cout << pin->GetName() << "    ";
 	}
 
 	for (auto pin : outputs)
 	{
-		std::cout << pin->GetName() << "\t";
+		std::cout << pin->GetName() << "    ";
 	}
 	std::cout << std::endl;
 
@@ -90,13 +90,13 @@ void LogicTools::PrintTruthTable(GateBase* gate)
 	for (auto pin : gate->GetInputPins())
 	{
 		inputsVect.push_back(pin.second);
-		std::cout << pin.first << "\t";
+		std::cout << pin.first << "    ";
 	}
 
 	for (auto pin : gate->GetOutputPins())
 	{
 		outputsVect.push_back(pin.second);
-		std::cout << pin.first << "\t";
+		std::cout << pin.first << "    ";
 	}
 	std::cout << std::endl;
 

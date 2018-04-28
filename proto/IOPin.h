@@ -6,8 +6,8 @@ class GateBase;
 class IOPin
 {
 public:
-	enum IO_STATE { LOW = 0, HI = 1, UNDEF = -1};
-	enum IO_DIRECTION { INPUT, OUTPUT };
+	enum IO_STATE { LOW = 0, HI = 1, UNDEF = -1, HI_Z = -100};
+	enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
 	IOPin() {}
 	IOPin(GateBase *parentGate, const char * name, IO_DIRECTION direction);

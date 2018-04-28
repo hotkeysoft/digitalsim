@@ -44,8 +44,8 @@ public:
 	void ConnectPins(IOPin* source, IOPin* target);
 
 protected:
-	virtual void AddInput(const char*  name, int8_t width = 1);
-	virtual void AddOutput(const char*  name, int8_t width = 1);
+	virtual IOPin* AddInput(const char*  name, int8_t width = 1);
+	virtual IOPin* AddOutput(const char*  name, int8_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 	std::string m_name;
 	GateBase* m_parent;
