@@ -69,9 +69,9 @@ namespace DigiLib
 			IOPinMapType m_inputPins;
 			IOPinMapType m_outputPins;
 
-			static AllowedConnectionMapType m_insideInsideMap;
-			static AllowedConnectionMapType m_insideParentMap;
-			static AllowedConnectionMapType m_parentInsideMap;
+			static AllowedConnectionMapType* m_pInsideInsideMap;
+			static AllowedConnectionMapType* m_pInsideParentMap;
+			static AllowedConnectionMapType* m_pParentInsideMap;
 			static void InitAllowedConnectionMaps();
 
 			bool IsValidPinName(const char* name);

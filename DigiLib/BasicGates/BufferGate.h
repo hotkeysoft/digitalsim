@@ -17,12 +17,10 @@ namespace DigiLib {
 		{
 		public:
 			BufferGate() noexcept;
-			virtual ~BufferGate() {}
 
-			virtual GateBase* Clone(const char* name);
+			GateBase* Clone(const char* name) override;
 
-			virtual void ComputeState();
-
+			void ComputeState() override;
 		};
 
 	}

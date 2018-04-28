@@ -7,16 +7,15 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		AllowedConnectionMapType GateBase::m_insideInsideMap;
-		AllowedConnectionMapType GateBase::m_insideParentMap;
-		AllowedConnectionMapType GateBase::m_parentInsideMap;
+		AllowedConnectionMapType* GateBase::m_pInsideInsideMap = nullptr;
+		AllowedConnectionMapType* GateBase::m_pInsideParentMap = nullptr;
+		AllowedConnectionMapType* GateBase::m_pParentInsideMap = nullptr;
 
 		GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL)
 		{
 			ValidateGateName(name);
 		}
-
-
+		
 		void GateBase::SetName(const char *name)
 		{
 			ValidateGateName(name);
@@ -146,9 +145,9 @@ namespace DigiLib
 			const bool parentToInside = (this == target->GetParent()->GetParent());
 
 			InitAllowedConnectionMaps();
-			if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||
-				(insideToParent && !m_insideParentMap[source->GetDirection()][target->GetDirection()]) ||
-				(parentToInside && !m_parentInsideMap[source->GetDirection()][target->GetDirection()]) ||
+			if ((insideInside && !(*m_pInsideInsideMap)[source->GetDirection()][target->GetDirection()]) ||
+				(insideToParent && !(*m_pInsideParentMap)[source->GetDirection()][target->GetDirection()]) ||
+				(parentToInside && !(*m_pParentInsideMap)[source->GetDirection()][target->GetDirection()]) ||
 				(!insideInside && !insideToParent && !parentToInside))
 			{
 				throw std::invalid_argument("Not allowed by connection rules");
@@ -168,49 +167,52 @@ namespace DigiLib
 
 		void GateBase::InitAllowedConnectionMaps()
 		{
-			if (m_insideInsideMap.empty())
+			if (!m_pInsideInsideMap)
 			{
-				m_insideInsideMap[IOPin::INPUT][IOPin::INPUT] = false;
-				m_insideInsideMap[IOPin::INPUT][IOPin::OUTPUT] = false;
-				m_insideInsideMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_pInsideInsideMap = new AllowedConnectionMapType();
+				(*m_pInsideInsideMap)[IOPin::INPUT][IOPin::INPUT] = false;
+				(*m_pInsideInsideMap)[IOPin::INPUT][IOPin::OUTPUT] = false;
+				(*m_pInsideInsideMap)[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
 
-				m_insideInsideMap[IOPin::OUTPUT][IOPin::INPUT] = true;
-				m_insideInsideMap[IOPin::OUTPUT][IOPin::OUTPUT] = false;
-				m_insideInsideMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT][IOPin::INPUT] = true;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT][IOPin::OUTPUT] = false;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
 
-				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = true;
-				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
-				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = true;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
+				(*m_pInsideInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
 			}
 
-			if (m_parentInsideMap.empty())
+			if (!m_pParentInsideMap)
 			{
-				m_parentInsideMap[IOPin::INPUT][IOPin::INPUT] = true;
-				m_parentInsideMap[IOPin::INPUT][IOPin::OUTPUT] = false;
-				m_parentInsideMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_pParentInsideMap = new AllowedConnectionMapType();
+				(*m_pParentInsideMap)[IOPin::INPUT][IOPin::INPUT] = true;
+				(*m_pParentInsideMap)[IOPin::INPUT][IOPin::OUTPUT] = false;
+				(*m_pParentInsideMap)[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
 
-				m_parentInsideMap[IOPin::OUTPUT][IOPin::INPUT] = false;
-				m_parentInsideMap[IOPin::OUTPUT][IOPin::OUTPUT] = false;
-				m_parentInsideMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT][IOPin::INPUT] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT][IOPin::OUTPUT] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
 
-				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
-				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
-				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
+				(*m_pParentInsideMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
 			}
 
-			if (m_insideParentMap.empty())
+			if (!m_pInsideParentMap)
 			{
-				m_insideParentMap[IOPin::INPUT][IOPin::INPUT] = false;
-				m_insideParentMap[IOPin::INPUT][IOPin::OUTPUT] = false;
-				m_insideParentMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_pInsideParentMap = new AllowedConnectionMapType();
+				(*m_pInsideParentMap)[IOPin::INPUT][IOPin::INPUT] = false;
+				(*m_pInsideParentMap)[IOPin::INPUT][IOPin::OUTPUT] = false;
+				(*m_pInsideParentMap)[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
 
-				m_insideParentMap[IOPin::OUTPUT][IOPin::INPUT] = false;
-				m_insideParentMap[IOPin::OUTPUT][IOPin::OUTPUT] = true;
-				m_insideParentMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = true;
+				(*m_pInsideParentMap)[IOPin::OUTPUT][IOPin::INPUT] = false;
+				(*m_pInsideParentMap)[IOPin::OUTPUT][IOPin::OUTPUT] = true;
+				(*m_pInsideParentMap)[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = true;
 
-				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
-				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = true;
-				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = true;
+				(*m_pInsideParentMap)[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
+				(*m_pInsideParentMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = true;
+				(*m_pInsideParentMap)[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = true;
 			}
 
 		}

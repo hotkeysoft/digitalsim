@@ -18,11 +18,9 @@ namespace DigiLib {
 		public:
 			NOTGate() noexcept;
 
-			virtual GateBase* Clone(const char* name);
+			GateBase* Clone(const char* name) override;
 
-			virtual void ComputeState();
+			void ComputeState() override;
 		};
-
-
 	}
 }

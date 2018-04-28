@@ -22,6 +22,11 @@ namespace DigiLib
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
 			IOPin(GateBase *parentGate, const char * name, IO_DIRECTION direction);
+			virtual ~IOPin() = default;
+			IOPin(const IOPin&) = delete;
+			IOPin& operator=(const IOPin&) = delete;
+			IOPin(IOPin&&) = delete;
+			GateBase& operator=(IOPin&&) = delete;
 
 			std::string GetName() { return m_name; }
 			std::string GetFullName();

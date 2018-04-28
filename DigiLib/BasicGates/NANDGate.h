@@ -18,11 +18,9 @@ namespace DigiLib {
 		public:
 			NANDGate(size_t inputs = 2) noexcept;
 
-			virtual GateBase* Clone(const char* name);
+			GateBase* Clone(const char* name) override;
 
-			virtual void ComputeState();
-
+			void ComputeState() override;
 		};
-
 	}
 }

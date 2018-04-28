@@ -18,9 +18,9 @@ namespace DigiLib {
 		public:
 			XORGate() noexcept;
 
-			virtual GateBase* Clone(const char* name);
+			GateBase* Clone(const char* name) override;
 
-			virtual void ComputeState();
+			void ComputeState() override;
 		};
 	}
 }

@@ -24,15 +24,15 @@ namespace DigiLib
 		{
 		public:
 			CompositeGate(const char* name);
-			virtual void SetName(const char *name);
+			void SetName(const char *name) override;
 
-			virtual GateBase* Clone(const char* name);
+			GateBase* Clone(const char* name) override;
 
 			using GateBase::AddInput;
 			using GateBase::AddOutput;
 
 			virtual void AddGate(const char* name, GateBase* gate);
-			virtual size_t GetGateCount() { return m_internalGates.size(); }
+			virtual size_t GetGateCount() noexcept { return m_internalGates.size(); }
 			virtual GateBase* GetGate(const char*  name);
 			virtual GateMapType& GetInternalGates() noexcept { return m_internalGates; }
 
