@@ -27,7 +27,15 @@ namespace DigiLib {
 				}
 				for (auto pin : outputs)
 				{
-					std::cout << pin->Get() << "    ";
+					char chState;
+					switch (pin->Get())
+					{
+					case IOPin::HI: chState = '1'; break;
+					case IOPin::HI_Z: chState = 'Z'; break;
+					case IOPin::LOW: chState = '0'; break;
+					default: chState = 'x'; 
+					}
+					std::cout << chState << "    ";
 				}
 				std::cout << std::endl;
 			}
