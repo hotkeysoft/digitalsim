@@ -55,7 +55,6 @@ namespace DigiLib
 			case IOPin::IO_DIRECTION::OUTPUT_HI_Z:
 				m_outputPins[name] = std::make_unique<IOPin>(this, name, dir);
 				return m_outputPins[name].get();
-				break;
 			default:
 				throw std::invalid_argument("bad output direction");
 			}
@@ -83,35 +82,66 @@ namespace DigiLib
 			return nullptr;
 		}
 
-		PinConnectionsType& GateBase::GetConnectedPins(const char * sourcePin)
+		PinConnectionsType& GateBase::GetConnectedToPins(const char * pinName)
 		{
-			if (sourcePin == nullptr)
+			if (pinName == nullptr)
 			{
 				throw std::invalid_argument("source pin is null");
 			}
 
-			const IOPin* pin = GetPin(sourcePin);
+			IOPin* pin = GetPin(pinName);
 			if (pin == nullptr)
 			{
 				throw std::invalid_argument("source pin not found");
 			}
 
-			return GetConnectedPins(GetPin(sourcePin));
+			return GetConnectedToPins(pin);
 		}
 
-		PinConnectionsType& GateBase::GetConnectedPins(IOPin * sourcePin)
+		PinConnectionsType& GateBase::GetConnectedToPins(IOPin * pin)
 		{
-			if (sourcePin == nullptr)
+			if (pin == nullptr)
 			{
 				throw std::invalid_argument("source pin is null");
 			}
 
-			if (sourcePin->GetParent() != this)
+			if (pin->GetParent() != this)
 			{
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedToPins[sourcePin];
+			return m_connectedToPins[pin];
+		}
+
+		PinConnectionsType& GateBase::GetConnectedFromPins(const char * pinName)
+		{
+			if (pinName == nullptr)
+			{
+				throw std::invalid_argument("source pin is null");
+			}
+
+			IOPin* pin = GetPin(pinName);
+			if (pin == nullptr)
+			{
+				throw std::invalid_argument("source pin not found");
+			}
+
+			return GetConnectedFromPins(pin);
+		}
+
+		PinConnectionsType& GateBase::GetConnectedFromPins(IOPin * pin)
+		{
+			if (pin == nullptr)
+			{
+				throw std::invalid_argument("source pin is null");
+			}
+
+			if (pin->GetParent() != this)
+			{
+				throw std::invalid_argument("pin belongs to another gate");
+			}
+
+			return m_connectedFromPins[pin];
 		}
 
 		void GateBase::SetParent(GateBase * parent)
@@ -158,7 +188,7 @@ namespace DigiLib
 			}
 
 			m_connectedToPins[source].insert(connection);
-			target->GetParent()->m_connectedToPins[target].insert(connection);
+			target->GetParent()->m_connectedFromPins[target].insert(connection);
 		}
 
 		void GateBase::InitAllowedConnectionMaps()

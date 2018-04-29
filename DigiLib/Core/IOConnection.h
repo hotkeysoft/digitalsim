@@ -14,7 +14,7 @@ namespace DigiLib
 	{
 		class IOPin;
 
-		class DllExport IOConnection
+		class IOConnection
 		{
 		public:
 			IOConnection(IOPin* source, IOPin* target);
@@ -22,7 +22,6 @@ namespace DigiLib
 			IOPin* GetSource() noexcept { return m_source; }
 			IOPin* GetTarget() noexcept { return m_target; }
 
-			bool operator==(const IOConnection& rhs) const noexcept;
 			bool operator<(const IOConnection& rhs) const noexcept;
 
 		protected:

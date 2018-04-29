@@ -428,38 +428,34 @@ namespace UnitTests
 
 	TEST(TestCore, TestHiZOutput)
 	{
-		Core::CompositeGate* buffers = new Core::CompositeGate("buffers");
-		buffers->AddGate("b1", new BasicGates::BufferGate());
-		buffers->AddGate("b2", new BasicGates::BufferGate());
+		Core::GateBase* b1 = new BasicGates::BufferGate();
+		Core::GateBase* b2 = new BasicGates::BufferGate();
+		Core::GateBase* wire = new BasicGates::WireGate();
 
-		buffers->AddInput("en1")->ConnectTo(buffers->GetGate("b1")->GetPin("en"));
-		buffers->AddInput("en2")->ConnectTo(buffers->GetGate("b2")->GetPin("en"));
-		buffers->AddInput("i1")->ConnectTo(buffers->GetGate("b1")->GetPin("in"));
-		buffers->AddInput("i2")->ConnectTo(buffers->GetGate("b2")->GetPin("in"));
+		b1->GetPin("out")->ConnectTo(wire->GetPin("in"));
+		b2->GetPin("out")->ConnectTo(wire->GetPin("in"));
 
-		Core::IOPin* out = buffers->AddOutput("out", 1, Core::IOPin::OUTPUT_HI_Z);
-		buffers->GetGate("b1")->GetPin("out")->ConnectTo(out);
-		buffers->GetGate("b2")->GetPin("out")->ConnectTo(out);
+		ASSERT_EQ(2, wire->GetConnectedFromPins("in").size());
 
-		buffers->GetPin("en1")->Set(Core::IOPin::LOW);
-		buffers->GetPin("en2")->Set(Core::IOPin::LOW);
-		ASSERT_EQ(Core::IOPin::HI_Z, buffers->GetPin("out")->Get());
+		b1->GetPin("en")->Set(Core::IOPin::LOW);
+		b2->GetPin("en")->Set(Core::IOPin::LOW);
+		ASSERT_EQ(Core::IOPin::HI_Z, wire->GetPin("out")->Get());
 
-		buffers->GetPin("i1")->Set(Core::IOPin::HI);
-		buffers->GetPin("en1")->Set(Core::IOPin::HI);
-		ASSERT_EQ(Core::IOPin::HI, buffers->GetPin("out")->Get());
-		buffers->GetPin("i1")->Set(Core::IOPin::LOW);
-		ASSERT_EQ(Core::IOPin::LOW, buffers->GetPin("out")->Get());
-		buffers->GetPin("i2")->Set(Core::IOPin::HI);
-		ASSERT_EQ(Core::IOPin::LOW, buffers->GetPin("out")->Get());
-		buffers->GetPin("en1")->Set(Core::IOPin::LOW);
-		ASSERT_EQ(Core::IOPin::HI_Z, buffers->GetPin("out")->Get());
-		buffers->GetPin("en2")->Set(Core::IOPin::HI);
-		ASSERT_EQ(Core::IOPin::HI, buffers->GetPin("out")->Get());
+		b1->GetPin("in")->Set(Core::IOPin::HI);
+		b1->GetPin("en")->Set(Core::IOPin::HI);
+		ASSERT_EQ(Core::IOPin::HI, wire->GetPin("out")->Get());
+		b1->GetPin("in")->Set(Core::IOPin::LOW);
+		ASSERT_EQ(Core::IOPin::LOW, wire->GetPin("out")->Get());
+		b2->GetPin("in")->Set(Core::IOPin::HI);
+		ASSERT_EQ(Core::IOPin::LOW, wire->GetPin("out")->Get());
+		b1->GetPin("en")->Set(Core::IOPin::LOW);
+		ASSERT_EQ(Core::IOPin::HI_Z, wire->GetPin("out")->Get());
+		b2->GetPin("en")->Set(Core::IOPin::HI);
+		ASSERT_EQ(Core::IOPin::HI, wire->GetPin("out")->Get());
 
 		// Both output enabled
-		buffers->GetPin("en1")->Set(Core::IOPin::HI);
-		ASSERT_EQ(Core::IOPin::UNDEF, buffers->GetPin("out")->Get());
+		b1->GetPin("en")->Set(Core::IOPin::HI);
+		ASSERT_EQ(Core::IOPin::UNDEF, wire->GetPin("out")->Get());
 	}
 
 	TEST(TestCore, TestNested)
@@ -504,22 +500,54 @@ namespace UnitTests
 		ASSERT_EQ(Core::IOPin::LOW, nested1->GetPin("out")->Get());
 	}
 
-	TEST(TestCore, TestGetConnectedPins)
+	TEST(TestCore, GetConnectedToPins)
 	{
 		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
 		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
-		EXPECT_THROW(not1->GetConnectedPins((const char*)nullptr), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedPins((Core::IOPin *)nullptr), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedPins(""), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedPins("bad"), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedPins(not2->GetPin("in")), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins((const char*)nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins((Core::IOPin *)nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins(""), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins("bad"), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins(not2->GetPin("in")), std::invalid_argument);
 
-		EXPECT_EQ(0, not1->GetConnectedPins("in").size());
-		EXPECT_EQ(0, not1->GetConnectedPins(not1->GetPin("in")).size());
+		EXPECT_EQ(0, not1->GetConnectedToPins("in").size());
+		EXPECT_EQ(0, not1->GetConnectedToPins(not1->GetPin("in")).size());
 
-		EXPECT_EQ(1, not1->GetConnectedPins("out").size());
-		EXPECT_EQ(1, not1->GetConnectedPins(not1->GetPin("out")).size());
+		EXPECT_EQ(1, not1->GetConnectedToPins("out").size());
+		EXPECT_EQ(1, not1->GetConnectedToPins(not1->GetPin("out")).size());
 	}
+	
+	TEST(TestLogicTools, GetConnectedFromPins)
+	{
+		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
+		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
+
+		EXPECT_THROW(not2->GetConnectedFromPins((const char*)nullptr), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPins((Core::IOPin *)nullptr), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPins(""), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPins("bad"), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPins(not1->GetPin("in")), std::invalid_argument);
+
+		EXPECT_EQ(1, not2->GetConnectedFromPins("in").size());
+		EXPECT_EQ(1, not2->GetConnectedFromPins(not2->GetPin("in")).size());
+
+		EXPECT_EQ(0, not2->GetConnectedFromPins("out").size());
+		EXPECT_EQ(0, not2->GetConnectedFromPins(not2->GetPin("out")).size());
+	}
+
+	TEST(TestLogicTools, GetConnectedFromToPins)
+	{
+		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
+		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
+
+		EXPECT_EQ(1, not2->GetConnectedFromPins().size());
+		EXPECT_EQ(0, not2->GetConnectedToPins().size());
+		EXPECT_EQ(0, not1->GetConnectedFromPins().size());
+		EXPECT_EQ(1, not1->GetConnectedToPins().size());
+	}
+
 }

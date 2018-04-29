@@ -42,9 +42,14 @@ namespace DigiLib
 
 			virtual IOPin* GetPin(const char*  name);
 
-			virtual PinConnectionsType& GetConnectedPins(const char* sourcePin);
-			virtual PinConnectionsType& GetConnectedPins(IOPin* sourcePin);
-			virtual ConnectedPinsType& GetConnectedPins() noexcept { return m_connectedToPins; }
+			virtual PinConnectionsType& GetConnectedFromPins(const char* sourcePin);
+			virtual PinConnectionsType& GetConnectedToPins(const char* sourcePin);
+			
+			virtual PinConnectionsType& GetConnectedFromPins(IOPin* sourcePin);
+			virtual PinConnectionsType& GetConnectedToPins(IOPin* sourcePin);
+
+			virtual ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
+			virtual ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
 
 			GateBase* GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateBase* parent);

@@ -59,7 +59,7 @@ namespace DigiLib {
 		{
 			for (auto & input : gate->GetInputPins())
 			{
-				for (auto connection : gate->GetConnectedPins(input.second.get()))
+				for (auto connection : gate->GetConnectedToPins(input.second.get()))
 				{
 					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -67,7 +67,7 @@ namespace DigiLib {
 
 			for (auto & output : gate->GetOutputPins())
 			{
-				for (auto connection : gate->GetConnectedPins(output.second.get()))
+				for (auto connection : gate->GetConnectedToPins(output.second.get()))
 				{
 					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}

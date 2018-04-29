@@ -22,12 +22,7 @@ namespace DigiLib
 
 		void IOPin::Set(IO_STATE state)
 		{
-			//if (m_direction == IO_DIRECTION::OUTPUT)
-			//{
-			//	throw std::exception("Cannot set input pin");
-			//}
-
-			auto& connectedPins = m_parentGate->GetConnectedPins(this);
+			auto & connectedPins = m_parentGate->GetConnectedToPins(this);
 
 			m_state = state;
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
@@ -38,8 +33,12 @@ namespace DigiLib
 					connected.GetTarget()->Set(state);
 				}
 			}
-			if (m_parentGate != NULL && m_direction == IO_DIRECTION::INPUT)
+
+			if (m_direction == IO_DIRECTION::INPUT)
 			{
+				// Handle HI_Z multiple input connections 
+				ComputePinState();
+
 				m_parentGate->ComputeState();
 			}
 
@@ -48,6 +47,32 @@ namespace DigiLib
 				for (auto connected : connectedPins)
 				{
 					connected.GetTarget()->Set(state);
+				}
+			}
+		}
+
+		void IOPin::ComputePinState()
+		{
+			auto & connectedFrom = m_parentGate->GetConnectedFromPins(this);
+			if (connectedFrom.size() > 1)
+			{
+				m_state = IOPin::HI_Z;
+				for (auto pin : connectedFrom)
+				{
+					IOPin::IO_STATE pinState = pin.GetSource()->Get();
+
+					if (m_state == IOPin::HI_Z)
+					{
+						m_state = pinState;
+					}
+					else if (pinState == IOPin::HI_Z)
+					{
+						// Keep existing state
+					}
+					else
+					{
+						m_state = IOPin::UNDEF; // Conflict
+					}
 				}
 			}
 		}

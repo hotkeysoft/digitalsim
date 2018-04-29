@@ -134,7 +134,7 @@ namespace DigiLib
 		{
 			CompositeGate* compositeClone = dynamic_cast<CompositeGate*>(clone);
 
-			for (auto connections : source->GetConnectedPins())
+			for (auto connections : source->GetConnectedToPins())
 			{
 				const IOPin* currentPin = connections.first;
 

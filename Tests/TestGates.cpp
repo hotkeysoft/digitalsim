@@ -10,6 +10,7 @@
 #include "BasicGates\ORGate.h"
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
+#include "BasicGates\BufferGate.h"
 #include "Tools\LogicTools.h"
 
 namespace UnitTests
@@ -272,20 +273,26 @@ namespace UnitTests
 
 		BasicGates::WireGate* wireGate = new BasicGates::WireGate();
 		comp->AddGate("wire", wireGate);
-		comp->AddInput("wire1")->ConnectTo(wireGate->GetPin("in"));
+		comp->AddInput("wire")->ConnectTo(wireGate->GetPin("in"));
 		wireGate->GetPin("out")->ConnectTo(comp->AddOutput("wireout"));
 
-		ASSERT_EQ(6, comp->GetGateCount());
+		BasicGates::BufferGate* bufferGate = new BasicGates::BufferGate();
+		comp->AddGate("buffer", bufferGate);
+		comp->AddInput("buffer")->ConnectTo(bufferGate->GetPin("in"));
+		comp->AddInput("bufferEN")->ConnectTo(bufferGate->GetPin("en"));
+		bufferGate->GetPin("out")->ConnectTo(comp->AddOutput("bufferout"));
+
+		ASSERT_EQ(7, comp->GetGateCount());
 
 		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(comp);
-		ASSERT_EQ(6144, out.size());
+		ASSERT_EQ(28672, out.size());
 
 		Core::GateBase* clone = comp->Clone("clone");
 		ASSERT_NE(nullptr, clone);
 		ASSERT_NE(comp, clone);
 
 		Tools::LogicTools::IOStateList outClone = Tools::LogicTools::GetTruthTable(clone);
-		ASSERT_EQ(6144, outClone.size());
+		ASSERT_EQ(28672, outClone.size());
 
 		ASSERT_EQ(out, outClone);
 	}

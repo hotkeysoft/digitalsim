@@ -45,6 +45,8 @@ namespace DigiLib
 			IO_DIRECTION m_direction;
 
 			IO_STATE m_state;
+
+			void ComputePinState();
 		};
 	}
 }
