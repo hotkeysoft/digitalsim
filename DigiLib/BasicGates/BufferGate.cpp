@@ -4,7 +4,6 @@
 
 namespace DigiLib {
 	namespace BasicGates {
-
 		using namespace DigiLib::Core;
 
 		BufferGate::BufferGate() noexcept : GateBase("buffer")

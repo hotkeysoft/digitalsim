@@ -44,7 +44,7 @@ namespace DigiLib
 
 			virtual PinConnectionsType& GetConnectedPins(const char* sourcePin);
 			virtual PinConnectionsType& GetConnectedPins(IOPin* sourcePin);
-			virtual ConnectedPinsType& GetConnectedPins() noexcept { return m_connectedPins; }
+			virtual ConnectedPinsType& GetConnectedPins() noexcept { return m_connectedToPins; }
 
 			GateBase* GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateBase* parent);
@@ -66,7 +66,8 @@ namespace DigiLib
 			std::string m_name;
 			GateBase* m_parent;
 
-			ConnectedPinsType m_connectedPins;
+			ConnectedPinsType m_connectedToPins;
+			ConnectedPinsType m_connectedFromPins;
 
 			IOPinMapType m_inputPins;
 			IOPinMapType m_outputPins;

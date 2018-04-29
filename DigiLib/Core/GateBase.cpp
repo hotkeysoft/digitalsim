@@ -111,7 +111,7 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedPins[sourcePin];
+			return m_connectedToPins[sourcePin];
 		}
 
 		void GateBase::SetParent(GateBase * parent)
@@ -149,16 +149,16 @@ namespace DigiLib
 				throw std::invalid_argument("Not allowed by connection rules");
 			}
 
-			// TODO:Hi-Z
 			const IOConnection connection(source, target);
-			auto& connectedPins = m_connectedPins[source];
+			auto& connectedPins = m_connectedToPins[source];
 			auto found = connectedPins.find(connection);
 			if (found != connectedPins.end())
 			{
 				throw std::invalid_argument("Connection already exists");
 			}
 
-			m_connectedPins[source].insert(connection);
+			m_connectedToPins[source].insert(connection);
+			target->GetParent()->m_connectedToPins[target].insert(connection);
 		}
 
 		void GateBase::InitAllowedConnectionMaps()
