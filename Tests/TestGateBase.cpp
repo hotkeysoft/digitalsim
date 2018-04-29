@@ -169,7 +169,7 @@ namespace UnitTests
 		delete gate2;
 	}
 
-	TEST(TestCore, TestFeedback)
+	TEST(TestCore, DISABLED_TestFeedback)
 	{
 		Core::GateBase* gate = new BasicGates::NOTGate();
 		Core::GateBase* gate2 = new BasicGates::NOTGate();
