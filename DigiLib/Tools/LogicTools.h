@@ -28,7 +28,7 @@ namespace DigiLib {
 
 		private:
 			static void PrintTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
-			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, Core::IOPinMapType& outputs, IOStateList& result);
+			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, const Core::IOPinMapType& outputs, IOStateList& result);
 		};
 	}
 }

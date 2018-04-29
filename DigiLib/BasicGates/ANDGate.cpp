@@ -27,7 +27,7 @@ namespace DigiLib {
 
 		void ANDGate::ComputeState()
 		{
-			for (auto pin : m_inputPins)
+			for (auto & pin : m_inputPins)
 			{
 				if (pin.second->Get() == IOPin::LOW)
 				{

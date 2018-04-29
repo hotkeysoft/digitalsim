@@ -79,17 +79,17 @@ namespace DigiLib
 		void CompositeGate::InternalCloneInputs(CompositeGate* source, CompositeGate * clone)
 		{
 			// Clone input pins
-			for (auto pin : source->m_inputPins)
+			for (auto & pin : source->m_inputPins)
 			{
-				clone->AddInput(pin.second->GetName().c_str(), 1);
+				clone->AddInput(pin.second.get()->GetName().c_str(), 1);
 			}
 		}
 
 		void CompositeGate::InternalCloneOutputs(CompositeGate* source, CompositeGate * clone)
 		{
-			for (auto pin : source->m_outputPins)
+			for (auto & pin: source->m_outputPins)
 			{
-				clone->AddOutput(pin.second->GetName().c_str(), 1);
+				clone->AddOutput(pin.second.get()->GetName().c_str(), 1);
 			}
 		}
 

@@ -26,7 +26,7 @@ namespace DigiLib {
 
 		void ORGate::ComputeState()
 		{
-			for (auto pin : m_inputPins)
+			for (auto & pin : m_inputPins)
 			{
 				if (pin.second->Get() == IOPin::HI)
 				{

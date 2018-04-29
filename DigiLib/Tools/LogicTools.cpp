@@ -57,17 +57,17 @@ namespace DigiLib {
 
 		void LogicTools::PrintInternalConnections(GateBase * gate)
 		{
-			for (auto input : gate->GetInputPins())
+			for (auto & input : gate->GetInputPins())
 			{
-				for (auto connection : gate->GetConnectedPins(input.second))
+				for (auto connection : gate->GetConnectedPins(input.second.get()))
 				{
 					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
 			}
 
-			for (auto output : gate->GetOutputPins())
+			for (auto & output : gate->GetOutputPins())
 			{
-				for (auto connection : gate->GetConnectedPins(output.second))
+				for (auto connection : gate->GetConnectedPins(output.second.get()))
 				{
 					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -88,15 +88,15 @@ namespace DigiLib {
 			std::vector<IOPin*> inputsVect;
 			std::vector<IOPin*> outputsVect;
 
-			for (auto pin : gate->GetInputPins())
+			for (auto & pin : gate->GetInputPins())
 			{
-				inputsVect.push_back(pin.second);
+				inputsVect.push_back(pin.second.get());
 				std::cout << pin.first << "    ";
 			}
 
-			for (auto pin : gate->GetOutputPins())
+			for (auto & pin : gate->GetOutputPins())
 			{
-				outputsVect.push_back(pin.second);
+				outputsVect.push_back(pin.second.get());
 				std::cout << pin.first << "    ";
 			}
 			std::cout << std::endl;
@@ -105,7 +105,7 @@ namespace DigiLib {
 			std::cout << std::endl;
 		}
 
-		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, IOPinMapType& outputs, IOStateList& result)
+		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, const IOPinMapType& outputs, IOStateList& result)
 		{
 			if (level <= inputs.size() - 1)
 			{
@@ -117,24 +117,24 @@ namespace DigiLib {
 			}
 			else
 			{
-				for (auto pin : outputs)
+				for (auto & pin : outputs)
 				{
-					result.push_back(pin.second->Get());
+					result.push_back(pin.second.get()->Get());
 				}
 			}
 		}
 
 		LogicTools::IOStateList LogicTools::GetTruthTable(GateBase * gate)
 		{
-			IOPinMapType inputs = gate->GetInputPins();
-			IOPinMapType outputs = gate->GetOutputPins();
+			const IOPinMapType & inputs = gate->GetInputPins();
+			const IOPinMapType & outputs = gate->GetOutputPins();
 			IOStateList outputList;
 
 			std::vector<IOPin*> inputsVect;
 
-			for (auto pin : inputs)
+			for (auto& pin : inputs)
 			{
-				inputsVect.push_back(pin.second);
+				inputsVect.push_back(pin.second.get());
 			}
 
 			GetTruthTable(0, inputsVect, outputs, outputList);

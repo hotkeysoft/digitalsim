@@ -2,8 +2,10 @@
 
 #include <set>
 #include <map>
+#include <memory>
 #include "IOPin.h"
 #include "IOConnection.h"
+#pragma warning ( disable:26426 )
 
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
@@ -17,7 +19,7 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		typedef std::map<std::string, IOPin*> IOPinMapType;
+		typedef std::map<std::string, std::unique_ptr<IOPin> > IOPinMapType;
 		typedef std::set<IOConnection> PinConnectionsType;
 		typedef std::map<IOPin*, PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
@@ -47,13 +49,13 @@ namespace DigiLib
 			GateBase* GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateBase* parent);
 
-			virtual void ComputeState() {};
+			virtual void ComputeState() noexcept(false) {};
 
 			size_t GetInputCount() noexcept { return m_inputPins.size(); }
 			size_t GetOutputCount() noexcept { return m_outputPins.size(); }
 
-			IOPinMapType GetInputPins() { return m_inputPins; }
-			IOPinMapType GetOutputPins() { return m_outputPins; }
+			const IOPinMapType& GetInputPins() noexcept { return m_inputPins; }
+			const IOPinMapType& GetOutputPins() noexcept { return m_outputPins; }
 
 			void ConnectPins(IOPin* source, IOPin* target);
 
@@ -69,9 +71,9 @@ namespace DigiLib
 			IOPinMapType m_inputPins;
 			IOPinMapType m_outputPins;
 
-			static AllowedConnectionMapType* m_pInsideInsideMap;
-			static AllowedConnectionMapType* m_pInsideParentMap;
-			static AllowedConnectionMapType* m_pParentInsideMap;
+			static AllowedConnectionMapType m_insideInsideMap;
+			static AllowedConnectionMapType m_insideParentMap;
+			static AllowedConnectionMapType m_parentInsideMap;
 			static void InitAllowedConnectionMaps();
 
 			bool IsValidPinName(const char* name);
