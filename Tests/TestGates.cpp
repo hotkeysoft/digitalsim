@@ -243,56 +243,60 @@ namespace UnitTests
 		Core::CompositeGate* comp = new Core::CompositeGate("comp");
 
 		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
+
+		// Share one input to avoir truth table explosion
+		Core::IOPin* input = comp->AddInput("masterIn");
+
 		comp->AddGate("and", andGate);
-		comp->AddInput("and1")->ConnectTo(andGate->GetPin("in1"));
+		input->ConnectTo(andGate->GetPin("in1"));
 		comp->AddInput("and2")->ConnectTo(andGate->GetPin("in2"));
 		andGate->GetPin("out")->ConnectTo(comp->AddOutput("andout"));
 
 		BasicGates::ORGate* orGate = new BasicGates::ORGate();
 		comp->AddGate("or", orGate);
-		comp->AddInput("or1")->ConnectTo(orGate->GetPin("in1"));
+		input->ConnectTo(orGate->GetPin("in1"));
 		comp->AddInput("or2")->ConnectTo(orGate->GetPin("in2"));
 		orGate->GetPin("out")->ConnectTo(comp->AddOutput("orout"));
 
 		BasicGates::XORGate* xorGate = new BasicGates::XORGate();
 		comp->AddGate("xor", xorGate);
-		comp->AddInput("xor1")->ConnectTo(xorGate->GetPin("in1"));
+		input->ConnectTo(xorGate->GetPin("in1"));
 		comp->AddInput("xor2")->ConnectTo(xorGate->GetPin("in2"));
 		xorGate->GetPin("out")->ConnectTo(comp->AddOutput("xorout"));
 
 		BasicGates::NANDGate* nandGate = new BasicGates::NANDGate();
 		comp->AddGate("nand", nandGate);
-		comp->AddInput("nand1")->ConnectTo(nandGate->GetPin("in1"));
+		input->ConnectTo(nandGate->GetPin("in1"));
 		comp->AddInput("nand2")->ConnectTo(nandGate->GetPin("in2"));
 		nandGate->GetPin("out")->ConnectTo(comp->AddOutput("nandout"));
 
 		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
 		comp->AddGate("not", notGate);
-		comp->AddInput("not1")->ConnectTo(notGate->GetPin("in"));
+		input->ConnectTo(notGate->GetPin("in"));
 		notGate->GetPin("out")->ConnectTo(comp->AddOutput("notout"));
 
 		BasicGates::WireGate* wireGate = new BasicGates::WireGate();
 		comp->AddGate("wire", wireGate);
-		comp->AddInput("wire")->ConnectTo(wireGate->GetPin("in"));
+		input->ConnectTo(wireGate->GetPin("in"));
 		wireGate->GetPin("out")->ConnectTo(comp->AddOutput("wireout"));
 
 		BasicGates::BufferGate* bufferGate = new BasicGates::BufferGate();
 		comp->AddGate("buffer", bufferGate);
-		comp->AddInput("buffer")->ConnectTo(bufferGate->GetPin("in"));
+		input->ConnectTo(bufferGate->GetPin("in"));
 		comp->AddInput("bufferEN")->ConnectTo(bufferGate->GetPin("en"));
 		bufferGate->GetPin("out")->ConnectTo(comp->AddOutput("bufferout"));
 
 		ASSERT_EQ(7, comp->GetGateCount());
 
 		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(comp);
-		ASSERT_EQ(28672, out.size());
+		ASSERT_EQ(448, out.size());
 
 		Core::GateBase* clone = comp->Clone("clone");
 		ASSERT_NE(nullptr, clone);
 		ASSERT_NE(comp, clone);
 
 		Tools::LogicTools::IOStateList outClone = Tools::LogicTools::GetTruthTable(clone);
-		ASSERT_EQ(28672, outClone.size());
+		ASSERT_EQ(448, outClone.size());
 
 		ASSERT_EQ(out, outClone);
 	}
