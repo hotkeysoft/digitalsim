@@ -21,7 +21,7 @@ namespace DigiLib
 	{
 		typedef std::map<std::string, std::unique_ptr<IOPin> > IOPinMapType;
 		typedef std::set<IOConnection> PinConnectionsType;
-		typedef std::map<IOPin*, PinConnectionsType> ConnectedPinsType;
+		typedef std::map<std::string, PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
 		class DllExport GateBase
@@ -40,7 +40,9 @@ namespace DigiLib
 
 			virtual GateBase* Clone(const char* name) = 0;
 
-			virtual IOPin* GetPin(const char*  name);
+			virtual IOPin* GetPin(const char* name);
+			virtual IOPin* GetPin(const char* name, size_t pin);
+			virtual IOPin* GetPin(const char* name, size_t low, size_t hi);
 
 			virtual PinConnectionsType& GetConnectedFromPins(const char* sourcePin);
 			virtual PinConnectionsType& GetConnectedToPins(const char* sourcePin);
@@ -65,8 +67,8 @@ namespace DigiLib
 			void ConnectPins(IOPin* source, IOPin* target);
 
 		protected:
-			virtual IOPin* AddInput(const char*  name, int8_t width = 1);
-			virtual IOPin* AddOutput(const char*  name, int8_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
+			virtual IOPin* AddInput(const char*  name, size_t width = 1);
+			virtual IOPin* AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 			std::string m_name;
 			GateBase* m_parent;
@@ -84,7 +86,7 @@ namespace DigiLib
 
 			bool IsValidPinName(const char* name);
 			void ValidatePinName(const char* name);
-			void ValidatePinWidth(int8_t width);
+			void ValidatePinWidth(size_t width);
 
 			virtual bool IsValidGateName(const char* name);
 			virtual void ValidateGateName(const char* name);

@@ -81,7 +81,7 @@ namespace DigiLib
 			// Clone input pins
 			for (auto & pin : source->m_inputPins)
 			{
-				clone->AddInput(pin.second.get()->GetName().c_str(), 1);
+				clone->AddInput(pin.second.get()->GetRawName().c_str(), pin.second.get()->GetWidth());
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace DigiLib
 		{
 			for (auto & pin: source->m_outputPins)
 			{
-				clone->AddOutput(pin.second.get()->GetName().c_str(), 1);
+				clone->AddOutput(pin.second.get()->GetRawName().c_str(), pin.second.get()->GetWidth(), pin.second.get()->GetDirection());
 			}
 		}
 
@@ -136,8 +136,6 @@ namespace DigiLib
 
 			for (auto connections : source->GetConnectedToPins())
 			{
-				const IOPin* currentPin = connections.first;
-
 				for (auto links : connections.second)
 				{
 					IOPin* clonedSource = nullptr;
@@ -146,22 +144,25 @@ namespace DigiLib
 					IOPin* sourcePin = links.GetSource();
 					IOPin* targetPin = links.GetTarget();
 
-					clonedSource = clone->GetPin(sourcePin->GetName().c_str());
+					clonedSource = sourcePin->Clone(clone);
 
 					if (targetPin->GetParent() == source->GetParent())
 					{
-						clonedTarget = clone->GetParent()->GetPin(targetPin->GetName().c_str());
+						// Target on same level as source pin
+						clonedTarget = targetPin->Clone(clone->GetParent());
 					}
 					else if (targetPin->GetParent()->GetParent() == source->GetParent())
 					{
+						// Target is outside component
 						std::string gateName = targetPin->GetParent()->GetName();
 						CompositeGate* comp = dynamic_cast<CompositeGate*>(clone->GetParent());
-						clonedTarget = comp->GetGate(gateName.c_str())->GetPin(targetPin->GetName().c_str());
+						clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()));
 					}
 					else
 					{
+						// Target is an internal gate below
 						std::string gateName = targetPin->GetParent()->GetName();
-						clonedTarget = compositeClone->GetGate(gateName.c_str())->GetPin(targetPin->GetName().c_str());
+						clonedTarget = targetPin->Clone(compositeClone->GetGate(gateName.c_str()));
 					}
 
 					clone->ConnectPins(clonedSource, clonedTarget);

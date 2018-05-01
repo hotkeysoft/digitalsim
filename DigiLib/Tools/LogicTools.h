@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Core\IOState.h"
 #include "Core\IOPin.h"
 #include "Core\GateBase.h"
 
@@ -17,18 +18,21 @@ namespace DigiLib {
 		class DllExport LogicTools
 		{
 		public:
-			typedef std::vector<Core::IOPin::IO_STATE> IOStateList;
+			typedef std::vector<Core::IOState::IO_STATE> ResultListType;
+			static ResultListType GetTruthTable(Core::GateBase* gate);
 
-			static IOStateList GetTruthTable(Core::GateBase* gate);
+			static std::string PrintTruthTable(Core::GateBase* gate);
+			static std::string PrintTruthTable(std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
 
-			static void PrintTruthTable(Core::GateBase* gate);
-			static void PrintTruthTable(std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
+			static std::string PrintInternalConnections(Core::GateBase* gate);
 
-			static void PrintInternalConnections(Core::GateBase* gate);
+			static std::string PrintPinInfo(Core::GateBase* gate);
 
 		private:
-			static void PrintTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
-			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, const Core::IOPinMapType& outputs, IOStateList& result);
+
+			static void PrintPinInfo(std::ostream& os, const Core::IOPinMapType& pins);
+			static void PrintTruthTable(std::ostream& os, size_t level, std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
+			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, const Core::IOPinMapType& outputs, ResultListType& result);
 		};
 	}
 }

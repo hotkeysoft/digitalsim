@@ -7,21 +7,38 @@ namespace DigiLib
 	namespace Core
 	{
 		IOPin::IOPin(GateBase *parentGate, const char* name, IO_DIRECTION direction) :
-			m_name(name), m_direction(direction), m_state(IOPin::UNDEF), m_parentGate(parentGate)
+			m_name(name), m_width(1), m_direction(direction), m_state(IOState::UNDEF), m_parentGate(parentGate)
 		{
 			assert(parentGate != NULL);
 			assert(name != NULL);
 		}
 
+		IOPin::IOPin(GateBase *parentGate, const char* name, size_t width, IO_DIRECTION direction) :
+			m_name(name), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
+		{
+			assert(parentGate != NULL);
+			assert(name != NULL);
+		}
+
+		IOPin * IOPin::Clone(GateBase * cloneParent)
+		{
+			return cloneParent->GetPin(GetRawName().c_str());
+		}
+
 		std::string IOPin::GetFullName()
 		{
 			std::ostringstream os;
-			os << m_parentGate->GetFullName() << "." << m_name;
+			os << m_parentGate->GetFullName() << "." << GetName();
 			return os.str();
 		}
 
-		void IOPin::Set(IO_STATE state)
+		void IOPin::Set(IOState state)
 		{
+			if (state.GetWidth() != this->GetWidth())
+			{
+				throw std::invalid_argument("pin width mismatch");
+			}
+
 			auto & connectedPins = m_parentGate->GetConnectedToPins(this);
 
 			m_state = state;
@@ -30,7 +47,7 @@ namespace DigiLib
 				// Connect to internal gates
 				for (auto connected : connectedPins)
 				{
-					connected.GetTarget()->Set(state);
+					connected.GetTarget()->Set(connected.GetSource()->Get());
 				}
 			}
 
@@ -46,7 +63,7 @@ namespace DigiLib
 			{
 				for (auto connected : connectedPins)
 				{
-					connected.GetTarget()->Set(state);
+					connected.GetTarget()->Set(connected.GetSource()->Get());
 				}
 			}
 		}
@@ -56,22 +73,27 @@ namespace DigiLib
 			auto & connectedFrom = m_parentGate->GetConnectedFromPins(this);
 			if (connectedFrom.size() > 1)
 			{
-				m_state = IOPin::HI_Z;
+				m_state = IOState(IOState::HI_Z, m_width);
 				for (auto pin : connectedFrom)
 				{
-					IOPin::IO_STATE pinState = pin.GetSource()->Get();
+					size_t offset = pin.GetTarget()->GetOffset();
+					size_t width = pin.GetSource()->GetWidth();
+					IOState state = pin.GetSource()->Get();
 
-					if (m_state == IOPin::HI_Z)
+					for (size_t i = 0; i < width; ++i, ++offset)
 					{
-						m_state = pinState;
-					}
-					else if (pinState == IOPin::HI_Z)
-					{
-						// Keep existing state
-					}
-					else
-					{
-						m_state = IOPin::UNDEF; // Conflict
+						if (m_state[offset] == IOState::HI_Z)
+						{
+							m_state[offset] = state[i];
+						}
+						else if (state[i] == IOState::HI_Z)
+						{
+							// Keep existing state
+						}
+						else
+						{
+							m_state[offset] = IOState::UNDEF; // Conflict
+						}
 					}
 				}
 			}

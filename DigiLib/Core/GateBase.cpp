@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "GateBase.h"
+#include "IOPinSubset.h"
 #include <regex>
 
 namespace DigiLib
@@ -35,29 +36,44 @@ namespace DigiLib
 			return os.str();
 		}
 
-		IOPin* GateBase::AddInput(const char* name, int8_t width)
+		IOPin* GateBase::AddInput(const char* name, size_t width)
 		{
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
-			m_inputPins[name] = std::make_unique<IOPin>(this, name, IOPin::IO_DIRECTION::INPUT);
+			if (width == 1)
+			{
+				m_inputPins[name] = std::make_unique<IOPin>(this, name, IOPin::IO_DIRECTION::INPUT);
+			}
+			else
+			{
+				m_inputPins[name] = std::make_unique<IOPin>(this, name, width, IOPin::IO_DIRECTION::INPUT);
+			}
+
 			return m_inputPins[name].get();
 		}
 
-		IOPin* GateBase::AddOutput(const char* name, int8_t width, IOPin::IO_DIRECTION dir)
+		IOPin* GateBase::AddOutput(const char* name, size_t width, IOPin::IO_DIRECTION dir)
 		{
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
-			switch (dir)
+			if (dir != IOPin::IO_DIRECTION::OUTPUT &&
+				dir != IOPin::IO_DIRECTION::OUTPUT_HI_Z)
 			{
-			case IOPin::IO_DIRECTION::OUTPUT:
-			case IOPin::IO_DIRECTION::OUTPUT_HI_Z:
-				m_outputPins[name] = std::make_unique<IOPin>(this, name, dir);
-				return m_outputPins[name].get();
-			default:
 				throw std::invalid_argument("bad output direction");
 			}
+
+			if (width == 1)
+			{
+				m_outputPins[name] = std::make_unique<IOPin>(this, name, dir);
+			}
+			else
+			{
+				m_outputPins[name] = std::make_unique<IOPin>(this, name, width, dir);
+			}
+
+			return m_outputPins[name].get();
 		}
 
 		IOPin* GateBase::GetPin(const char* name)
@@ -77,6 +93,48 @@ namespace DigiLib
 			if (it != m_outputPins.end())
 			{
 				return it->second.get();
+			}
+
+			return nullptr;
+		}
+
+		IOPin * GateBase::GetPin(const char * name, size_t offset)
+		{
+			IOPin* ioPin = GetPin(name);
+			if (ioPin != nullptr)
+			{
+				if (ioPin->GetWidth() < 2)
+				{
+					throw std::invalid_argument("pin is not a bus");
+				}
+				else if (offset < 0 || offset >= ioPin->GetWidth())
+				{
+					throw std::out_of_range("invalid pin index");
+				}
+
+				IOPinSubset* subset = new IOPinSubset(ioPin, offset);
+				
+				return subset;
+			}
+
+			return nullptr;
+		}
+
+		IOPin * GateBase::GetPin(const char * name, size_t low, size_t hi)
+		{
+			IOPin* ioPin = GetPin(name);
+			if (ioPin != nullptr)
+			{
+				if (low < 0 || low >= ioPin->GetWidth() ||
+					hi < 0 || hi >= ioPin->GetWidth() ||
+					low > hi)
+				{
+					throw std::out_of_range("invalid pin index");
+				}
+
+				IOPinSubset* subset = new IOPinSubset(ioPin, low, hi);
+
+				return subset;
 			}
 
 			return nullptr;
@@ -110,7 +168,7 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedToPins[pin];
+			return m_connectedToPins[pin->GetRawName()];
 		}
 
 		PinConnectionsType& GateBase::GetConnectedFromPins(const char * pinName)
@@ -141,7 +199,7 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedFromPins[pin];
+			return m_connectedFromPins[pin->GetRawName()];
 		}
 
 		void GateBase::SetParent(GateBase * parent)
@@ -163,7 +221,12 @@ namespace DigiLib
 
 			if (target->GetParent() == this)
 			{
-				throw std::invalid_argument("Cannot connect to self");
+				throw std::invalid_argument("cannot connect to self");
+			}
+
+			if (source->GetWidth() != target->GetWidth())
+			{
+				throw std::invalid_argument("bus width mismatch");
 			}
 
 			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
@@ -180,15 +243,15 @@ namespace DigiLib
 			}
 
 			const IOConnection connection(source, target);
-			auto& connectedPins = m_connectedToPins[source];
+			auto& connectedPins = m_connectedToPins[source->GetRawName()];
 			auto found = connectedPins.find(connection);
 			if (found != connectedPins.end())
 			{
 				throw std::invalid_argument("Connection already exists");
 			}
 
-			m_connectedToPins[source].insert(connection);
-			target->GetParent()->m_connectedFromPins[target].insert(connection);
+			m_connectedToPins[source->GetRawName()].insert(connection);
+			target->GetParent()->m_connectedFromPins[target->GetRawName()].insert(connection);
 		}
 
 		void GateBase::InitAllowedConnectionMaps()
@@ -269,15 +332,15 @@ namespace DigiLib
 			}
 		}
 
-		void GateBase::ValidatePinWidth(int8_t width)
+		void GateBase::ValidatePinWidth(size_t width)
 		{
 			if (width < 1)
 			{
 				throw std::out_of_range("width must be >=1");
 			}
-			else if (width > 1)
+			else if (width > MAX_PINS)
 			{
-				throw std::out_of_range("width >1 not supported yet");
+				throw std::out_of_range("width>MAX_WIDTH");
 			}
 		}
 

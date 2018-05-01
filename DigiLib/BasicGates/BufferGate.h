@@ -16,12 +16,14 @@ namespace DigiLib {
 		class DllExport BufferGate : public Core::GateBase
 		{
 		public:
-			BufferGate() noexcept;
+			BufferGate(size_t width = 1);
 
 			GateBase* Clone(const char* name) override;
 
 			void ComputeState() override;
-		};
 
+		private:
+			size_t m_width;
+		};
 	}
 }

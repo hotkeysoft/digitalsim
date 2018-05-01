@@ -43,10 +43,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestBus.cpp" />
     <ClCompile Include="TestGateBase.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="TestGates.cpp" />
+    <ClCompile Include="TestIOState.cpp" />
     <ClCompile Include="TestLogicTools.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -19,13 +19,13 @@ namespace DigiLib {
 
 		void NOTGate::ComputeState()
 		{
-			if (GetPin("in")->Get() == IOPin::HI)
+			if (GetPin("in")->Get() == IOState::HI)
 			{
-				GetPin("out")->Set(IOPin::LOW);
+				GetPin("out")->Set(IOState::LOW);
 			}
 			else
 			{
-				GetPin("out")->Set(IOPin::HI);
+				GetPin("out")->Set(IOState::HI);
 			}
 
 		}

@@ -20,14 +20,14 @@ namespace DigiLib {
 
 		void XORGate::ComputeState()
 		{
-			if ((GetPin("in1")->Get() == IOPin::LOW && GetPin("in2")->Get() == IOPin::HI) ||
-				(GetPin("in1")->Get() == IOPin::HI && GetPin("in2")->Get() == IOPin::LOW))
+			if ((GetPin("in1")->Get() == IOState::LOW && GetPin("in2")->Get() == IOState::HI) ||
+				(GetPin("in1")->Get() == IOState::HI && GetPin("in2")->Get() == IOState::LOW))
 			{
-				GetPin("out")->Set(IOPin::HI);
+				GetPin("out")->Set(IOState::HI);
 			}
 			else
 			{
-				GetPin("out")->Set(IOPin::LOW);
+				GetPin("out")->Set(IOState::LOW);
 			}
 
 		}

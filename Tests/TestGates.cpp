@@ -15,9 +15,98 @@
 
 namespace UnitTests
 {
-	Core::CompositeGate* BuildDecoder()
+	using namespace DigiLib::Core;
+
+	CompositeGate* BuildFullAdder()
 	{
-		Core::CompositeGate * component = new Core::CompositeGate("DECODER");
+		CompositeGate * component = new CompositeGate("FULLADDER");
+		component->AddInput("x");
+		component->AddInput("y");
+		component->AddInput("cin");
+		component->AddOutput("s");
+		component->AddOutput("cout");
+
+		BasicGates::XORGate* xor1 = new BasicGates::XORGate();
+		BasicGates::XORGate* xor2 = new BasicGates::XORGate();
+
+		BasicGates::ANDGate* and1 = new BasicGates::ANDGate();
+		BasicGates::ANDGate* and2 = new BasicGates::ANDGate();
+		BasicGates::ANDGate* and3 = new BasicGates::ANDGate();
+
+		BasicGates::ORGate* or1 = new BasicGates::ORGate(3);
+
+		component->AddGate("xor1", xor1);
+		component->AddGate("xor2", xor2);
+		component->AddGate("and1", and1);
+		component->AddGate("and2", and2);
+		component->AddGate("and3", and3);
+		component->AddGate("or1", or1);
+
+		component->GetPin("x")->ConnectTo(xor1->GetPin("in1"));
+		component->GetPin("x")->ConnectTo(and1->GetPin("in2"));
+		component->GetPin("x")->ConnectTo(and3->GetPin("in2"));
+
+		component->GetPin("y")->ConnectTo(xor1->GetPin("in2"));
+		component->GetPin("y")->ConnectTo(and2->GetPin("in2"));
+		component->GetPin("y")->ConnectTo(and3->GetPin("in1"));
+
+		component->GetPin("cin")->ConnectTo(xor2->GetPin("in2"));
+		component->GetPin("cin")->ConnectTo(and1->GetPin("in1"));
+		component->GetPin("cin")->ConnectTo(and2->GetPin("in1"));
+
+		xor1->GetPin("out")->ConnectTo(xor2->GetPin("in1")); 
+		xor2->GetPin("out")->ConnectTo(component->GetPin("s"));
+
+		and1->GetPin("out")->ConnectTo(or1->GetPin("in1"));
+		and2->GetPin("out")->ConnectTo(or1->GetPin("in2"));
+		and3->GetPin("out")->ConnectTo(or1->GetPin("in3"));
+
+		or1->GetPin("out")->ConnectTo(component->GetPin("cout"));
+
+		return component;
+	}
+
+	CompositeGate* Build4BitAdder()
+	{
+		CompositeGate * adder4 = new CompositeGate("adder4");
+		adder4->AddInput("x", 4);
+		adder4->AddInput("y", 4);
+		adder4->AddInput("cin");
+		adder4->AddOutput("s", 4);
+		adder4->AddOutput("cout");
+
+		adder4->AddGate("a0", BuildFullAdder());
+		adder4->AddGate("a1", BuildFullAdder());
+		adder4->AddGate("a2", BuildFullAdder());
+		adder4->AddGate("a3", BuildFullAdder());
+
+		adder4->GetPin("x", 0)->ConnectTo(adder4->GetGate("a0")->GetPin("x"));
+		adder4->GetPin("x", 1)->ConnectTo(adder4->GetGate("a1")->GetPin("x"));
+		adder4->GetPin("x", 2)->ConnectTo(adder4->GetGate("a2")->GetPin("x"));
+		adder4->GetPin("x", 3)->ConnectTo(adder4->GetGate("a3")->GetPin("x"));
+
+		adder4->GetPin("y", 0)->ConnectTo(adder4->GetGate("a0")->GetPin("y"));
+		adder4->GetPin("y", 1)->ConnectTo(adder4->GetGate("a1")->GetPin("y"));
+		adder4->GetPin("y", 2)->ConnectTo(adder4->GetGate("a2")->GetPin("y"));
+		adder4->GetPin("y", 3)->ConnectTo(adder4->GetGate("a3")->GetPin("y"));
+
+		adder4->GetGate("a0")->GetPin("s")->ConnectTo(adder4->GetPin("s", 0));
+		adder4->GetGate("a1")->GetPin("s")->ConnectTo(adder4->GetPin("s", 1));
+		adder4->GetGate("a2")->GetPin("s")->ConnectTo(adder4->GetPin("s", 2));
+		adder4->GetGate("a3")->GetPin("s")->ConnectTo(adder4->GetPin("s", 3));
+
+		adder4->GetPin("cin")->ConnectTo(adder4->GetGate("a0")->GetPin("cin"));
+		adder4->GetGate("a0")->GetPin("cout")->ConnectTo(adder4->GetGate("a1")->GetPin("cin"));
+		adder4->GetGate("a1")->GetPin("cout")->ConnectTo(adder4->GetGate("a2")->GetPin("cin"));
+		adder4->GetGate("a2")->GetPin("cout")->ConnectTo(adder4->GetGate("a3")->GetPin("cin"));
+		adder4->GetGate("a3")->GetPin("cout")->ConnectTo(adder4->GetPin("cout"));
+
+		return adder4;
+	}
+
+	CompositeGate* BuildDecoder()
+	{
+		CompositeGate * component = new CompositeGate("DECODER");
 		component->AddInput("EN");
 		component->AddInput("I0");		
 		component->AddInput("I1");
@@ -63,8 +152,8 @@ namespace UnitTests
 	TEST(TestGates, TestNOTGate)
 	{
 		BasicGates::NOTGate * gate = new BasicGates::NOTGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::HI, Core::IOPin::LOW };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -72,8 +161,8 @@ namespace UnitTests
 	TEST(TestGates, TestWireGate)
 	{
 		BasicGates::WireGate * gate = new BasicGates::WireGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::LOW, Core::IOPin::HI };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -81,8 +170,8 @@ namespace UnitTests
 	TEST(TestGates, TestANDGate)
 	{
 		BasicGates::ANDGate * gate = new BasicGates::ANDGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::HI };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -90,13 +179,13 @@ namespace UnitTests
 	TEST(TestGates, TestANDGate4)
 	{
 		BasicGates::ANDGate * gate = new BasicGates::ANDGate(4);
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { 
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::HI,
-		};
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
+		});
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -104,8 +193,8 @@ namespace UnitTests
 	TEST(TestGates, TestORGate)
 	{
 		BasicGates::ORGate * gate = new BasicGates::ORGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::LOW, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::HI });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -113,12 +202,12 @@ namespace UnitTests
 	TEST(TestGates, TestORGate4)
 	{
 		BasicGates::ORGate * gate = new BasicGates::ORGate(4);
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = {
-			Core::IOPin::LOW, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare = {
+			IOState::LOW, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 		};
 		ASSERT_EQ(compare, out);
 		delete gate;
@@ -127,8 +216,8 @@ namespace UnitTests
 	TEST(TestGates, TestXORGate)
 	{
 		BasicGates::XORGate * gate = new BasicGates::XORGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::LOW, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::LOW };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -136,8 +225,8 @@ namespace UnitTests
 	TEST(TestGates, TestNANDGate)
 	{
 		BasicGates::NANDGate * gate = new BasicGates::NANDGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::LOW };
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::HI, IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
@@ -145,33 +234,42 @@ namespace UnitTests
 	TEST(TestGates, TestNANDGate4)
 	{
 		BasicGates::NANDGate * gate = new BasicGates::NANDGate(4);
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = {
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI,
-			Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::HI, Core::IOPin::LOW,
-		};
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
+			IOState::HI, IOState::HI, IOState::HI, IOState::LOW,
+		});
 		ASSERT_EQ(compare, out);
 		delete gate;
 	}
 
+	TEST(TestGates, TestBufferGate)
+	{
+		BasicGates::BufferGate * gate = new BasicGates::BufferGate();
+		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::IOStateList compare = { Core::IOPin::HI_Z, Core::IOPin::HI_Z, Core::IOPin::LOW, Core::IOPin::HI };
+		ASSERT_EQ(compare, out);
+		delete gate;
+	}
+	
 	TEST(TestGates, TestCustomDecoder)
 	{
-		Core::GateBase * component = BuildDecoder();
+		GateBase * component = BuildDecoder();
 		
 		ASSERT_NE(nullptr, component);
 
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(component);
-		Tools::LogicTools::IOStateList compare = {
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::HI, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::HI, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::HI, Core::IOPin::LOW, Core::IOPin::LOW,
-			Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::LOW, Core::IOPin::HI,
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(component);
+		Tools::LogicTools::ResultListType compare = {
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::HI, IOState::LOW, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::HI, IOState::LOW,
+			IOState::LOW, IOState::HI, IOState::LOW, IOState::LOW,
+			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
 		};
 		ASSERT_EQ(compare, out);
 		delete component;
@@ -179,15 +277,15 @@ namespace UnitTests
 
 	TEST(TestGates, TestCustomComplexComponent)
 	{
-		Core::GateBase * decoder1 = BuildDecoder();
+		GateBase * decoder1 = BuildDecoder();
 		ASSERT_NE(nullptr, decoder1);
 
-		Core::GateBase * decoder2 = BuildDecoder();
+		GateBase * decoder2 = BuildDecoder();
 		ASSERT_NE(nullptr, decoder2);
 
 		BasicGates::NOTGate *notI1 = new BasicGates::NOTGate();
 
-		Core::CompositeGate * decoder3to8 = new Core::CompositeGate("Decoder3to8");
+		CompositeGate * decoder3to8 = new CompositeGate("Decoder3to8");
 		decoder3to8->AddInput("I0");
 		decoder3to8->AddInput("I1");
 		decoder3to8->AddInput("I2");
@@ -221,17 +319,17 @@ namespace UnitTests
 		decoder3to8->GetPin("I2")->ConnectTo(notI1->GetPin("in"));
 		notI1->GetPin("out")->ConnectTo(decoder1->GetPin("EN"));
 
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(decoder3to8);
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(decoder3to8);
 
-		Tools::LogicTools::IOStateList compare = {
-			Core::IOPin::HI, Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI ,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,
-			Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::LOW,Core::IOPin::HI 
+		Tools::LogicTools::ResultListType compare = {
+			IOState::HI, IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI ,IOState::LOW,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::HI ,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI ,IOState::LOW,
+			IOState::LOW,IOState::HI ,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI ,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI ,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,
+			IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI 
 		};
 
 		ASSERT_EQ(compare, out);
@@ -240,12 +338,12 @@ namespace UnitTests
 
 	TEST(TestGates, TestClone)
 	{
-		Core::CompositeGate* comp = new Core::CompositeGate("comp");
+		CompositeGate* comp = new CompositeGate("comp");
 
 		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
 
 		// Share one input to avoir truth table explosion
-		Core::IOPin* input = comp->AddInput("masterIn");
+		IOPin* input = comp->AddInput("masterIn");
 
 		comp->AddGate("and", andGate);
 		input->ConnectTo(andGate->GetPin("in1"));
@@ -288,17 +386,57 @@ namespace UnitTests
 
 		ASSERT_EQ(7, comp->GetGateCount());
 
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(comp);
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(comp);
 		ASSERT_EQ(448, out.size());
 
-		Core::GateBase* clone = comp->Clone("clone");
+		GateBase* clone = comp->Clone("clone");
 		ASSERT_NE(nullptr, clone);
 		ASSERT_NE(comp, clone);
 
-		Tools::LogicTools::IOStateList outClone = Tools::LogicTools::GetTruthTable(clone);
+		Tools::LogicTools::ResultListType outClone = Tools::LogicTools::GetTruthTable(clone);
 		ASSERT_EQ(448, outClone.size());
 
 		ASSERT_EQ(out, outClone);
 	}
 
+	TEST(TestGates, TestFullAdder)
+	{
+		GateBase* gate = BuildFullAdder();		
+		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI, 
+			IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
+			IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
+			IOState::HI, IOState::LOW, IOState::HI, IOState::HI });
+		ASSERT_EQ(compare, out);
+
+		TEST_COUT << "Building 4 bit adder";
+		CompositeGate* adder4 = Build4BitAdder();
+
+		adder4->GetPin("cin")->Set(IOState::LOW);
+		adder4->GetPin("x")->Set(IOState::FromInt(2, 4));
+		adder4->GetPin("y")->Set(IOState::FromInt(2, 4));
+		ASSERT_EQ(IOState::FromInt(4, 4), adder4->GetPin("s")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
+
+		adder4->GetPin("x")->Set(IOState::FromInt(10, 4));
+		adder4->GetPin("y")->Set(IOState::FromInt(5, 4));
+		ASSERT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
+
+		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
+		adder4->GetPin("y")->Set(IOState::FromInt(1, 4));
+		ASSERT_EQ(IOState::FromInt(0, 4), adder4->GetPin("s")->Get());
+		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+
+		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
+		adder4->GetPin("y")->Set(IOState::FromInt(15, 4));
+		ASSERT_EQ(IOState::FromInt(14, 4), adder4->GetPin("s")->Get());
+		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+
+		adder4->GetPin("cin")->Set(IOState::HI);
+		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
+		adder4->GetPin("y")->Set(IOState::FromInt(15, 4));
+		ASSERT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
+		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+	}
 }

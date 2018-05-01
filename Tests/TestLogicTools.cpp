@@ -10,6 +10,7 @@
 #include "BasicGates\ORGate.h"
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
+#include "BasicGates\BufferGate.h"
 #include "Tools\LogicTools.h"
 
 namespace UnitTests
@@ -36,5 +37,11 @@ namespace UnitTests
 	TEST(TestLogicTools, PrintInternalConnections)
 	{
 		Tools::LogicTools::PrintInternalConnections(BuildDecoder());
+	}
+
+	TEST(TestLogicTools, PrintPinInfo)
+	{
+		Tools::LogicTools::PrintPinInfo(BuildDecoder());
+		Tools::LogicTools::PrintPinInfo(new BasicGates::BufferGate(4));
 	}
 }

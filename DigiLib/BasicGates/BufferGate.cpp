@@ -6,23 +6,24 @@ namespace DigiLib {
 	namespace BasicGates {
 		using namespace DigiLib::Core;
 
-		BufferGate::BufferGate() noexcept : GateBase("buffer")
+		BufferGate::BufferGate(size_t width) : GateBase("buffer"), m_width(width)
 		{
-			AddInput("in");
+			AddInput("in", width);
 			AddInput("en");
-			AddOutput("out", 1, IOPin::OUTPUT_HI_Z);
+			AddOutput("out", width, IOPin::OUTPUT_HI_Z);
 		}
 
 		GateBase * BufferGate::Clone(const char * name)
 		{
-			return new BufferGate();
+			return new BufferGate(this->m_width);
 		}
 
 		void BufferGate::ComputeState()
 		{
-			if (GetPin("en")->Get() == IOPin::LOW)
+			if (GetPin("en")->Get() == IOState::LOW)
 			{
-				GetPin("out")->Set(IOPin::HI_Z);
+				IOState hiz(IOState::HI_Z, m_width);
+				GetPin("out")->Set(hiz);
 			}
 			else
 			{

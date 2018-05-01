@@ -66,6 +66,12 @@
     <ClInclude Include="Core\IOPin.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\IOState.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IOPinSubset.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -111,6 +117,12 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\IOPin.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\IOState.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\IOPinSubset.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

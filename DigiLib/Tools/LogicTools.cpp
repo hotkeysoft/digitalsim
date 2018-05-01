@@ -8,68 +8,63 @@ namespace DigiLib {
 	namespace Tools {
 		using namespace DigiLib::Core;
 
-		void LogicTools::PrintTruthTable(size_t level, std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs)
+		void LogicTools::PrintTruthTable(std::ostream& os, size_t level, std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs)
 		{
 			if (level <= inputs.size() - 1)
 			{
+				inputs[level]->Set(IOState::LOW);
+				PrintTruthTable(os, level + 1, inputs, outputs);
 
-				inputs[level]->Set(IOPin::LOW);
-				PrintTruthTable(level + 1, inputs, outputs);
-
-				inputs[level]->Set(IOPin::HI);
-				PrintTruthTable(level + 1, inputs, outputs);
+				inputs[level]->Set(IOState::HI);
+				PrintTruthTable(os, level + 1, inputs, outputs);
 			}
 			else
 			{
 				for (auto pin : inputs)
 				{
-					std::cout << pin->Get() << "    ";
+					os << pin->Get().ToString() << "    ";
 				}
 				for (auto pin : outputs)
 				{
-					char chState;
-					switch (pin->Get())
-					{
-					case IOPin::HI: chState = '1'; break;
-					case IOPin::HI_Z: chState = 'Z'; break;
-					case IOPin::LOW: chState = '0'; break;
-					default: chState = 'x'; 
-					}
-					std::cout << chState << "    ";
+					os << pin->Get().ToString() << "    ";
 				}
-				std::cout << std::endl;
+				os << std::endl;
 			}
 		}
 
-		void LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector<IOPin*> const & outputs)
+		std::string LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector<IOPin*> const & outputs)
 		{
+			std::ostringstream os;
 			if (inputs.size() == 0 || outputs.size() == 0)
 			{
-				return;
+				return "";
 			}
 
 			for (auto pin : inputs)
 			{
-				std::cout << pin->GetName() << "    ";
+				os << pin->GetName() << "    ";
 			}
 
 			for (auto pin : outputs)
 			{
-				std::cout << pin->GetName() << "    ";
+				os << pin->GetName() << "    ";
 			}
-			std::cout << std::endl;
+			os << std::endl;
 
-			PrintTruthTable(0, inputs, outputs);
-			std::cout << std::endl;
+			PrintTruthTable(os, 0, inputs, outputs);
+			os << std::endl;
+
+			return os.str();
 		}
 
-		void LogicTools::PrintInternalConnections(GateBase * gate)
+		std::string LogicTools::PrintInternalConnections(GateBase * gate)
 		{
+			std::ostringstream os;
 			for (auto & input : gate->GetInputPins())
 			{
 				for (auto connection : gate->GetConnectedToPins(input.second.get()))
 				{
-					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
+					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
 			}
 
@@ -77,7 +72,7 @@ namespace DigiLib {
 			{
 				for (auto connection : gate->GetConnectedToPins(output.second.get()))
 				{
-					std::cout << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
+					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
 			}
 
@@ -86,58 +81,91 @@ namespace DigiLib {
 			{
 				for (auto subGate : composite->GetInternalGates())
 				{
-					PrintInternalConnections(subGate.second);
+					os << PrintInternalConnections(subGate.second);
 				}
 			}
+
+			return os.str();
 		}
 
-		void LogicTools::PrintTruthTable(GateBase* gate)
+		void LogicTools::PrintPinInfo(std::ostream& os, const Core::IOPinMapType& pins)
 		{
+			const char* prefix = "";
+			for (auto & pin : pins)
+			{
+				os << prefix << " - " << pin.second->GetName();
+				if (pin.second->GetWidth() > 1)
+				{
+					os << "[" << pin.second->GetWidth() << "]";
+				}
+				prefix = "\n";
+			}
+			os << std::endl;
+		}
+
+		std::string LogicTools::PrintPinInfo(Core::GateBase * gate)
+		{
+			std::ostringstream os;
+			os << "Input pins:" << std::endl;
+			PrintPinInfo(os, gate->GetInputPins());
+
+			os << "Output pins:" << std::endl;
+			PrintPinInfo(os, gate->GetOutputPins());
+
+			return os.str();
+		}
+
+		std::string LogicTools::PrintTruthTable(GateBase* gate)
+		{
+			std::ostringstream os;
 			std::vector<IOPin*> inputsVect;
 			std::vector<IOPin*> outputsVect;
 
 			for (auto & pin : gate->GetInputPins())
 			{
 				inputsVect.push_back(pin.second.get());
-				std::cout << pin.first << "    ";
+				os << pin.first << "    ";
 			}
 
 			for (auto & pin : gate->GetOutputPins())
 			{
 				outputsVect.push_back(pin.second.get());
-				std::cout << pin.first << "    ";
+				os << pin.first << "    ";
 			}
-			std::cout << std::endl;
+			os << std::endl;
 
-			PrintTruthTable(0, inputsVect, outputsVect);
-			std::cout << std::endl;
+			PrintTruthTable(os, 0, inputsVect, outputsVect);
+			os << std::endl;
+
+			return os.str();
 		}
 
-		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, const IOPinMapType& outputs, IOStateList& result)
+		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, const IOPinMapType& outputs, LogicTools::ResultListType& result)
 		{
 			if (level <= inputs.size() - 1)
 			{
-				inputs[level]->Set(IOPin::LOW);
+				inputs[level]->Set(IOState::LOW);
 				GetTruthTable(level + 1, inputs, outputs, result);
 
-				inputs[level]->Set(IOPin::HI);
+				inputs[level]->Set(IOState::HI);
 				GetTruthTable(level + 1, inputs, outputs, result);
 			}
 			else
 			{
 				for (auto & pin : outputs)
 				{
-					result.push_back(pin.second.get()->Get());
+					// TODO: Won't work for bus
+					result.push_back(pin.second.get()->Get().Get());
 				}
 			}
 		}
 
-		LogicTools::IOStateList LogicTools::GetTruthTable(GateBase * gate)
+		LogicTools::ResultListType LogicTools::GetTruthTable(GateBase * gate)
 		{
 			const IOPinMapType & inputs = gate->GetInputPins();
 			const IOPinMapType & outputs = gate->GetOutputPins();
-			IOStateList outputList;
 
+			LogicTools::ResultListType results;
 			std::vector<IOPin*> inputsVect;
 
 			for (auto& pin : inputs)
@@ -145,9 +173,9 @@ namespace DigiLib {
 				inputsVect.push_back(pin.second.get());
 			}
 
-			GetTruthTable(0, inputsVect, outputs, outputList);
+			GetTruthTable(0, inputsVect, outputs, results);
 
-			return outputList;
+			return results;
 		}
 	}
 }

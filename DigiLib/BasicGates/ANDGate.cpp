@@ -29,14 +29,14 @@ namespace DigiLib {
 		{
 			for (auto & pin : m_inputPins)
 			{
-				if (pin.second->Get() == IOPin::LOW)
+				if (pin.second->Get() == IOState::LOW)
 				{
-					GetPin("out")->Set(IOPin::LOW);
+					GetPin("out")->Set(IOState::LOW);
 					return;
 				}
 			}
 
-			GetPin("out")->Set(IOPin::HI);
+			GetPin("out")->Set(IOState::HI);
 		}
 	}
 }
