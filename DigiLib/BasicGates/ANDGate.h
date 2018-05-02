@@ -25,8 +25,8 @@ namespace DigiLib {
 			void ComputeState() override;
 
 		protected:
-			std::vector<Core::IOPin*> m_inputPins;
-			Core::IOPin * m_out;
+			std::vector<Core::IOPinPtr> m_inputPins;
+			Core::IOPinPtr m_out;
 		};
 
 	}

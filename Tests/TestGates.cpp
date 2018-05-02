@@ -334,7 +334,7 @@ namespace UnitTests
 		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
 
 		// Share one input to avoir truth table explosion
-		IOPin* input = comp->AddInput("masterIn");
+		IOPinPtr input = comp->AddInput("masterIn");
 
 		comp->AddGate("and", andGate);
 		input->ConnectTo(andGate->GetPin("in1"));

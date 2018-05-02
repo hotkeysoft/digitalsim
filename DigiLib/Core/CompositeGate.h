@@ -18,7 +18,7 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		typedef std::map<std::string, GateBase*> GateMapType;
+		typedef std::map<std::string, std::unique_ptr<GateBase> > GateMapType;
 
 		class DllExport CompositeGate : public GateBase
 		{

@@ -6,19 +6,19 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOPinSubset::IOPinSubset(IOPin * parentPin, size_t offset)
+		IOPinSubset::IOPinSubset(IOPinPtr parentPin, size_t offset)
 			: IOPin(parentPin->GetParent(), parentPin->GetID(), parentPin->GetName().c_str(), 1, parentPin->GetDirection()),
-			m_parentPin(parentPin), m_low(offset), m_hi(offset), m_width(1)
+			 m_parentPin(parentPin), m_low(offset), m_hi(offset)
 		{
 		}
 
-		IOPinSubset::IOPinSubset(IOPin * parentPin, size_t low, size_t hi)
+		IOPinSubset::IOPinSubset(IOPinPtr parentPin, size_t low, size_t hi)
 			: IOPin(parentPin->GetParent(), parentPin->GetID(), parentPin->GetName().c_str(), hi-low+1, parentPin->GetDirection()),
-			m_parentPin(parentPin), m_low(low), m_hi(hi), m_width(hi-low+1)
+			 m_parentPin(parentPin), m_low(low), m_hi(hi)
 		{
 		}
 
-		IOPin * IOPinSubset::Clone(GateBase * cloneParent)
+		IOPinPtr IOPinSubset::Clone(GateBase * cloneParent)
 		{
 			return cloneParent->GetPin(GetRawName().c_str(), m_low, m_hi);
 		}

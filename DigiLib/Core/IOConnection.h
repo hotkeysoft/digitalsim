@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IOPin.h"
+
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
 #define DllExport __declspec(dllexport)  
@@ -12,21 +14,19 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		class IOPin;
-
 		class IOConnection
 		{
 		public:
-			IOConnection(IOPin* source, IOPin* target);
+			IOConnection(IOPinPtr source, IOPinPtr target);
 
-			IOPin* GetSource() const noexcept { return m_source; }
-			IOPin* GetTarget() const noexcept { return m_target; }
+			IOPinPtr GetSource() const noexcept { return m_source; }
+			IOPinPtr GetTarget() const noexcept { return m_target; }
 
 			bool operator<(const IOConnection& rhs) const noexcept;
 
 		protected:
-			IOPin * m_source;
-			IOPin * m_target;
+			IOPinPtr m_source;
+			IOPinPtr m_target;
 		};
 	}
 }

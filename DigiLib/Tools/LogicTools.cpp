@@ -8,7 +8,7 @@ namespace DigiLib {
 	namespace Tools {
 		using namespace DigiLib::Core;
 
-		void LogicTools::PrintTruthTable(std::ostream& os, size_t level, std::vector<IOPin*> const& inputs, std::vector<IOPin*> const& outputs)
+		void LogicTools::PrintTruthTable(std::ostream& os, size_t level, std::vector<IOPinPtr> const& inputs, std::vector<IOPinPtr> const& outputs)
 		{
 			if (level <= inputs.size() - 1)
 			{
@@ -32,7 +32,7 @@ namespace DigiLib {
 			}
 		}
 
-		std::string LogicTools::PrintTruthTable(std::vector<IOPin*> const & inputs, std::vector<IOPin*> const & outputs)
+		std::string LogicTools::PrintTruthTable(std::vector<IOPinPtr> const & inputs, std::vector<IOPinPtr> const & outputs)
 		{
 			std::ostringstream os;
 			if (inputs.size() == 0 || outputs.size() == 0)
@@ -79,9 +79,9 @@ namespace DigiLib {
 			CompositeGate* composite = dynamic_cast<CompositeGate*>(gate);
 			if (composite)
 			{
-				for (auto subGate : composite->GetInternalGates())
+				for (auto & subGate : composite->GetInternalGates())
 				{
-					os << PrintInternalConnections(subGate.second);
+					os << PrintInternalConnections(subGate.second.get());
 				}
 			}
 
@@ -93,7 +93,7 @@ namespace DigiLib {
 			const char* prefix = "";
 			for (auto & pinId : pins)
 			{
-				IOPin * pin = gate->GetPin(pinId.second);
+				IOPinPtr pin = gate->GetPin(pinId.second);
 				os << prefix << " - " << pin->GetName();
 				if (pin->GetWidth() > 1)
 				{
@@ -119,19 +119,19 @@ namespace DigiLib {
 		std::string LogicTools::PrintTruthTable(GateBase* gate)
 		{
 			std::ostringstream os;
-			std::vector<IOPin*> inputsVect;
-			std::vector<IOPin*> outputsVect;
+			std::vector<IOPinPtr> inputsVect;
+			std::vector<IOPinPtr> outputsVect;
 
 			for (auto & pinId : gate->GetInputPins())
 			{
-				IOPin* pin = gate->GetPin(pinId.second);
+				IOPinPtr pin = gate->GetPin(pinId.second);
 				inputsVect.push_back(pin);
 				os << pin->GetName() << "    ";
 			}
 
 			for (auto & pinId : gate->GetOutputPins())
 			{
-				IOPin* pin = gate->GetPin(pinId.second);
+				IOPinPtr pin = gate->GetPin(pinId.second);
 				outputsVect.push_back(pin);
 				os << pin->GetName() << "    ";
 			}
@@ -143,7 +143,7 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, GateBase * gate, const IOPinNameToIDMapType& outputs, LogicTools::ResultListType& result)
+		void LogicTools::GetTruthTable(size_t level, std::vector<IOPinPtr> const& inputs, GateBase * gate, const IOPinNameToIDMapType& outputs, LogicTools::ResultListType& result)
 		{
 			if (level <= inputs.size() - 1)
 			{
@@ -157,7 +157,7 @@ namespace DigiLib {
 			{
 				for (auto & pinID : outputs)
 				{
-					IOPin * pin = gate->GetPin(pinID.second);
+					IOPinPtr pin = gate->GetPin(pinID.second);
 					result.push_back(pin->Get().Get());
 				}
 			}
@@ -169,11 +169,11 @@ namespace DigiLib {
 			const IOPinNameToIDMapType & outputs = gate->GetOutputPins();
 
 			LogicTools::ResultListType results;
-			std::vector<IOPin*> inputsVect;
+			std::vector<IOPinPtr> inputsVect;
 
 			for (auto& pinId : inputs)
 			{
-				IOPin * pin = gate->GetPin(pinId.second);
+				IOPinPtr pin = gate->GetPin(pinId.second);
 				inputsVect.push_back(pin);
 			}
 

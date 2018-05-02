@@ -19,11 +19,9 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		typedef std::vector<std::unique_ptr<IOPin> > IOPinListType;
+		typedef std::vector<IOPinPtr> IOPinListType;
 		typedef std::map<std::string, size_t> IOPinNameToIDMapType;
-
 		typedef std::set<IOConnection> PinConnectionsType;
-		//typedef std::map<std::string, PinConnectionsType> ConnectedPinsType;
 		typedef std::vector<PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
@@ -43,10 +41,10 @@ namespace DigiLib
 
 			virtual GateBase* Clone(const char* name) = 0;
 
-			virtual IOPin* GetPin(size_t pinID) { return m_ioPins[pinID].get(); }
-			virtual IOPin* GetPin(const char* name);
-			virtual IOPin* GetPin(const char* name, size_t pin);
-			virtual IOPin* GetPin(const char* name, size_t low, size_t hi);
+			virtual IOPinPtr GetPin(size_t pinID) { return m_ioPins[pinID]; }
+			virtual IOPinPtr GetPin(const char* name);
+			virtual IOPinPtr GetPin(const char* name, size_t pin);
+			virtual IOPinPtr GetPin(const char* name, size_t low, size_t hi);
 
 			virtual PinConnectionsType& GetConnectedFromPins(size_t pinID);
 			virtual PinConnectionsType& GetConnectedToPins(size_t pinID);
@@ -54,8 +52,8 @@ namespace DigiLib
 			virtual PinConnectionsType& GetConnectedFromPins(const char* sourcePin);
 			virtual PinConnectionsType& GetConnectedToPins(const char* sourcePin);
 			
-			virtual PinConnectionsType& GetConnectedFromPins(IOPin* sourcePin);
-			virtual PinConnectionsType& GetConnectedToPins(IOPin* sourcePin);
+			virtual PinConnectionsType& GetConnectedFromPins(IOPinPtr sourcePin);
+			virtual PinConnectionsType& GetConnectedToPins(IOPinPtr sourcePin);
 
 			virtual ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
 			virtual ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
@@ -63,7 +61,7 @@ namespace DigiLib
 			GateBase* GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateBase* parent);
 
-			virtual void ComputeState() noexcept(false) {};
+			virtual void ComputeState() noexcept(false) {}
 
 			size_t GetInputCount() noexcept { return m_inputPinsNames.size(); }
 			size_t GetOutputCount() noexcept { return m_outputPinsNames.size(); }
@@ -71,11 +69,11 @@ namespace DigiLib
 			const IOPinNameToIDMapType& GetInputPins() noexcept { return m_inputPinsNames; }
 			const IOPinNameToIDMapType& GetOutputPins() noexcept { return m_outputPinsNames; }
 
-			void ConnectPins(IOPin* source, IOPin* target);
+			void ConnectPins(IOPinPtr source, IOPinPtr target);
 
 		protected:
-			virtual IOPin* AddInput(const char*  name, size_t width = 1);
-			virtual IOPin* AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
+			virtual IOPinPtr AddInput(const char*  name, size_t width = 1);
+			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 			std::string m_name;
 			GateBase* m_parent;

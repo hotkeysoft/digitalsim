@@ -22,7 +22,7 @@ namespace DigiLib {
 			static ResultListType GetTruthTable(Core::GateBase* gate);
 
 			static std::string PrintTruthTable(Core::GateBase* gate);
-			static std::string PrintTruthTable(std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
+			static std::string PrintTruthTable(std::vector<Core::IOPinPtr> const& inputs, std::vector<Core::IOPinPtr> const& outputs);
 
 			static std::string PrintInternalConnections(Core::GateBase* gate);
 
@@ -31,8 +31,8 @@ namespace DigiLib {
 		private:
 
 			static void PrintPinInfo(std::ostream& os, Core::GateBase * gate, const Core::IOPinNameToIDMapType& pins);
-			static void PrintTruthTable(std::ostream& os, size_t level, std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
-			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, Core::GateBase * gate, const Core::IOPinNameToIDMapType& outputs, ResultListType& result);
+			static void PrintTruthTable(std::ostream& os, size_t level, std::vector<Core::IOPinPtr> const& inputs, std::vector<Core::IOPinPtr> const& outputs);
+			static void GetTruthTable(size_t level, std::vector<Core::IOPinPtr> const& inputs, Core::GateBase * gate, const Core::IOPinNameToIDMapType& outputs, ResultListType& result);
 		};
 	}
 }

@@ -22,16 +22,15 @@ namespace DigiLib
 		public:
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
-			IOPinSubset(IOPin* parentPin, size_t offset);
-			IOPinSubset(IOPin* parentPin, size_t low, size_t hi);
+			IOPinSubset(IOPinPtr parentPin, size_t offset);
+			IOPinSubset(IOPinPtr parentPin, size_t low, size_t hi);
 
-			IOPin* Clone(GateBase *cloneParent) override;
+			IOPinPtr Clone(GateBase *cloneParent) override;
 
 			std::string GetName() override;
 
-			IOPin* GetParent() noexcept { return m_parentPin; }
+			IOPinPtr GetParent() noexcept { return m_parentPin; }
 
-			virtual size_t GetWidth() { return m_width; }
 			IOState Get() noexcept override;
 			void Set(IOState state) override;
 
@@ -40,8 +39,7 @@ namespace DigiLib
 
 			size_t m_low;
 			size_t m_hi;
-			size_t m_width;
-			IOPin * m_parentPin;
+			IOPinPtr m_parentPin;
 		};
 	}
 }

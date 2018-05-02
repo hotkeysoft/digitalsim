@@ -44,7 +44,9 @@ namespace DigiLib
 
 			gate->SetParent(this);
 			gate->SetName(name);
-			m_internalGates[name] = gate;
+
+			std::unique_ptr<GateBase> ptr(gate);
+			m_internalGates[name] = std::move(ptr);
 		}
 
 		GateBase * CompositeGate::GetGate(const char* name)
@@ -57,7 +59,7 @@ namespace DigiLib
 			GateMapType::iterator it = m_internalGates.find(name);
 			if (it != m_internalGates.end())
 			{
-				return it->second;
+				return it->second.get();
 			}
 
 			return nullptr;
@@ -81,7 +83,7 @@ namespace DigiLib
 			// Clone input pins
 			for (auto & inputs : source->m_inputPinsNames)
 			{
-				IOPin* pin = source->m_ioPins[inputs.second].get();
+				IOPinPtr pin = source->m_ioPins[inputs.second];
 
 				clone->AddInput(pin->GetRawName().c_str(), pin->GetWidth());
 			}
@@ -91,17 +93,17 @@ namespace DigiLib
 		{
 			for (auto & outputs: source->m_outputPinsNames)
 			{
-				IOPin* pin = source->m_ioPins[outputs.second].get();
+				IOPinPtr pin = source->m_ioPins[outputs.second];
 				clone->AddOutput(pin->GetRawName().c_str(), pin->GetWidth(), pin->GetDirection());
 			}
 		}
 
 		void CompositeGate::InternalCloneGates(CompositeGate* source, CompositeGate* clone)
 		{
-			for (auto gate : source->m_internalGates)
+			for (auto & gate : source->m_internalGates)
 			{
 				const char* gateName = gate.first.c_str();
-				CompositeGate* innerSource = dynamic_cast<CompositeGate*>(gate.second);
+				CompositeGate* innerSource = dynamic_cast<CompositeGate*>(gate.second.get());
 				if (innerSource)
 				{
 					CompositeGate* innerClone = new CompositeGate(gateName);
@@ -124,9 +126,9 @@ namespace DigiLib
 			CompositeGate* compositeClone = dynamic_cast<CompositeGate*>(clone);
 			if (compositeSource)
 			{
-				for (auto gate : compositeSource->m_internalGates)
+				for (auto & gate : compositeSource->m_internalGates)
 				{
-					InternalCloneLinks(gate.second, compositeClone->GetGate(gate.first.c_str()));
+					InternalCloneLinks(gate.second.get(), compositeClone->GetGate(gate.first.c_str()));
 				}
 			}
 
@@ -141,11 +143,11 @@ namespace DigiLib
 			{
 				for (auto links : connections)
 				{
-					IOPin* clonedSource = nullptr;
-					IOPin* clonedTarget = nullptr;
+					IOPinPtr clonedSource = nullptr;
+					IOPinPtr clonedTarget = nullptr;
 					
-					IOPin* sourcePin = links.GetSource();
-					IOPin* targetPin = links.GetTarget();
+					IOPinPtr sourcePin = links.GetSource();
+					IOPinPtr targetPin = links.GetTarget();
 
 					clonedSource = sourcePin->Clone(clone);
 

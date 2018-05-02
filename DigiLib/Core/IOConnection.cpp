@@ -6,7 +6,7 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOConnection::IOConnection(IOPin * source, IOPin * target) : m_source(source), m_target(target)
+		IOConnection::IOConnection(IOPinPtr source, IOPinPtr target) : m_source(source), m_target(target)
 		{
 		}
 

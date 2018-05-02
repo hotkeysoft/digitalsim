@@ -17,10 +17,10 @@ namespace UnitTests
 	{
 		BasicGates::BufferGate* buffer = new BasicGates::BufferGate(width);
 
-		IOPin* inPin = buffer->GetPin("in");
+		IOPinPtr inPin = buffer->GetPin("in");
 		EXPECT_NE(nullptr, inPin);
 
-		IOPin* outPin = buffer->GetPin("out");
+		IOPinPtr outPin = buffer->GetPin("out");
 		EXPECT_NE(nullptr, outPin);
 
 		buffer->GetPin("en")->Set(IOState::HI);
@@ -42,7 +42,7 @@ namespace UnitTests
 
 		// Set all bus pins	
 		buffer->GetPin("in")->Set(IOState(IOState::HI, 4));
-		IOPin* outPin = buffer->GetPin("out");
+		IOPinPtr outPin = buffer->GetPin("out");
 		ASSERT_EQ(outPin->Get(), IOState({ IOState::HI, IOState::HI, IOState::HI, IOState::HI }));
 
 		// Set all bus pins	
@@ -52,7 +52,7 @@ namespace UnitTests
 		// Width mismatch
 		ASSERT_THROW(buffer->GetPin("in")->Set(IOState(IOState::HI)), std::invalid_argument);
 
-		IOPin* pin13 = buffer->GetPin("in", 1, 3);
+		IOPinPtr pin13 = buffer->GetPin("in", 1, 3);
 		ASSERT_THROW(pin13->Set(IOState({ IOState::HI, IOState::LOW })), std::invalid_argument);
 
 		// Bad pin
@@ -292,9 +292,9 @@ namespace UnitTests
 		EXPECT_NE(nullptr, buffer->GetPin("in", 0));
 		EXPECT_NE(nullptr, buffer->GetPin("in", 3));
 		
-		IOPin* inPin = buffer->GetPin("in");
-		IOPin* singlePin2 = buffer->GetPin("in", 2);
-		IOPin* singlePin0 = buffer->GetPin("in", 0);
+		IOPinPtr inPin = buffer->GetPin("in");
+		IOPinPtr singlePin2 = buffer->GetPin("in", 2);
+		IOPinPtr singlePin0 = buffer->GetPin("in", 0);
 		EXPECT_EQ(1, singlePin2->GetWidth());
 		EXPECT_STREQ("in[2]", singlePin2->GetName().c_str());
 		EXPECT_STREQ("in", singlePin2->GetRawName().c_str());
@@ -343,10 +343,10 @@ namespace UnitTests
 		EXPECT_NE(nullptr, buffer->GetPin("in", 0, 2));
 		EXPECT_NE(nullptr, buffer->GetPin("in", 2, 3));
 
-		IOPin* inPin = buffer->GetPin("in");
-		IOPin* singlePin22 = buffer->GetPin("in", 2, 2);
-		IOPin* singlePin02 = buffer->GetPin("in", 0, 2);
-		IOPin* singlePin13 = buffer->GetPin("in", 1, 3);
+		IOPinPtr inPin = buffer->GetPin("in");
+		IOPinPtr singlePin22 = buffer->GetPin("in", 2, 2);
+		IOPinPtr singlePin02 = buffer->GetPin("in", 0, 2);
+		IOPinPtr singlePin13 = buffer->GetPin("in", 1, 3);
 
 		EXPECT_EQ(1, singlePin22->GetWidth());
 		EXPECT_EQ(3, singlePin02->GetWidth());

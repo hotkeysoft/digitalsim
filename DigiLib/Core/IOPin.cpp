@@ -6,12 +6,18 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOPin::IOPin(GateBase *parentGate, size_t id, const char* name, IO_DIRECTION direction) :
-			m_name(name), m_id(id), m_width(1), m_direction(direction), m_state(IOState::UNDEF), m_parentGate(parentGate)
-		{
-			assert(parentGate != NULL);
-			assert(name != NULL);
-		}
+		//IOPinPtr IOPin::Create(GateBase *parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction)
+		//{
+		//	struct make_shared_enabler : public IOPin {};
+		//	IOPinPtr created = std::make_shared<make_shared_enabler>();
+		//	created->m_parentGate = parentGate;
+		//	created->m_id = id;
+		//	created->m_name = name;
+		//	created->m_direction = direction;
+		//	created->m_width = width;
+
+		//	return created;
+		//}
 
 		IOPin::IOPin(GateBase *parentGate, size_t id, const char* name, size_t width, IO_DIRECTION direction) :
 			m_name(name), m_id(id), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
@@ -20,7 +26,7 @@ namespace DigiLib
 			assert(name != NULL);
 		}
 
-		IOPin * IOPin::Clone(GateBase * cloneParent)
+		IOPinPtr IOPin::Clone(GateBase * cloneParent)
 		{
 			return cloneParent->GetPin(GetRawName().c_str());
 		}
@@ -99,9 +105,10 @@ namespace DigiLib
 			}
 		}
 
-		void IOPin::ConnectTo(IOPin* target)
+		void IOPin::ConnectTo(IOPinPtr target)
 		{
-			m_parentGate->ConnectPins(this, target);
+			IOPinPtr source = this->shared_from_this();
+			m_parentGate->ConnectPins(source, target);
 		}
 	}
 }

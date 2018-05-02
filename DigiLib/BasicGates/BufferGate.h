@@ -25,9 +25,9 @@ namespace DigiLib {
 			void ComputeState() override;
 
 		protected:
-			Core::IOPin * m_in;
-			Core::IOPin * m_en;
-			Core::IOPin * m_out;
+			Core::IOPinPtr m_in;
+			Core::IOPinPtr m_en;
+			Core::IOPinPtr m_out;
 
 			size_t m_width;
 		};

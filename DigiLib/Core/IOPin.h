@@ -1,5 +1,5 @@
 #pragma once
-#include <set>
+#include <memory>
 #include "IOState.h"
 
 #ifdef  DIGILIB_EXPORTS 
@@ -16,13 +16,17 @@ namespace DigiLib
 	{
 		class GateBase;
 
-		class DllExport IOPin
+		class IOPin;
+		typedef std::shared_ptr<IOPin> IOPinPtr;
+
+		class DllExport IOPin : public std::enable_shared_from_this<IOPin>
 		{
 		public:
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
-			IOPin(GateBase *parentGate, size_t id, const char * name, IO_DIRECTION direction);
+		public:
 			IOPin(GateBase *parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
+			//static IOPinPtr Create(GateBase *parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
 
 			virtual ~IOPin() = default;
 			IOPin(const IOPin&) = delete;
@@ -30,7 +34,7 @@ namespace DigiLib
 			IOPin(IOPin&&) = delete;
 			GateBase& operator=(IOPin&&) = delete;
 
-			virtual IOPin* Clone(GateBase *cloneParent);
+			virtual IOPinPtr Clone(GateBase *cloneParent);
 
 			size_t GetID() { return m_id;  }
 			virtual std::string GetRawName() { return m_name; }
@@ -43,9 +47,9 @@ namespace DigiLib
 			virtual IOState Get() noexcept { return m_state; };
 			virtual void Set(IOState state);
 
-			virtual void ConnectTo(IOPin*);
+			virtual void ConnectTo(IOPinPtr);
 
-		protected:			
+		protected:					
 			virtual size_t GetOffset() { return 0; }
 			size_t m_id;
 			size_t m_width;
@@ -57,6 +61,10 @@ namespace DigiLib
 			IOState m_state;
 
 			void ComputePinState();
+
+		protected:			
+//			IOPin() {};
+
 		};
 	}
 }

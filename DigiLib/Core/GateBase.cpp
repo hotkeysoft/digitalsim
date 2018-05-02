@@ -1,8 +1,10 @@
 #include "stdafx.h"
 
 #include "GateBase.h"
+#include "IOPin.h"
 #include "IOPinSubset.h"
 #include <regex>
+#include <memory>
 
 namespace DigiLib
 {
@@ -38,29 +40,22 @@ namespace DigiLib
 			return os.str();
 		}
 
-		IOPin* GateBase::AddInput(const char* name, size_t width)
+		IOPinPtr GateBase::AddInput(const char* name, size_t width)
 		{
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
 			size_t newPinID = m_ioPinCount;
-			if (width == 1)
-			{
-				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, IOPin::IO_DIRECTION::INPUT));
-			}
-			else
-			{
-				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
-			}
+			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
 			m_inputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
 			m_connectedToPins.resize(m_ioPinCount);
 
-			return m_ioPins[newPinID].get();
+			return m_ioPins[newPinID];
 		}
 
-		IOPin* GateBase::AddOutput(const char* name, size_t width, IOPin::IO_DIRECTION dir)
+		IOPinPtr GateBase::AddOutput(const char* name, size_t width, IOPin::IO_DIRECTION dir)
 		{
 			ValidatePinName(name);
 			ValidatePinWidth(width);
@@ -72,23 +67,16 @@ namespace DigiLib
 			}
 
 			size_t newPinID = m_ioPinCount;
-			if (width == 1)
-			{
-				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, dir));
-			}
-			else
-			{
-				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, dir));
-			}
+			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, dir));
 			m_outputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
 			m_connectedToPins.resize(m_ioPinCount);
 
-			return m_ioPins[newPinID].get();
+			return m_ioPins[newPinID];
 		}
 
-		IOPin* GateBase::GetPin(const char* name)
+		IOPinPtr GateBase::GetPin(const char* name)
 		{
 			if (name == nullptr)
 			{
@@ -98,21 +86,21 @@ namespace DigiLib
 			auto it = m_inputPinsNames.find(name);
 			if (it != m_inputPinsNames.end())
 			{
-				return m_ioPins[it->second].get();
+				return m_ioPins[it->second];
 			}
 
 			it = m_outputPinsNames.find(name);
 			if (it != m_outputPinsNames.end())
 			{
-				return m_ioPins[it->second].get();
+				return m_ioPins[it->second];
 			}
 
 			return nullptr;
 		}
 
-		IOPin * GateBase::GetPin(const char * name, size_t offset)
+		IOPinPtr GateBase::GetPin(const char * name, size_t offset)
 		{
-			IOPin* ioPin = GetPin(name);
+			IOPinPtr ioPin = GetPin(name);
 			if (ioPin != nullptr)
 			{
 				if (ioPin->GetWidth() < 2)
@@ -124,7 +112,8 @@ namespace DigiLib
 					throw std::out_of_range("invalid pin index");
 				}
 
-				IOPinSubset* subset = new IOPinSubset(ioPin, offset);
+				//IOPinSubset* subset = new IOPinSubset();
+				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin, offset);
 				
 				return subset;
 			}
@@ -132,9 +121,9 @@ namespace DigiLib
 			return nullptr;
 		}
 
-		IOPin * GateBase::GetPin(const char * name, size_t low, size_t hi)
+		IOPinPtr GateBase::GetPin(const char * name, size_t low, size_t hi)
 		{
-			IOPin* ioPin = GetPin(name);
+			IOPinPtr ioPin = GetPin(name);
 			if (ioPin != nullptr)
 			{
 				if (low < 0 || low >= ioPin->GetWidth() ||
@@ -144,7 +133,7 @@ namespace DigiLib
 					throw std::out_of_range("invalid pin index");
 				}
 
-				IOPinSubset* subset = new IOPinSubset(ioPin, low, hi);
+				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin, low, hi);
 
 				return subset;
 			}
@@ -168,7 +157,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			IOPin* pin = GetPin(pinName);
+			IOPinPtr pin = GetPin(pinName);
 			if (pin == nullptr)
 			{
 				throw std::invalid_argument("source pin not found");
@@ -177,7 +166,7 @@ namespace DigiLib
 			return GetConnectedToPins(pin->GetID());
 		}
 
-		PinConnectionsType& GateBase::GetConnectedToPins(IOPin * pin)
+		PinConnectionsType& GateBase::GetConnectedToPins(IOPinPtr pin)
 		{
 			if (pin == nullptr)
 			{
@@ -208,7 +197,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			IOPin* pin = GetPin(pinName);
+			IOPinPtr pin = GetPin(pinName);
 			if (pin == nullptr)
 			{
 				throw std::invalid_argument("source pin not found");
@@ -217,7 +206,7 @@ namespace DigiLib
 			return GetConnectedFromPins(pin->GetID());
 		}
 
-		PinConnectionsType& GateBase::GetConnectedFromPins(IOPin * pin)
+		PinConnectionsType& GateBase::GetConnectedFromPins(IOPinPtr pin)
 		{
 			if (pin == nullptr)
 			{
@@ -242,7 +231,7 @@ namespace DigiLib
 			m_parent = parent;
 		}
 
-		void GateBase::ConnectPins(IOPin * source, IOPin * target)
+		void GateBase::ConnectPins(IOPinPtr source, IOPinPtr target)
 		{
 			if (source == NULL || target == NULL)
 			{

@@ -15,14 +15,17 @@
 
 namespace UnitTests
 {		
-	Core::CompositeGate* NestGate(const char* name, Core::GateBase* toNest)
+	using namespace Core;
+
+	CompositeGate* NestGate(const char* name, GateBase* toNest)
 	{
-		Core::CompositeGate* comp = new Core::CompositeGate(name);
-		comp->AddInput("in");
-		comp->AddOutput("out");
+		CompositeGate* comp = new CompositeGate(name);
+		IOPinPtr pin = comp->AddInput("in");
+		IOPinPtr pout = comp->AddOutput("out");
 		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
 		comp->AddGate("not", notGate);
 		comp->AddGate("inner", toNest);
+
 		comp->GetPin("in")->ConnectTo(notGate->GetPin("in"));
 		toNest->GetPin("out")->ConnectTo(comp->GetPin("out"));
 		notGate->GetPin("out")->ConnectTo(toNest->GetPin("in"));
@@ -32,7 +35,7 @@ namespace UnitTests
 
 	TEST(TestCore, TestAddInput)
 	{
-		Core::CompositeGate* gate = new Core::CompositeGate("test");
+		CompositeGate* gate = new CompositeGate("test");
 
 		//Logger::WriteMessage("TestAddInput: Bad input");
 		EXPECT_THROW(gate->AddInput(NULL), std::invalid_argument);
@@ -76,7 +79,7 @@ namespace UnitTests
 
 	TEST(TestCore, TestAddOutput)
 	{
-		Core::CompositeGate* gate = new Core::CompositeGate("test");
+		CompositeGate* gate = new CompositeGate("test");
 
 		//Logger::WriteMessage("TestAddOutput: Bad Input");
 		EXPECT_THROW(gate->AddOutput(NULL), std::invalid_argument);
@@ -113,7 +116,7 @@ namespace UnitTests
 		EXPECT_THROW(gate->AddOutput("width", -1), std::out_of_range);
 		EXPECT_THROW(gate->AddOutput("width", 17), std::out_of_range);
 
-		EXPECT_THROW(gate->AddOutput("width", 1, Core::IOPin::IO_DIRECTION::INPUT), std::invalid_argument);
+		EXPECT_THROW(gate->AddOutput("width", 1, IOPin::IO_DIRECTION::INPUT), std::invalid_argument);
 
 		ASSERT_NE(nullptr, gate->AddOutput("width", 16));
 
@@ -142,11 +145,11 @@ namespace UnitTests
 
 	TEST(TestCore, TestConnectTo)
 	{
-		Core::CompositeGate* gate = new Core::CompositeGate("test");
+		CompositeGate* gate = new CompositeGate("test");
 		gate->AddInput("in");
 		gate->AddOutput("out");
 
-		Core::CompositeGate* gate2 = new Core::CompositeGate("test2");
+		CompositeGate* gate2 = new CompositeGate("test2");
 		gate2->AddInput("in");
 		gate2->AddOutput("out");
 
@@ -175,14 +178,14 @@ namespace UnitTests
 
 	TEST(TestCore, DISABLED_TestFeedback)
 	{
-		Core::GateBase* gate = new BasicGates::NOTGate();
-		Core::GateBase* gate2 = new BasicGates::NOTGate();
+		GateBase* gate = new BasicGates::NOTGate();
+		GateBase* gate2 = new BasicGates::NOTGate();
 			
 		//Logger::WriteMessage("TestFeedback: gate->gate2->gate");
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 		gate2->GetPin("out")->ConnectTo(gate->GetPin("in"));
 
-//			gate->GetPin("in")->Set(Core::IOState::LOW);
+//			gate->GetPin("in")->Set(IOState::LOW);
 		FAIL();
 
 		delete gate;
@@ -191,7 +194,7 @@ namespace UnitTests
 
 	TEST(TestCore, TestSetName)
 	{
-		Core::GateBase * notGate = new BasicGates::NOTGate();
+		GateBase * notGate = new BasicGates::NOTGate();
 		ASSERT_STREQ("not", notGate->GetName().c_str());
 
 		EXPECT_THROW(notGate->SetName(NULL), std::invalid_argument);
@@ -210,10 +213,10 @@ namespace UnitTests
 
 	TEST(TestCore, TestAddGate)
 	{
-		Core::CompositeGate * gate = new Core::CompositeGate("test");
-		Core::GateBase * dummyGate = new BasicGates::NOTGate();
-		Core::GateBase * notGate = new BasicGates::NOTGate();
-		Core::GateBase * notGate2 = new BasicGates::NOTGate();
+		CompositeGate * gate = new CompositeGate("test");
+		GateBase * dummyGate = new BasicGates::NOTGate();
+		GateBase * notGate = new BasicGates::NOTGate();
+		GateBase * notGate2 = new BasicGates::NOTGate();
 
 		ASSERT_EQ(0, (int)gate->GetGateCount());
 		ASSERT_EQ(0, gate->GetInternalGates().size());
@@ -254,8 +257,8 @@ namespace UnitTests
 	
 	TEST(TestCore, TestGetGate)
 	{
-		Core::CompositeGate * gate = new Core::CompositeGate("test");
-		Core::GateBase * notGate = new BasicGates::NOTGate();
+		CompositeGate * gate = new CompositeGate("test");
+		GateBase * notGate = new BasicGates::NOTGate();
 		ASSERT_EQ(nullptr, notGate->GetParent());
 
 		gate->AddGate("not", notGate);
@@ -267,7 +270,7 @@ namespace UnitTests
 		ASSERT_EQ(nullptr, gate->GetGate(" "));
 		ASSERT_EQ(nullptr, gate->GetGate(" ba"));
 		ASSERT_EQ(nullptr, gate->GetGate(" not"));
-		Core::GateBase* child = gate->GetGate("not");
+		GateBase* child = gate->GetGate("not");
 		ASSERT_EQ(notGate, child);
 		ASSERT_STREQ("not", child->GetName().c_str());
 		ASSERT_EQ(gate, child->GetParent());
@@ -276,9 +279,9 @@ namespace UnitTests
 	TEST(TestCore, TestComponentToTopLevel)
 	{
 		//Logger::WriteMessage("TestComponentToTopLevel: Outside->Outside");
-		Core::CompositeGate * gate = new Core::CompositeGate("test");
+		CompositeGate * gate = new CompositeGate("test");
 		gate->AddOutput("out");
-		Core::CompositeGate * gate2 = new Core::CompositeGate("test2");
+		CompositeGate * gate2 = new CompositeGate("test2");
 		gate2->AddInput("in");
 
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
@@ -286,7 +289,7 @@ namespace UnitTests
 
 	TEST(TestCore, TestInnerToComponent)
 	{
-		Core::CompositeGate * gate = new Core::CompositeGate("test");
+		CompositeGate * gate = new CompositeGate("test");
 		gate->AddInput("in");
 		gate->AddOutput("out");
 		BasicGates::NOTGate * not1 = new BasicGates::NOTGate();
@@ -303,14 +306,14 @@ namespace UnitTests
 
 		//Logger::WriteMessage("TestInnerToComponent: Inside->Inside");
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
-		ASSERT_EQ(Core::IOState::UNDEF, not2->GetPin("out")->Get());
-		not1->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, not2->GetPin("out")->Get());
-		not1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, not2->GetPin("out")->Get());
+		ASSERT_EQ(IOState::UNDEF, not2->GetPin("out")->Get());
+		not1->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, not2->GetPin("out")->Get());
+		not1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, not2->GetPin("out")->Get());
 
 		// Outside gate
-		Core::GateBase * outsideNot = new BasicGates::NOTGate();
+		GateBase * outsideNot = new BasicGates::NOTGate();
 
 		//Logger::WriteMessage("TestInnerToComponent: Inside->Input pin (not allowed)");			
 		EXPECT_THROW(not3->GetPin("out")->ConnectTo(gate->GetPin("in")), std::invalid_argument);
@@ -322,10 +325,10 @@ namespace UnitTests
 		not4->GetPin("out")->ConnectTo(gate->GetPin("out"));
 
 		//Logger::WriteMessage("TestInnerToComponent: Validate inner gate working");
-		gate->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::LOW, gate->GetPin("out")->Get());
-		gate->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::HI, gate->GetPin("out")->Get());
+		gate->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::LOW, gate->GetPin("out")->Get());
+		gate->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::HI, gate->GetPin("out")->Get());
 
 		//Logger::WriteMessage("TestInnerToComponent: Output pin->inside (not allowed)");
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(not5->GetPin("in")), std::invalid_argument);
@@ -340,19 +343,19 @@ namespace UnitTests
 		//Logger::WriteMessage("TestInnerComponentToComponent: Outside gate->Outside pin (ok)");
 		not6->GetPin("out")->ConnectTo(gate->GetPin("in"));
 		//Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside gate->Outside pin");
-		not6->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, gate->GetPin("out")->Get());
-		not6->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, gate->GetPin("out")->Get());
+		not6->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, gate->GetPin("out")->Get());
+		not6->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, gate->GetPin("out")->Get());
 
 		BasicGates::NOTGate * not7 = new BasicGates::NOTGate();
 		//Logger::WriteMessage("TestInnerComponentToComponent: Outside pin->Outside gate (ok)");
 		gate->GetPin("out")->ConnectTo(not7->GetPin("in"));
 		//Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside pin->Outside gate");
-		gate->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, not7->GetPin("out")->Get());
-		gate->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, not7->GetPin("out")->Get());
+		gate->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, not7->GetPin("out")->Get());
+		gate->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, not7->GetPin("out")->Get());
 	}
 
 	TEST(TestCore, TestFullName)
@@ -364,21 +367,21 @@ namespace UnitTests
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("not.in", notGate->GetPin("in")->GetFullName().c_str());
 
-		Core::CompositeGate* nested1 = NestGate("nest1", notGate);
+		CompositeGate* nested1 = NestGate("nest1", notGate);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest1.inner", notGate->GetFullName().c_str());
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("nest1.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 
-		Core::CompositeGate* nested2 = NestGate("nest2", nested1);
+		CompositeGate* nested2 = NestGate("nest2", nested1);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest2.inner.inner", notGate->GetFullName().c_str());
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("nest2.inner.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 		
-		Core::CompositeGate* nested3 = NestGate("nest3", nested2);
+		CompositeGate* nested3 = NestGate("nest3", nested2);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest3.inner.inner.inner", notGate->GetFullName().c_str());
@@ -386,7 +389,7 @@ namespace UnitTests
 		ASSERT_STREQ("nest3.inner.inner.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 	}
 
-	void AssertEqualOutputs(Core::GateBase* g1, Core::GateBase* g2)
+	void AssertEqualOutputs(GateBase* g1, GateBase* g2)
 	{
 		ASSERT_EQ(g1->GetPin("Y0")->Get(), g2->GetPin("Y0")->Get());
 		ASSERT_EQ(g1->GetPin("Y1")->Get(), g2->GetPin("Y1")->Get());
@@ -396,9 +399,9 @@ namespace UnitTests
 
 	TEST(TestCore, TestClone)
 	{
-		Core::CompositeGate* base = BuildDecoder();
-		Core::GateBase* clonedBase = base->Clone("clone");
-		Core::CompositeGate* cloned = dynamic_cast<Core::CompositeGate*>(clonedBase);
+		CompositeGate* base = BuildDecoder();
+		GateBase* clonedBase = base->Clone("clone");
+		CompositeGate* cloned = dynamic_cast<CompositeGate*>(clonedBase);
 
 		ASSERT_NE(nullptr, cloned);
 		ASSERT_NE(base, cloned);
@@ -409,99 +412,99 @@ namespace UnitTests
 		ASSERT_EQ(base->GetGateCount(), cloned->GetGateCount());
 
 		// Compare behavior
-		base->GetPin("EN")->Set(Core::IOState::LOW);
-		base->GetPin("I0")->Set(Core::IOState::LOW);
-		base->GetPin("I1")->Set(Core::IOState::LOW);
+		base->GetPin("EN")->Set(IOState::LOW);
+		base->GetPin("I0")->Set(IOState::LOW);
+		base->GetPin("I1")->Set(IOState::LOW);
 
-		cloned->GetPin("EN")->Set(Core::IOState::LOW);
-		cloned->GetPin("I0")->Set(Core::IOState::LOW);
-		cloned->GetPin("I1")->Set(Core::IOState::LOW);
-
-		AssertEqualOutputs(base, cloned);
-
-		base->GetPin("EN")->Set(Core::IOState::HI);
-		cloned->GetPin("EN")->Set(Core::IOState::HI);
+		cloned->GetPin("EN")->Set(IOState::LOW);
+		cloned->GetPin("I0")->Set(IOState::LOW);
+		cloned->GetPin("I1")->Set(IOState::LOW);
 
 		AssertEqualOutputs(base, cloned);
 
-		base->GetPin("I0")->Set(Core::IOState::HI);
-		cloned->GetPin("I0")->Set(Core::IOState::HI);
+		base->GetPin("EN")->Set(IOState::HI);
+		cloned->GetPin("EN")->Set(IOState::HI);
+
+		AssertEqualOutputs(base, cloned);
+
+		base->GetPin("I0")->Set(IOState::HI);
+		cloned->GetPin("I0")->Set(IOState::HI);
 
 		AssertEqualOutputs(base, cloned);
 	}	
 
 	TEST(TestCore, TestHiZOutput)
 	{
-		Core::GateBase* b1 = new BasicGates::BufferGate();
-		Core::GateBase* b2 = new BasicGates::BufferGate();
-		Core::GateBase* wire = new BasicGates::WireGate();
+		GateBase* b1 = new BasicGates::BufferGate();
+		GateBase* b2 = new BasicGates::BufferGate();
+		GateBase* wire = new BasicGates::WireGate();
 
 		b1->GetPin("out")->ConnectTo(wire->GetPin("in"));
 		b2->GetPin("out")->ConnectTo(wire->GetPin("in"));
 
 		ASSERT_EQ(2, wire->GetConnectedFromPins("in").size());
 
-		b1->GetPin("en")->Set(Core::IOState::LOW);
-		b2->GetPin("en")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::HI_Z, wire->GetPin("out")->Get());
+		b1->GetPin("en")->Set(IOState::LOW);
+		b2->GetPin("en")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::HI_Z, wire->GetPin("out")->Get());
 
-		b1->GetPin("in")->Set(Core::IOState::HI);
-		b1->GetPin("en")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, wire->GetPin("out")->Get());
-		b1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, wire->GetPin("out")->Get());
-		b2->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::LOW, wire->GetPin("out")->Get());
-		b1->GetPin("en")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::HI_Z, wire->GetPin("out")->Get());
-		b2->GetPin("en")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, wire->GetPin("out")->Get());
+		b1->GetPin("in")->Set(IOState::HI);
+		b1->GetPin("en")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, wire->GetPin("out")->Get());
+		b1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, wire->GetPin("out")->Get());
+		b2->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::LOW, wire->GetPin("out")->Get());
+		b1->GetPin("en")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::HI_Z, wire->GetPin("out")->Get());
+		b2->GetPin("en")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, wire->GetPin("out")->Get());
 
 		// Both output enabled
-		b1->GetPin("en")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::UNDEF, wire->GetPin("out")->Get());
+		b1->GetPin("en")->Set(IOState::HI);
+		ASSERT_EQ(IOState::UNDEF, wire->GetPin("out")->Get());
 	}
 
 	TEST(TestCore, TestNested)
 	{
 		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
 
-		Core::CompositeGate* nested1 = NestGate("nest1", notGate);
+		CompositeGate* nested1 = NestGate("nest1", notGate);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_EQ(2, nested1->GetGateCount());
-		nested1->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, nested1->GetPin("out")->Get());
-		nested1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
-		Core::CompositeGate* nested2 = NestGate("nest2", nested1);
+		CompositeGate* nested2 = NestGate("nest2", nested1);
 		ASSERT_NE(nullptr, nested2);
 		ASSERT_EQ(2, nested2->GetGateCount());
-		nested1->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, nested1->GetPin("out")->Get());
-		nested1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
-		Core::CompositeGate* nested3 = NestGate("nest3", nested2);
+		CompositeGate* nested3 = NestGate("nest3", nested2);
 		ASSERT_NE(nullptr, nested3);
 		ASSERT_EQ(2, nested3->GetGateCount());
-		nested1->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, nested1->GetPin("out")->Get());
-		nested1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::LOW, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
 		// Now Clone it
-		Core::GateBase* clone = nested3->Clone("clone");
+		GateBase* clone = nested3->Clone("clone");
 
 		// Check independance
-		nested1->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, nested1->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, nested1->GetPin("out")->Get());
 
-		clone->GetPin("in")->Set(Core::IOState::HI);
-		ASSERT_EQ(Core::IOState::HI, clone->GetPin("out")->Get());
-		nested1->GetPin("in")->Set(Core::IOState::LOW);
-		ASSERT_EQ(Core::IOState::HI, clone->GetPin("out")->Get());
-		ASSERT_EQ(Core::IOState::LOW, nested1->GetPin("out")->Get());
+		clone->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, clone->GetPin("out")->Get());
+		nested1->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::HI, clone->GetPin("out")->Get());
+		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 	}
 
 	TEST(TestCore, GetConnectedToPins)
@@ -511,7 +514,7 @@ namespace UnitTests
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
 		EXPECT_THROW(not1->GetConnectedToPins((const char*)nullptr), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins((Core::IOPin *)nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins(nullptr), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins(""), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins("bad"), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins(not2->GetPin("in")), std::invalid_argument);
@@ -530,7 +533,7 @@ namespace UnitTests
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
 		EXPECT_THROW(not2->GetConnectedFromPins((const char*)nullptr), std::invalid_argument);
-		EXPECT_THROW(not2->GetConnectedFromPins((Core::IOPin *)nullptr), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPins((IOPinPtr)nullptr), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPins(""), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPins("bad"), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPins(not1->GetPin("in")), std::invalid_argument);
