@@ -1,6 +1,8 @@
 #pragma once
 
+#include <vector>
 #include "Core\GateBase.h"
+#include "Core\IOPin.h"
 
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
@@ -22,7 +24,11 @@ namespace DigiLib {
 
 			void ComputeState() override;
 
-		private:
+		protected:
+			Core::IOPin * m_in;
+			Core::IOPin * m_en;
+			Core::IOPin * m_out;
+
 			size_t m_width;
 		};
 	}

@@ -62,7 +62,7 @@ namespace DigiLib {
 			std::ostringstream os;
 			for (auto & input : gate->GetInputPins())
 			{
-				for (auto connection : gate->GetConnectedToPins(input.second.get()))
+				for (auto connection : gate->GetConnectedToPins(input.second))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -70,7 +70,7 @@ namespace DigiLib {
 
 			for (auto & output : gate->GetOutputPins())
 			{
-				for (auto connection : gate->GetConnectedToPins(output.second.get()))
+				for (auto connection : gate->GetConnectedToPins(output.second))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -88,15 +88,16 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		void LogicTools::PrintPinInfo(std::ostream& os, const Core::IOPinMapType& pins)
+		void LogicTools::PrintPinInfo(std::ostream& os, Core::GateBase * gate, const Core::IOPinNameToIDMapType& pins)
 		{
 			const char* prefix = "";
-			for (auto & pin : pins)
+			for (auto & pinId : pins)
 			{
-				os << prefix << " - " << pin.second->GetName();
-				if (pin.second->GetWidth() > 1)
+				IOPin * pin = gate->GetPin(pinId.second);
+				os << prefix << " - " << pin->GetName();
+				if (pin->GetWidth() > 1)
 				{
-					os << "[" << pin.second->GetWidth() << "]";
+					os << "[" << pin->GetWidth() << "]";
 				}
 				prefix = "\n";
 			}
@@ -107,10 +108,10 @@ namespace DigiLib {
 		{
 			std::ostringstream os;
 			os << "Input pins:" << std::endl;
-			PrintPinInfo(os, gate->GetInputPins());
+			PrintPinInfo(os, gate, gate->GetInputPins());
 
 			os << "Output pins:" << std::endl;
-			PrintPinInfo(os, gate->GetOutputPins());
+			PrintPinInfo(os, gate, gate->GetOutputPins());
 
 			return os.str();
 		}
@@ -121,16 +122,18 @@ namespace DigiLib {
 			std::vector<IOPin*> inputsVect;
 			std::vector<IOPin*> outputsVect;
 
-			for (auto & pin : gate->GetInputPins())
+			for (auto & pinId : gate->GetInputPins())
 			{
-				inputsVect.push_back(pin.second.get());
-				os << pin.first << "    ";
+				IOPin* pin = gate->GetPin(pinId.second);
+				inputsVect.push_back(pin);
+				os << pin->GetName() << "    ";
 			}
 
-			for (auto & pin : gate->GetOutputPins())
+			for (auto & pinId : gate->GetOutputPins())
 			{
-				outputsVect.push_back(pin.second.get());
-				os << pin.first << "    ";
+				IOPin* pin = gate->GetPin(pinId.second);
+				outputsVect.push_back(pin);
+				os << pin->GetName() << "    ";
 			}
 			os << std::endl;
 
@@ -140,40 +143,41 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, const IOPinMapType& outputs, LogicTools::ResultListType& result)
+		void LogicTools::GetTruthTable(size_t level, std::vector<IOPin*> const& inputs, GateBase * gate, const IOPinNameToIDMapType& outputs, LogicTools::ResultListType& result)
 		{
 			if (level <= inputs.size() - 1)
 			{
 				inputs[level]->Set(IOState::LOW);
-				GetTruthTable(level + 1, inputs, outputs, result);
+				GetTruthTable(level + 1, inputs, gate, outputs, result);
 
 				inputs[level]->Set(IOState::HI);
-				GetTruthTable(level + 1, inputs, outputs, result);
+				GetTruthTable(level + 1, inputs, gate, outputs, result);
 			}
 			else
 			{
-				for (auto & pin : outputs)
+				for (auto & pinID : outputs)
 				{
-					// TODO: Won't work for bus
-					result.push_back(pin.second.get()->Get().Get());
+					IOPin * pin = gate->GetPin(pinID.second);
+					result.push_back(pin->Get().Get());
 				}
 			}
 		}
 
 		LogicTools::ResultListType LogicTools::GetTruthTable(GateBase * gate)
 		{
-			const IOPinMapType & inputs = gate->GetInputPins();
-			const IOPinMapType & outputs = gate->GetOutputPins();
+			const IOPinNameToIDMapType & inputs = gate->GetInputPins();
+			const IOPinNameToIDMapType & outputs = gate->GetOutputPins();
 
 			LogicTools::ResultListType results;
 			std::vector<IOPin*> inputsVect;
 
-			for (auto& pin : inputs)
+			for (auto& pinId : inputs)
 			{
-				inputsVect.push_back(pin.second.get());
+				IOPin * pin = gate->GetPin(pinId.second);
+				inputsVect.push_back(pin);
 			}
 
-			GetTruthTable(0, inputsVect, outputs, results);
+			GetTruthTable(0, inputsVect, gate, outputs, results);
 
 			return results;
 		}

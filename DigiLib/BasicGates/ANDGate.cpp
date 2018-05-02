@@ -14,10 +14,10 @@ namespace DigiLib {
 			{
 				std::ostringstream ss;
 				ss << "in" << i;
-				AddInput(ss.str().c_str());
+				m_inputPins.push_back(AddInput(ss.str().c_str()));
 			}
 
-			AddOutput("out");
+			m_out = AddOutput("out");
 		}
 
 		GateBase * ANDGate::Clone(const char * name)
@@ -29,14 +29,14 @@ namespace DigiLib {
 		{
 			for (auto & pin : m_inputPins)
 			{
-				if (pin.second->Get() == IOState::LOW)
+				if (pin->Get() == IOState::LOW)
 				{
-					GetPin("out")->Set(IOState::LOW);
+					m_out->Set(IOState::LOW);
 					return;
 				}
 			}
 
-			GetPin("out")->Set(IOState::HI);
+			m_out->Set(IOState::HI);
 		}
 	}
 }

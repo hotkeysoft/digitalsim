@@ -8,8 +8,8 @@ namespace DigiLib {
 
 		NOTGate::NOTGate() noexcept : GateBase("not")
 		{
-			AddInput("in");
-			AddOutput("out");
+			m_in = AddInput("in");
+			m_out = AddOutput("out");
 		}
 
 		GateBase * NOTGate::Clone(const char * name)
@@ -19,15 +19,14 @@ namespace DigiLib {
 
 		void NOTGate::ComputeState()
 		{
-			if (GetPin("in")->Get() == IOState::HI)
+			if (m_in->Get() == IOState::HI)
 			{
-				GetPin("out")->Set(IOState::LOW);
+				m_out->Set(IOState::LOW);
 			}
 			else
 			{
-				GetPin("out")->Set(IOState::HI);
+				m_out->Set(IOState::HI);
 			}
-
 		}
 	}
 }

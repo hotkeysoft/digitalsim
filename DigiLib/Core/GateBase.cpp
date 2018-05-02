@@ -16,8 +16,7 @@ namespace DigiLib
 		{
 			ValidateGateName(name);
 		}
-
-
+		
 		void GateBase::SetName(const char *name)
 		{
 			ValidateGateName(name);
@@ -41,16 +40,18 @@ namespace DigiLib
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
+			size_t newPinID = m_ioPins.size();
 			if (width == 1)
 			{
-				m_inputPins[name] = std::make_unique<IOPin>(this, name, IOPin::IO_DIRECTION::INPUT);
+				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, IOPin::IO_DIRECTION::INPUT));
 			}
 			else
 			{
-				m_inputPins[name] = std::make_unique<IOPin>(this, name, width, IOPin::IO_DIRECTION::INPUT);
+				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
 			}
+			m_inputPinsNames[name] = newPinID;
 
-			return m_inputPins[name].get();
+			return m_ioPins[newPinID].get();
 		}
 
 		IOPin* GateBase::AddOutput(const char* name, size_t width, IOPin::IO_DIRECTION dir)
@@ -64,16 +65,18 @@ namespace DigiLib
 				throw std::invalid_argument("bad output direction");
 			}
 
+			size_t newPinID = m_ioPins.size();
 			if (width == 1)
 			{
-				m_outputPins[name] = std::make_unique<IOPin>(this, name, dir);
+				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, dir));
 			}
 			else
 			{
-				m_outputPins[name] = std::make_unique<IOPin>(this, name, width, dir);
+				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, dir));
 			}
+			m_outputPinsNames[name] = newPinID;
 
-			return m_outputPins[name].get();
+			return m_ioPins[newPinID].get();
 		}
 
 		IOPin* GateBase::GetPin(const char* name)
@@ -83,16 +86,16 @@ namespace DigiLib
 				throw std::invalid_argument("name is null");
 			}
 
-			IOPinMapType::const_iterator it = m_inputPins.find(name);
-			if (it != m_inputPins.end())
+			auto it = m_inputPinsNames.find(name);
+			if (it != m_inputPinsNames.end())
 			{
-				return it->second.get();
+				return m_ioPins[it->second].get();
 			}
 
-			it = m_outputPins.find(name);
-			if (it != m_outputPins.end())
+			it = m_outputPinsNames.find(name);
+			if (it != m_outputPinsNames.end())
 			{
-				return it->second.get();
+				return m_ioPins[it->second].get();
 			}
 
 			return nullptr;
@@ -140,6 +143,17 @@ namespace DigiLib
 			return nullptr;
 		}
 
+		PinConnectionsType& GateBase::GetConnectedToPins(size_t pinID)
+		{
+			IOPin* pin = GetPin(pinID);
+
+			if (pin->GetParent() != this)
+			{
+				throw std::invalid_argument("pin belongs to another gate");
+			}
+
+			return m_connectedToPins[pin->GetRawName()];
+		}
 		PinConnectionsType& GateBase::GetConnectedToPins(const char * pinName)
 		{
 			if (pinName == nullptr)
@@ -153,7 +167,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin not found");
 			}
 
-			return GetConnectedToPins(pin);
+			return GetConnectedToPins(pin->GetID());
 		}
 
 		PinConnectionsType& GateBase::GetConnectedToPins(IOPin * pin)
@@ -171,6 +185,17 @@ namespace DigiLib
 			return m_connectedToPins[pin->GetRawName()];
 		}
 
+		PinConnectionsType& GateBase::GetConnectedFromPins(size_t pinID)
+		{
+			IOPin* pin = GetPin(pinID);
+			if (pin->GetParent() != this)
+			{
+				throw std::invalid_argument("pin belongs to another gate");
+			}
+
+			return m_connectedFromPins[pin->GetRawName()];
+
+		}
 		PinConnectionsType& GateBase::GetConnectedFromPins(const char * pinName)
 		{
 			if (pinName == nullptr)
@@ -184,7 +209,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin not found");
 			}
 
-			return GetConnectedFromPins(pin);
+			return GetConnectedFromPins(pin->GetID());
 		}
 
 		PinConnectionsType& GateBase::GetConnectedFromPins(IOPin * pin)
@@ -325,8 +350,8 @@ namespace DigiLib
 				throw std::invalid_argument("invalid pin name");
 			}
 
-			if (m_inputPins.find(name) != m_inputPins.end() ||
-				m_outputPins.find(name) != m_outputPins.end())
+			if (m_inputPinsNames.find(name) != m_inputPinsNames.end() ||
+				m_outputPinsNames.find(name) != m_outputPinsNames.end())
 			{
 				throw std::invalid_argument("duplicate pin name");
 			}

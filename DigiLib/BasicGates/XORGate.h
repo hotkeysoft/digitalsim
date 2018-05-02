@@ -21,6 +21,11 @@ namespace DigiLib {
 			GateBase* Clone(const char* name) override;
 
 			void ComputeState() override;
+
+		protected:
+			Core::IOPin * m_in1;
+			Core::IOPin * m_in2;
+			Core::IOPin * m_out;
 		};
 	}
 }

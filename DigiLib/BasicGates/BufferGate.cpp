@@ -8,9 +8,9 @@ namespace DigiLib {
 
 		BufferGate::BufferGate(size_t width) : GateBase("buffer"), m_width(width)
 		{
-			AddInput("in", width);
-			AddInput("en");
-			AddOutput("out", width, IOPin::OUTPUT_HI_Z);
+			m_in = AddInput("in", width);
+			m_en = AddInput("en");
+			m_out = AddOutput("out", width, IOPin::OUTPUT_HI_Z);
 		}
 
 		GateBase * BufferGate::Clone(const char * name)
@@ -20,14 +20,14 @@ namespace DigiLib {
 
 		void BufferGate::ComputeState()
 		{
-			if (GetPin("en")->Get() == IOState::LOW)
+			if (m_en->Get() == IOState::LOW)
 			{
 				IOState hiz(IOState::HI_Z, m_width);
-				GetPin("out")->Set(hiz);
+				m_out->Set(hiz);
 			}
 			else
 			{
-				GetPin("out")->Set(GetPin("in")->Get());
+				m_out->Set(m_in->Get());
 			}
 		}
 	}

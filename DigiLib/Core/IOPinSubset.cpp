@@ -7,13 +7,13 @@ namespace DigiLib
 	namespace Core
 	{
 		IOPinSubset::IOPinSubset(IOPin * parentPin, size_t offset)
-			: IOPin(parentPin->GetParent(), parentPin->GetName().c_str(), 1, parentPin->GetDirection()),
+			: IOPin(parentPin->GetParent(), parentPin->GetID(), parentPin->GetName().c_str(), 1, parentPin->GetDirection()),
 			m_parentPin(parentPin), m_low(offset), m_hi(offset), m_width(1)
 		{
 		}
 
 		IOPinSubset::IOPinSubset(IOPin * parentPin, size_t low, size_t hi)
-			: IOPin(parentPin->GetParent(), parentPin->GetName().c_str(), hi-low+1, parentPin->GetDirection()),
+			: IOPin(parentPin->GetParent(), parentPin->GetID(), parentPin->GetName().c_str(), hi-low+1, parentPin->GetDirection()),
 			m_parentPin(parentPin), m_low(low), m_hi(hi), m_width(hi-low+1)
 		{
 		}

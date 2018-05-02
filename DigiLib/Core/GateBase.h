@@ -19,9 +19,12 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		typedef std::map<std::string, std::unique_ptr<IOPin> > IOPinMapType;
+		typedef std::vector<std::unique_ptr<IOPin> > IOPinListType;
+		typedef std::map<std::string, size_t> IOPinNameToIDMapType;
+
 		typedef std::set<IOConnection> PinConnectionsType;
 		typedef std::map<std::string, PinConnectionsType> ConnectedPinsType;
+		//typedef std::vector<PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
 		class DllExport GateBase
@@ -40,9 +43,13 @@ namespace DigiLib
 
 			virtual GateBase* Clone(const char* name) = 0;
 
+			virtual IOPin* GetPin(size_t pinID) { return m_ioPins[pinID].get(); }
 			virtual IOPin* GetPin(const char* name);
 			virtual IOPin* GetPin(const char* name, size_t pin);
 			virtual IOPin* GetPin(const char* name, size_t low, size_t hi);
+
+			virtual PinConnectionsType& GetConnectedFromPins(size_t pinID);
+			virtual PinConnectionsType& GetConnectedToPins(size_t pinID);
 
 			virtual PinConnectionsType& GetConnectedFromPins(const char* sourcePin);
 			virtual PinConnectionsType& GetConnectedToPins(const char* sourcePin);
@@ -58,11 +65,11 @@ namespace DigiLib
 
 			virtual void ComputeState() noexcept(false) {};
 
-			size_t GetInputCount() noexcept { return m_inputPins.size(); }
-			size_t GetOutputCount() noexcept { return m_outputPins.size(); }
+			size_t GetInputCount() noexcept { return m_inputPinsNames.size(); }
+			size_t GetOutputCount() noexcept { return m_outputPinsNames.size(); }
 
-			const IOPinMapType& GetInputPins() noexcept { return m_inputPins; }
-			const IOPinMapType& GetOutputPins() noexcept { return m_outputPins; }
+			const IOPinNameToIDMapType& GetInputPins() noexcept { return m_inputPinsNames; }
+			const IOPinNameToIDMapType& GetOutputPins() noexcept { return m_outputPinsNames; }
 
 			void ConnectPins(IOPin* source, IOPin* target);
 
@@ -76,8 +83,10 @@ namespace DigiLib
 			ConnectedPinsType m_connectedToPins;
 			ConnectedPinsType m_connectedFromPins;
 
-			IOPinMapType m_inputPins;
-			IOPinMapType m_outputPins;
+			IOPinNameToIDMapType m_inputPinsNames;
+			IOPinNameToIDMapType m_outputPinsNames;
+
+			IOPinListType m_ioPins;
 
 			static AllowedConnectionMapType m_insideInsideMap;
 			static AllowedConnectionMapType m_insideParentMap;

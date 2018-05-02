@@ -1,6 +1,8 @@
 #pragma once
 
+#include <vector>
 #include "Core\GateBase.h"
+#include "Core\IOPin.h"
 
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
@@ -21,6 +23,10 @@ namespace DigiLib {
 			GateBase* Clone(const char* name) override;
 
 			void ComputeState() override;
+
+		protected:
+			std::vector<Core::IOPin*> m_inputPins;
+			Core::IOPin * m_out;
 		};
 	}
 }

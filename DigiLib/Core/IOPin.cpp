@@ -6,15 +6,15 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOPin::IOPin(GateBase *parentGate, const char* name, IO_DIRECTION direction) :
-			m_name(name), m_width(1), m_direction(direction), m_state(IOState::UNDEF), m_parentGate(parentGate)
+		IOPin::IOPin(GateBase *parentGate, size_t id, const char* name, IO_DIRECTION direction) :
+			m_name(name), m_id(id), m_width(1), m_direction(direction), m_state(IOState::UNDEF), m_parentGate(parentGate)
 		{
 			assert(parentGate != NULL);
 			assert(name != NULL);
 		}
 
-		IOPin::IOPin(GateBase *parentGate, const char* name, size_t width, IO_DIRECTION direction) :
-			m_name(name), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
+		IOPin::IOPin(GateBase *parentGate, size_t id, const char* name, size_t width, IO_DIRECTION direction) :
+			m_name(name), m_id(id), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
 		{
 			assert(parentGate != NULL);
 			assert(name != NULL);
@@ -39,7 +39,7 @@ namespace DigiLib
 				throw std::invalid_argument("pin width mismatch");
 			}
 
-			auto & connectedPins = m_parentGate->GetConnectedToPins(this);
+			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
 
 			m_state = state;
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
@@ -70,7 +70,7 @@ namespace DigiLib
 
 		void IOPin::ComputePinState()
 		{
-			auto & connectedFrom = m_parentGate->GetConnectedFromPins(this);
+			auto & connectedFrom = m_parentGate->GetConnectedFromPins(m_id);
 			if (connectedFrom.size() > 1)
 			{
 				m_state = IOState(IOState::HI_Z, m_width);

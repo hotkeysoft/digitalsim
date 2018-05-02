@@ -30,9 +30,9 @@ namespace DigiLib {
 
 		private:
 
-			static void PrintPinInfo(std::ostream& os, const Core::IOPinMapType& pins);
+			static void PrintPinInfo(std::ostream& os, Core::GateBase * gate, const Core::IOPinNameToIDMapType& pins);
 			static void PrintTruthTable(std::ostream& os, size_t level, std::vector<Core::IOPin*> const& inputs, std::vector<Core::IOPin*> const& outputs);
-			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, const Core::IOPinMapType& outputs, ResultListType& result);
+			static void GetTruthTable(size_t level, std::vector<Core::IOPin*> const& inputs, Core::GateBase * gate, const Core::IOPinNameToIDMapType& outputs, ResultListType& result);
 		};
 	}
 }

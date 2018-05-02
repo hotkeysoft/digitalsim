@@ -8,9 +8,9 @@ namespace DigiLib {
 
 		XORGate::XORGate() noexcept : GateBase("xor")
 		{
-			AddInput("in1");
-			AddInput("in2");
-			AddOutput("out");
+			m_in1 = AddInput("in1");
+			m_in2 = AddInput("in2");
+			m_out = AddOutput("out");
 		}
 
 		GateBase * XORGate::Clone(const char * name)
@@ -20,14 +20,14 @@ namespace DigiLib {
 
 		void XORGate::ComputeState()
 		{
-			if ((GetPin("in1")->Get() == IOState::LOW && GetPin("in2")->Get() == IOState::HI) ||
-				(GetPin("in1")->Get() == IOState::HI && GetPin("in2")->Get() == IOState::LOW))
+			if ((m_in1->Get() == IOState::LOW && m_in2->Get() == IOState::HI) ||
+				(m_in1->Get() == IOState::HI && m_in2->Get() == IOState::LOW))
 			{
-				GetPin("out")->Set(IOState::HI);
+				m_out->Set(IOState::HI);
 			}
 			else
 			{
-				GetPin("out")->Set(IOState::LOW);
+				m_out->Set(IOState::LOW);
 			}
 
 		}

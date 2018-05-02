@@ -8,8 +8,8 @@ namespace DigiLib {
 
 		WireGate::WireGate() noexcept : GateBase("wire")
 		{
-			AddInput("in");
-			AddOutput("out");
+			m_in = AddInput("in");
+			m_out = AddOutput("out");
 		}
 
 		GateBase * WireGate::Clone(const char * name)
@@ -19,7 +19,7 @@ namespace DigiLib {
 
 		void WireGate::ComputeState()
 		{
-			GetPin("out")->Set(GetPin("in")->Get());
+			m_out->Set(m_in->Get());
 		}
 	}
 }
