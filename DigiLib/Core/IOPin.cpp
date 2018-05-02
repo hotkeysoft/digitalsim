@@ -45,13 +45,13 @@ namespace DigiLib
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
 			{
 				// Connect to internal gates
-				for (auto connected : connectedPins)
+				for (auto & connected : connectedPins)
 				{
 					connected.GetTarget()->Set(connected.GetSource()->Get());
 				}
 			}
-
-			if (m_direction == IO_DIRECTION::INPUT)
+			// TODO: Not sure about this.. could it be both?
+			else if (m_direction == IO_DIRECTION::INPUT)
 			{
 				// Handle HI_Z multiple input connections 
 				ComputePinState();
@@ -61,7 +61,7 @@ namespace DigiLib
 
 			if (m_direction == IO_DIRECTION::OUTPUT || m_direction == IO_DIRECTION::OUTPUT_HI_Z)
 			{
-				for (auto connected : connectedPins)
+				for (auto & connected : connectedPins)
 				{
 					connected.GetTarget()->Set(connected.GetSource()->Get());
 				}

@@ -19,8 +19,8 @@ namespace DigiLib
 		public:
 			IOConnection(IOPin* source, IOPin* target);
 
-			IOPin* GetSource() noexcept { return m_source; }
-			IOPin* GetTarget() noexcept { return m_target; }
+			IOPin* GetSource() const noexcept { return m_source; }
+			IOPin* GetTarget() const noexcept { return m_target; }
 
 			bool operator<(const IOConnection& rhs) const noexcept;
 

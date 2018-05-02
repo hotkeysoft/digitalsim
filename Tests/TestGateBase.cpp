@@ -548,10 +548,11 @@ namespace UnitTests
 		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
-		EXPECT_EQ(1, not2->GetConnectedFromPins().size());
-		EXPECT_EQ(0, not2->GetConnectedToPins().size());
-		EXPECT_EQ(0, not1->GetConnectedFromPins().size());
-		EXPECT_EQ(1, not1->GetConnectedToPins().size());
+		// Size is always number of pins
+		EXPECT_EQ(2, not2->GetConnectedFromPins().size());
+		EXPECT_EQ(2, not2->GetConnectedToPins().size());
+		EXPECT_EQ(2, not1->GetConnectedFromPins().size());
+		EXPECT_EQ(2, not1->GetConnectedToPins().size());
 	}
 
 }

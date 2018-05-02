@@ -23,8 +23,8 @@ namespace DigiLib
 		typedef std::map<std::string, size_t> IOPinNameToIDMapType;
 
 		typedef std::set<IOConnection> PinConnectionsType;
-		typedef std::map<std::string, PinConnectionsType> ConnectedPinsType;
-		//typedef std::vector<PinConnectionsType> ConnectedPinsType;
+		//typedef std::map<std::string, PinConnectionsType> ConnectedPinsType;
+		typedef std::vector<PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
 		class DllExport GateBase
@@ -79,6 +79,7 @@ namespace DigiLib
 
 			std::string m_name;
 			GateBase* m_parent;
+			size_t m_ioPinCount;
 
 			ConnectedPinsType m_connectedToPins;
 			ConnectedPinsType m_connectedFromPins;

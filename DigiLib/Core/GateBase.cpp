@@ -12,8 +12,11 @@ namespace DigiLib
 		AllowedConnectionMapType GateBase::m_insideParentMap;
 		AllowedConnectionMapType GateBase::m_parentInsideMap;
 
-		GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL)
+		GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL), m_ioPinCount(0)
 		{
+			m_ioPins.reserve(MAX_PINS * 2);
+			m_connectedFromPins.reserve(MAX_PINS);
+			m_connectedToPins.reserve(MAX_PINS);
 			ValidateGateName(name);
 		}
 		
@@ -40,7 +43,7 @@ namespace DigiLib
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
-			size_t newPinID = m_ioPins.size();
+			size_t newPinID = m_ioPinCount;
 			if (width == 1)
 			{
 				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, IOPin::IO_DIRECTION::INPUT));
@@ -50,6 +53,9 @@ namespace DigiLib
 				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
 			}
 			m_inputPinsNames[name] = newPinID;
+			m_ioPinCount++;
+			m_connectedFromPins.resize(m_ioPinCount);
+			m_connectedToPins.resize(m_ioPinCount);
 
 			return m_ioPins[newPinID].get();
 		}
@@ -65,7 +71,7 @@ namespace DigiLib
 				throw std::invalid_argument("bad output direction");
 			}
 
-			size_t newPinID = m_ioPins.size();
+			size_t newPinID = m_ioPinCount;
 			if (width == 1)
 			{
 				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, dir));
@@ -75,6 +81,9 @@ namespace DigiLib
 				m_ioPins.push_back(std::make_unique<IOPin>(this, newPinID, name, width, dir));
 			}
 			m_outputPinsNames[name] = newPinID;
+			m_ioPinCount++;
+			m_connectedFromPins.resize(m_ioPinCount);
+			m_connectedToPins.resize(m_ioPinCount);
 
 			return m_ioPins[newPinID].get();
 		}
@@ -145,14 +154,12 @@ namespace DigiLib
 
 		PinConnectionsType& GateBase::GetConnectedToPins(size_t pinID)
 		{
-			IOPin* pin = GetPin(pinID);
-
-			if (pin->GetParent() != this)
+			if (pinID < 0 || pinID >= m_ioPinCount)
 			{
-				throw std::invalid_argument("pin belongs to another gate");
+				throw std::invalid_argument("invalid pin ID");
 			}
 
-			return m_connectedToPins[pin->GetRawName()];
+			return m_connectedToPins[pinID];
 		}
 		PinConnectionsType& GateBase::GetConnectedToPins(const char * pinName)
 		{
@@ -182,19 +189,17 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedToPins[pin->GetRawName()];
+			return m_connectedToPins[pin->GetID()];
 		}
 
 		PinConnectionsType& GateBase::GetConnectedFromPins(size_t pinID)
 		{
-			IOPin* pin = GetPin(pinID);
-			if (pin->GetParent() != this)
+			if (pinID < 0 || pinID >= m_ioPinCount)
 			{
-				throw std::invalid_argument("pin belongs to another gate");
+				throw std::invalid_argument("invalid pin ID");
 			}
 
-			return m_connectedFromPins[pin->GetRawName()];
-
+			return m_connectedFromPins[pinID];
 		}
 		PinConnectionsType& GateBase::GetConnectedFromPins(const char * pinName)
 		{
@@ -224,7 +229,7 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
-			return m_connectedFromPins[pin->GetRawName()];
+			return m_connectedFromPins[pin->GetID()];
 		}
 
 		void GateBase::SetParent(GateBase * parent)
@@ -268,15 +273,15 @@ namespace DigiLib
 			}
 
 			const IOConnection connection(source, target);
-			auto& connectedPins = m_connectedToPins[source->GetRawName()];
+			auto& connectedPins = m_connectedToPins[source->GetID()];
 			auto found = connectedPins.find(connection);
 			if (found != connectedPins.end())
 			{
 				throw std::invalid_argument("Connection already exists");
 			}
 
-			m_connectedToPins[source->GetRawName()].insert(connection);
-			target->GetParent()->m_connectedFromPins[target->GetRawName()].insert(connection);
+			m_connectedToPins[source->GetID()].insert(connection);
+			target->GetParent()->m_connectedFromPins[target->GetID()].insert(connection);
 		}
 
 		void GateBase::InitAllowedConnectionMaps()

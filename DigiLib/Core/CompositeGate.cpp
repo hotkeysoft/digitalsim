@@ -139,7 +139,7 @@ namespace DigiLib
 
 			for (auto connections : source->GetConnectedToPins())
 			{
-				for (auto links : connections.second)
+				for (auto links : connections)
 				{
 					IOPin* clonedSource = nullptr;
 					IOPin* clonedTarget = nullptr;
