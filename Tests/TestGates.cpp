@@ -245,15 +245,6 @@ namespace UnitTests
 		delete gate;
 	}
 
-	TEST(TestGates, TestBufferGate)
-	{
-		BasicGates::BufferGate * gate = new BasicGates::BufferGate();
-		Tools::LogicTools::IOStateList out = Tools::LogicTools::GetTruthTable(gate);
-		Tools::LogicTools::IOStateList compare = { Core::IOPin::HI_Z, Core::IOPin::HI_Z, Core::IOPin::LOW, Core::IOPin::HI };
-		ASSERT_EQ(compare, out);
-		delete gate;
-	}
-	
 	TEST(TestGates, TestCustomDecoder)
 	{
 		GateBase * component = BuildDecoder();

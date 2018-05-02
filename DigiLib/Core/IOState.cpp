@@ -6,15 +6,24 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOState::IOState(IO_STATE state, size_t width) : m_states(width, state)
+		IOState::IOState(IO_STATE state, size_t width) : m_width(width)
 		{
 			if (width < 1 || width > MAX_PINS)
 				throw std::out_of_range("invalid pin width");
+			for (int i = 0; i < width; ++i)
+			{
+				m_states[i] = state;
+			}
 		}
 
-		IOState::IOState(std::initializer_list<IO_STATE> init_list) : m_states(init_list.size())
+		IOState::IOState(std::initializer_list<IO_STATE> init_list)
 		{
-			m_states = init_list;
+			int i = 0;
+			for(auto state : init_list)
+			{
+				m_states[i++] = state;
+			}
+			m_width = i;
 		}
 
 		IOState IOState::operator=(const IOState &rhs)
@@ -23,6 +32,7 @@ namespace DigiLib
 			{
 				throw std::invalid_argument("source and target must be same width");
 			}
+
 			this->m_states = rhs.m_states;
 			return *this;
 		}
@@ -35,22 +45,26 @@ namespace DigiLib
 
 		bool IOState::operator==(const IOState & rhs) const
 		{
-			return m_states == rhs.m_states;
+			if (rhs.m_width != m_width)
+				return false;
+			return memcmp(&m_states, &rhs.m_states, m_width * sizeof(IO_STATE)) == 0;
 		}
 
 		bool IOState::operator!=(const IOState & rhs) const
 		{
-			return m_states != rhs.m_states;
+			if (rhs.m_width != m_width)
+				return true;
+			return memcmp(&m_states, &rhs.m_states, m_width * sizeof(IO_STATE) != 0);
 		}
 
 		bool IOState::operator==(IO_STATE rhs) const
 		{
-			return m_states.size() == 1 && m_states[0] == rhs;
+			return m_width == 1 && m_states[0] == rhs;
 		}
 
 		bool IOState::operator!=(IO_STATE rhs) const
 		{
-			if (m_states.size() != 1)
+			if (m_width != 1)
 				return true;
 
 			return m_states[0] != rhs;
@@ -59,7 +73,7 @@ namespace DigiLib
 		std::string IOState::ToString() const
 		{
 			std::ostringstream os;
-			if (m_states.size() == 1)
+			if (m_width == 1)
 			{
 				os << ToString(m_states[0]);
 			}
@@ -67,9 +81,9 @@ namespace DigiLib
 			{
 				const char* separator = "";
 				os << "{";
-				for (IO_STATE state : m_states)
+				for (size_t i = 0; i<m_width; ++i)
 				{
-					os << separator << ToString(state);
+					os << separator << ToString(m_states[i]);
 					separator = ", ";
 				}
 				os << "}";
@@ -91,7 +105,7 @@ namespace DigiLib
 		uint8_t IOState::ToInt8() const
 		{
 			uint8_t ret = 0;
-			for (size_t i = 0; i < std::min((size_t)8, m_states.size()); ++i)
+			for (size_t i = 0; i < std::min((size_t)8, m_width); ++i)
 			{
 				switch (m_states[i])
 				{
@@ -111,7 +125,7 @@ namespace DigiLib
 		uint16_t IOState::ToInt16() const
 		{
 			uint16_t ret = 0;
-			for (size_t i = 0; i < std::min((size_t)16, m_states.size()); ++i)
+			for (size_t i = 0; i < std::min((size_t)16, m_width); ++i)
 			{
 				switch (m_states[i])
 				{
@@ -153,7 +167,7 @@ namespace DigiLib
 
 		IOState::IO_STATE IOState::Get(size_t pin) const
 		{
-			if (pin < 0 || pin >= m_states.size())
+			if (pin < 0 || pin >= m_width)
 			{
 				throw std::out_of_range("invalid pin");
 			}
@@ -163,15 +177,15 @@ namespace DigiLib
 
 		IOState IOState::Get(size_t low, size_t hi) const
 		{
-			if (low < 0 || low >= m_states.size() ||
-				hi < 0 || hi >= m_states.size() ||
+			if (low < 0 || low >= m_width ||
+				hi < 0 || hi >= m_width ||
 				low > hi)
 			{
 				throw std::out_of_range("invalid range");
 			}
 
 			size_t width = hi - low + 1;
-			IOState state(IOState::UNDEF, width);
+			IOState state(width);
 			for (size_t out=0, in = low; in <= hi; ++in, ++out)
 			{
 				state[out] = m_states[in];
@@ -181,17 +195,21 @@ namespace DigiLib
 
 		void IOState::Set(std::vector<IO_STATE> pins)
 		{
-			if (pins.size() != m_states.size())
+			if (pins.size() != m_width)
 			{
 				throw std::invalid_argument("source and target must be same width");
 			}
 
-			m_states = pins;
+			int i = 0; 
+			for (auto state : pins)
+			{
+				m_states[i++] = state;
+			}
 		}
 
 		void IOState::Set(size_t pin, IO_STATE state)
 		{
-			if (pin < 0 || pin >= m_states.size())
+			if (pin < 0 || pin >= m_width)
 			{
 				throw std::out_of_range("invalid pin");
 			}
@@ -201,7 +219,7 @@ namespace DigiLib
 
 		void IOState::Set(IO_STATE state)
 		{
-			if (m_states.size() != 1)
+			if (m_width != 1)
 			{
 				throw std::invalid_argument("Can not be used on bus");
 			}
@@ -211,7 +229,7 @@ namespace DigiLib
 
 		IOState::IO_STATE & IOState::operator[](size_t pin)
 		{
-			if (pin < 0 || pin >= m_states.size())
+			if (pin < 0 || pin >= m_width)
 			{
 				throw std::out_of_range("invalid pin");
 			}

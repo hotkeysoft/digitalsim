@@ -6,6 +6,8 @@
 #include <ostream>
 #include <initializer_list>
 
+#define MAX_PINS 16
+
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
 #define DllExport __declspec(dllexport)  
@@ -25,11 +27,11 @@ namespace DigiLib
 
 			IOState(IO_STATE state = UNDEF, size_t width = 1);
 			IOState(std::initializer_list<IO_STATE> init_list);
-			IOState(const IOState& rhs) : m_states(rhs.m_states) {};
+			IOState(const IOState& rhs) : m_width(rhs.m_width), m_states(rhs.m_states) {};
 			IOState operator=(const IOState&);
 			IOState operator=(IO_STATE);
 
-			size_t GetWidth() const { return m_states.size(); }
+			size_t GetWidth() const { return m_width; }
 
 			bool operator==(const IOState& rhs) const;
 			bool operator!=(const IOState& rhs) const;
@@ -53,9 +55,11 @@ namespace DigiLib
 
 			static IOState FromInt(int value, size_t bitCount);
 
-		private:
-			std::vector<IO_STATE> m_states;
-			//std::array<IO_STATE, MAX_PINS> m_states2;
+		protected:
+			IOState(size_t width) : m_width(width) {}
+
+			size_t m_width;
+			std::array<IO_STATE, MAX_PINS> m_states;
 		};
 
 		inline bool operator==(IOState::IO_STATE lhs, const IOState& rhs) { return rhs == lhs; }
