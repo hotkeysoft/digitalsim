@@ -24,6 +24,11 @@ namespace DigiLib
 			return os.str();
 		}
 
+		void IOPin::Reset()
+		{
+			m_state = IOState(IOState::UNDEF, m_width);
+		}
+
 		void IOPin::Set(IOState state)
 		{
 			if (state.GetWidth() != this->GetWidth())
@@ -31,9 +36,14 @@ namespace DigiLib
 				throw std::invalid_argument("pin width mismatch");
 			}
 			
-			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
-
+			if (m_state == state)
+			{
+				return;
+			}
 			m_state = state;
+			
+			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
+			
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
 			{
 				// Connect to internal gates

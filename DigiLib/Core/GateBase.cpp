@@ -233,6 +233,14 @@ namespace DigiLib
 			m_parent = parent;
 		}
 
+		void GateBase::ResetPins()
+		{
+			for (auto pin : m_ioPins)
+			{
+				pin->Reset();
+			}
+		}
+
 		void GateBase::ConnectPins(IOPinPtr source, IOPinPtr target)
 		{
 			if (source == NULL || target == NULL)
@@ -249,6 +257,12 @@ namespace DigiLib
 			{
 				throw std::invalid_argument("bus width mismatch");
 			}
+
+			// Reset all pins
+			source->Reset();
+			target->Reset();
+			ResetPins();
+			target->GetParent()->ResetPins();
 
 			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
 			const bool insideToParent = (GetParent() == target->GetParent());

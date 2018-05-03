@@ -40,6 +40,7 @@ namespace DigiLib
 
 			virtual size_t GetWidth() { return m_width; }
 			virtual IOState Get() noexcept { return m_state; };
+			virtual void Reset();
 			virtual void Set(IOState state);
 
 			virtual void ConnectTo(IOPinPtr);

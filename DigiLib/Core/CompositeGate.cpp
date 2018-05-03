@@ -40,6 +40,15 @@ namespace DigiLib
 			return clone;
 		}
 
+		void CompositeGate::ResetPins()
+		{
+			GateBase::ResetPins();
+			for (auto child : m_internalGates)
+			{
+				child.second->ResetPins();
+			}
+		}
+
 		void CompositeGate::AddGate(const char* name, GatePtr gate)
 		{
 			ValidateGateName(name);

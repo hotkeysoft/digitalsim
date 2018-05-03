@@ -44,6 +44,8 @@ namespace DigiLib
 
 			virtual GatePtr Clone(const char* name) = 0;
 
+			virtual void ResetPins();
+
 			virtual IOPinPtr GetPin(size_t pinID) { return m_ioPins[pinID]; }
 			virtual IOPinPtr GetPin(const char* name);
 			virtual IOPinPtr GetPin(const char* name, size_t pin);

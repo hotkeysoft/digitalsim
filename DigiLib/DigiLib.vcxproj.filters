@@ -75,6 +75,12 @@
     <ClInclude Include="Core\Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BasicGates\SRLatch.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\NORGate.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -127,6 +133,12 @@
     </ClCompile>
     <ClCompile Include="Core\IOPinSubset.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\SRLatch.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\NORGate.cpp">
+      <Filter>BasicGates</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
