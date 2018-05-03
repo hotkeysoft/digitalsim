@@ -16,12 +16,21 @@ namespace DigiLib
 			ValidateGateName(name, false);
 			this->m_name = name;
 		}
+		
+		CompositeGatePtr CompositeGate::Create(const char* name)
+		{
+			auto ptr = std::make_shared<shared_enabler>(name);
+			CompositeGatePtr gate = std::static_pointer_cast<CompositeGate>(ptr);
+			gate->Init();
+			return gate;
+		}
 
-		GatePtr CompositeGate::Clone(const char* name)
+		GatePtr CompositeGate::Clone(const char * name)
 		{
 			ValidateGateName(name, false);
-			CompositeGatePtr clone = std::make_shared<CompositeGate>(name);
-
+			auto ptr = std::make_shared<shared_enabler>(name);
+			CompositeGatePtr clone = std::static_pointer_cast<CompositeGate>(ptr);
+			clone->Init();
 			CompositeGatePtr source = thisCompositeGate();
 			InternalCloneInputs(source, clone);
 			InternalCloneOutputs(source, clone);
@@ -106,7 +115,7 @@ namespace DigiLib
 				CompositeGatePtr innerSource = std::dynamic_pointer_cast<CompositeGate>(gate.second);
 				if (innerSource)
 				{
-					CompositeGatePtr innerClone = std::make_shared<CompositeGate>(gateName);
+					CompositeGatePtr innerClone = CompositeGate::Create(gateName);
 					InternalCloneGates(innerSource, innerClone);
 					InternalCloneInputs(innerSource, innerClone);
 					InternalCloneOutputs(innerSource, innerClone);
@@ -174,5 +183,14 @@ namespace DigiLib
 				}
 			}
 		}
+
+		struct CompositeGate::shared_enabler : public CompositeGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: CompositeGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

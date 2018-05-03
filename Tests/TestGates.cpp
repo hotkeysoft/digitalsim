@@ -17,23 +17,23 @@ namespace UnitTests
 {
 	using namespace DigiLib::Core;
 
-	CompositeGate* BuildFullAdder()
+	GatePtr BuildFullAdder()
 	{
-		CompositeGate * component = new CompositeGate("FULLADDER");
+		CompositeGatePtr component = CompositeGate::Create("FULLADDER");
 		component->AddInput("x");
 		component->AddInput("y");
 		component->AddInput("cin");
 		component->AddOutput("s");
 		component->AddOutput("cout");
 
-		BasicGates::XORGate* xor1 = new BasicGates::XORGate();
-		BasicGates::XORGate* xor2 = new BasicGates::XORGate();
+		GatePtr xor1 = BasicGates::XORGate::Create();
+		GatePtr xor2 = BasicGates::XORGate::Create();
 
-		BasicGates::ANDGate* and1 = new BasicGates::ANDGate();
-		BasicGates::ANDGate* and2 = new BasicGates::ANDGate();
-		BasicGates::ANDGate* and3 = new BasicGates::ANDGate();
+		GatePtr and1 = BasicGates::ANDGate::Create();
+		GatePtr and2 = BasicGates::ANDGate::Create();
+		GatePtr and3 = BasicGates::ANDGate::Create();
 
-		BasicGates::ORGate* or1 = new BasicGates::ORGate(3);
+		GatePtr or1 = BasicGates::ORGate::Create(3);
 
 		component->AddGate("xor1", xor1);
 		component->AddGate("xor2", xor2);
@@ -54,7 +54,7 @@ namespace UnitTests
 		component->GetPin("cin")->ConnectTo(and1->GetPin("in1"));
 		component->GetPin("cin")->ConnectTo(and2->GetPin("in1"));
 
-		xor1->GetPin("out")->ConnectTo(xor2->GetPin("in1")); 
+		xor1->GetPin("out")->ConnectTo(xor2->GetPin("in1"));
 		xor2->GetPin("out")->ConnectTo(component->GetPin("s"));
 
 		and1->GetPin("out")->ConnectTo(or1->GetPin("in1"));
@@ -66,9 +66,9 @@ namespace UnitTests
 		return component;
 	}
 
-	CompositeGate* Build4BitAdder()
+	GatePtr Build4BitAdder()
 	{
-		CompositeGate * adder4 = new CompositeGate("adder4");
+		CompositeGatePtr adder4 = CompositeGate::Create("adder4");
 		adder4->AddInput("x", 4);
 		adder4->AddInput("y", 4);
 		adder4->AddInput("cin");
@@ -104,23 +104,23 @@ namespace UnitTests
 		return adder4;
 	}
 
-	CompositeGate* BuildDecoder()
+	GatePtr BuildDecoder()
 	{
-		CompositeGate * component = new CompositeGate("DECODER");
+		CompositeGatePtr component = CompositeGate::Create("DECODER");
 		component->AddInput("EN");
-		component->AddInput("I0");		
+		component->AddInput("I0");
 		component->AddInput("I1");
 		component->AddOutput("Y0");
 		component->AddOutput("Y1");
 		component->AddOutput("Y2");
 		component->AddOutput("Y3");
 
-		component->AddGate("NOTI0", new BasicGates::NOTGate());
-		component->AddGate("NOTI1", new BasicGates::NOTGate());
-		component->AddGate("AND0", new BasicGates::ANDGate(3));
-		component->AddGate("AND1", new BasicGates::ANDGate(3));
-		component->AddGate("AND2", new BasicGates::ANDGate(3));
-		component->AddGate("AND3", new BasicGates::ANDGate(3));
+		component->AddGate("NOTI0", BasicGates::NOTGate::Create());
+		component->AddGate("NOTI1", BasicGates::NOTGate::Create());
+		component->AddGate("AND0", BasicGates::ANDGate::Create(3));
+		component->AddGate("AND1", BasicGates::ANDGate::Create(3));
+		component->AddGate("AND2", BasicGates::ANDGate::Create(3));
+		component->AddGate("AND3", BasicGates::ANDGate::Create(3));
 
 		component->GetGate("AND0")->GetPin("out")->ConnectTo(component->GetPin("Y0"));
 		component->GetGate("AND1")->GetPin("out")->ConnectTo(component->GetPin("Y1"));
@@ -151,34 +151,31 @@ namespace UnitTests
 
 	TEST(TestGates, TestNOTGate)
 	{
-		BasicGates::NOTGate * gate = new BasicGates::NOTGate();
+		GatePtr gate = BasicGates::NOTGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestWireGate)
 	{
-		BasicGates::WireGate * gate = new BasicGates::WireGate();
+		GatePtr gate = BasicGates::WireGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestANDGate)
 	{
-		BasicGates::ANDGate * gate = new BasicGates::ANDGate();
+		GatePtr gate = BasicGates::ANDGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestANDGate4)
 	{
-		BasicGates::ANDGate * gate = new BasicGates::ANDGate(4);
+		GatePtr gate = BasicGates::ANDGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
@@ -187,21 +184,19 @@ namespace UnitTests
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
 		});
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestORGate)
 	{
-		BasicGates::ORGate * gate = new BasicGates::ORGate();
+		GatePtr gate = BasicGates::ORGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::HI });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestORGate4)
 	{
-		BasicGates::ORGate * gate = new BasicGates::ORGate(4);
+		GatePtr gate = BasicGates::ORGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare = {
 			IOState::LOW, IOState::HI, IOState::HI, IOState::HI,
@@ -210,30 +205,27 @@ namespace UnitTests
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 		};
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestXORGate)
 	{
-		BasicGates::XORGate * gate = new BasicGates::XORGate();
+		GatePtr gate = BasicGates::XORGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestNANDGate)
 	{
-		BasicGates::NANDGate * gate = new BasicGates::NANDGate();
+		GatePtr gate = BasicGates::NANDGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::HI, IOState::HI, IOState::LOW });
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestNANDGate4)
 	{
-		BasicGates::NANDGate * gate = new BasicGates::NANDGate(4);
+		GatePtr gate = BasicGates::NANDGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
@@ -242,12 +234,11 @@ namespace UnitTests
 			IOState::HI, IOState::HI, IOState::HI, IOState::LOW,
 		});
 		ASSERT_EQ(compare, out);
-		delete gate;
 	}
 
 	TEST(TestGates, TestCustomDecoder)
 	{
-		GateBase * component = BuildDecoder();
+		GatePtr component = BuildDecoder();
 		
 		ASSERT_NE(nullptr, component);
 
@@ -263,20 +254,19 @@ namespace UnitTests
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
 		};
 		ASSERT_EQ(compare, out);
-		delete component;
 	}
 
 	TEST(TestGates, TestCustomComplexComponent)
 	{
-		GateBase * decoder1 = BuildDecoder();
+		GatePtr decoder1 = BuildDecoder();
 		ASSERT_NE(nullptr, decoder1);
 
-		GateBase * decoder2 = BuildDecoder();
+		GatePtr decoder2 = BuildDecoder();
 		ASSERT_NE(nullptr, decoder2);
 
-		BasicGates::NOTGate *notI1 = new BasicGates::NOTGate();
+		GatePtr notI1 = BasicGates::NOTGate::Create();
 
-		CompositeGate * decoder3to8 = new CompositeGate("Decoder3to8");
+		CompositeGatePtr decoder3to8 = CompositeGate::Create("Decoder3to8");
 		decoder3to8->AddInput("I0");
 		decoder3to8->AddInput("I1");
 		decoder3to8->AddInput("I2");
@@ -324,14 +314,13 @@ namespace UnitTests
 		};
 
 		ASSERT_EQ(compare, out);
-		delete decoder3to8;
 	}
 
 	TEST(TestGates, TestClone)
 	{
-		CompositeGate* comp = new CompositeGate("comp");
+		CompositeGatePtr comp = CompositeGate::Create("comp");
 
-		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
+		GatePtr andGate = BasicGates::ANDGate::Create();
 
 		// Share one input to avoir truth table explosion
 		IOPinPtr input = comp->AddInput("masterIn");
@@ -341,35 +330,35 @@ namespace UnitTests
 		comp->AddInput("and2")->ConnectTo(andGate->GetPin("in2"));
 		andGate->GetPin("out")->ConnectTo(comp->AddOutput("andout"));
 
-		BasicGates::ORGate* orGate = new BasicGates::ORGate();
+		GatePtr orGate = BasicGates::ORGate::Create();
 		comp->AddGate("or", orGate);
 		input->ConnectTo(orGate->GetPin("in1"));
 		comp->AddInput("or2")->ConnectTo(orGate->GetPin("in2"));
 		orGate->GetPin("out")->ConnectTo(comp->AddOutput("orout"));
 
-		BasicGates::XORGate* xorGate = new BasicGates::XORGate();
+		GatePtr xorGate = BasicGates::XORGate::Create();
 		comp->AddGate("xor", xorGate);
 		input->ConnectTo(xorGate->GetPin("in1"));
 		comp->AddInput("xor2")->ConnectTo(xorGate->GetPin("in2"));
 		xorGate->GetPin("out")->ConnectTo(comp->AddOutput("xorout"));
 
-		BasicGates::NANDGate* nandGate = new BasicGates::NANDGate();
+		GatePtr nandGate = BasicGates::NANDGate::Create();
 		comp->AddGate("nand", nandGate);
 		input->ConnectTo(nandGate->GetPin("in1"));
 		comp->AddInput("nand2")->ConnectTo(nandGate->GetPin("in2"));
 		nandGate->GetPin("out")->ConnectTo(comp->AddOutput("nandout"));
 
-		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
+		GatePtr notGate = BasicGates::NOTGate::Create();
 		comp->AddGate("not", notGate);
 		input->ConnectTo(notGate->GetPin("in"));
 		notGate->GetPin("out")->ConnectTo(comp->AddOutput("notout"));
 
-		BasicGates::WireGate* wireGate = new BasicGates::WireGate();
+		GatePtr wireGate = BasicGates::WireGate::Create();
 		comp->AddGate("wire", wireGate);
 		input->ConnectTo(wireGate->GetPin("in"));
 		wireGate->GetPin("out")->ConnectTo(comp->AddOutput("wireout"));
 
-		BasicGates::BufferGate* bufferGate = new BasicGates::BufferGate();
+		GatePtr bufferGate = BasicGates::BufferGate::Create();
 		comp->AddGate("buffer", bufferGate);
 		input->ConnectTo(bufferGate->GetPin("in"));
 		comp->AddInput("bufferEN")->ConnectTo(bufferGate->GetPin("en"));
@@ -380,7 +369,7 @@ namespace UnitTests
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(comp);
 		ASSERT_EQ(448, out.size());
 
-		GateBase* clone = comp->Clone("clone");
+		GatePtr clone = comp->Clone("clone");
 		ASSERT_NE(nullptr, clone);
 		ASSERT_NE(comp, clone);
 
@@ -392,7 +381,7 @@ namespace UnitTests
 
 	TEST(TestGates, TestFullAdder)
 	{
-		GateBase* gate = BuildFullAdder();		
+		GatePtr gate = BuildFullAdder();		
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI, 
 			IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
@@ -401,7 +390,7 @@ namespace UnitTests
 		ASSERT_EQ(compare, out);
 
 		TEST_COUT << "Building 4 bit adder";
-		CompositeGate* adder4 = Build4BitAdder();
+		GatePtr adder4 = Build4BitAdder();
 
 		adder4->GetPin("cin")->Set(IOState::LOW);
 		adder4->GetPin("x")->Set(IOState::FromInt(2, 4));

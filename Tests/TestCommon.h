@@ -8,7 +8,9 @@ using namespace DigiLib;
 
 namespace UnitTests
 {
-	Core::CompositeGate* BuildDecoder();
+	using namespace DigiLib::Core;
+	
+	GatePtr BuildDecoder();
 }
 
 namespace testing

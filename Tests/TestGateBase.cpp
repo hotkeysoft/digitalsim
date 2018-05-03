@@ -17,14 +17,17 @@ namespace UnitTests
 {		
 	using namespace Core;
 
-	CompositeGate* NestGate(const char* name, GateBase* toNest)
+	CompositeGatePtr NestGate(const char* name, GatePtr toNest)
 	{
-		CompositeGate* comp = new CompositeGate(name);
+		CompositeGatePtr comp = CompositeGate::Create(name);
 		IOPinPtr pin = comp->AddInput("in");
 		IOPinPtr pout = comp->AddOutput("out");
-		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
+		GatePtr notGate = BasicGates::NOTGate::Create();
 		comp->AddGate("not", notGate);
 		comp->AddGate("inner", toNest);
+
+		IOPinPtr in2 = comp->GetPin("in");
+		IOPinPtr notin2 = notGate->GetPin("in");
 
 		comp->GetPin("in")->ConnectTo(notGate->GetPin("in"));
 		toNest->GetPin("out")->ConnectTo(comp->GetPin("out"));
@@ -35,7 +38,7 @@ namespace UnitTests
 
 	TEST(TestCore, TestAddInput)
 	{
-		CompositeGate* gate = new CompositeGate("test");
+		CompositeGatePtr gate = CompositeGate::Create("test");
 
 		//Logger::WriteMessage("TestAddInput: Bad input");
 		EXPECT_THROW(gate->AddInput(NULL), std::invalid_argument);
@@ -73,13 +76,11 @@ namespace UnitTests
 		EXPECT_THROW(gate->AddInput("width", 17), std::out_of_range);
 
 		ASSERT_NE(nullptr, gate->AddInput("width", 16));
-
-		delete gate;
 	}
 
 	TEST(TestCore, TestAddOutput)
 	{
-		CompositeGate* gate = new CompositeGate("test");
+		CompositeGatePtr gate = CompositeGate::Create("test");
 
 		//Logger::WriteMessage("TestAddOutput: Bad Input");
 		EXPECT_THROW(gate->AddOutput(NULL), std::invalid_argument);
@@ -119,13 +120,11 @@ namespace UnitTests
 		EXPECT_THROW(gate->AddOutput("width", 1, IOPin::IO_DIRECTION::INPUT), std::invalid_argument);
 
 		ASSERT_NE(nullptr, gate->AddOutput("width", 16));
-
-		delete gate;
 	}
 
 	TEST(TestCore, TestGetPin)
 	{
-		BasicGates::ANDGate* gate = new BasicGates::ANDGate();
+		GatePtr gate = BasicGates::ANDGate::Create();
 
 		EXPECT_THROW(gate->GetPin(nullptr), std::invalid_argument);
 		ASSERT_EQ(nullptr, gate->GetPin(""));
@@ -145,11 +144,11 @@ namespace UnitTests
 
 	TEST(TestCore, TestConnectTo)
 	{
-		CompositeGate* gate = new CompositeGate("test");
+		CompositeGatePtr gate = CompositeGate::Create("test");
 		gate->AddInput("in");
 		gate->AddOutput("out");
 
-		CompositeGate* gate2 = new CompositeGate("test2");
+		CompositeGatePtr gate2 = CompositeGate::Create("test2");
 		gate2->AddInput("in");
 		gate2->AddOutput("out");
 
@@ -171,15 +170,12 @@ namespace UnitTests
 		//Logger::WriteMessage("TestConnectTo: Duplicate");
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate2->GetPin("in")), std::invalid_argument);
-
-		delete gate;
-		delete gate2;
 	}
 
 	TEST(TestCore, DISABLED_TestFeedback)
 	{
-		GateBase* gate = new BasicGates::NOTGate();
-		GateBase* gate2 = new BasicGates::NOTGate();
+		GatePtr gate = BasicGates::NOTGate::Create();
+		GatePtr gate2 = BasicGates::NOTGate::Create();
 			
 		//Logger::WriteMessage("TestFeedback: gate->gate2->gate");
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
@@ -187,14 +183,11 @@ namespace UnitTests
 
 //			gate->GetPin("in")->Set(IOState::LOW);
 		FAIL();
-
-		delete gate;
-		delete gate2;
 	}
 
 	TEST(TestCore, TestSetName)
 	{
-		GateBase * notGate = new BasicGates::NOTGate();
+		GatePtr notGate = BasicGates::NOTGate::Create();
 		ASSERT_STREQ("not", notGate->GetName().c_str());
 
 		EXPECT_THROW(notGate->SetName(NULL), std::invalid_argument);
@@ -213,10 +206,10 @@ namespace UnitTests
 
 	TEST(TestCore, TestAddGate)
 	{
-		CompositeGate * gate = new CompositeGate("test");
-		GateBase * dummyGate = new BasicGates::NOTGate();
-		GateBase * notGate = new BasicGates::NOTGate();
-		GateBase * notGate2 = new BasicGates::NOTGate();
+		CompositeGatePtr gate = CompositeGate::Create("test");
+		GatePtr dummyGate = BasicGates::NOTGate::Create();
+		GatePtr notGate = BasicGates::NOTGate::Create();
+		GatePtr notGate2 = BasicGates::NOTGate::Create();
 
 		ASSERT_EQ(0, (int)gate->GetGateCount());
 		ASSERT_EQ(0, gate->GetInternalGates().size());
@@ -257,8 +250,8 @@ namespace UnitTests
 	
 	TEST(TestCore, TestGetGate)
 	{
-		CompositeGate * gate = new CompositeGate("test");
-		GateBase * notGate = new BasicGates::NOTGate();
+		CompositeGatePtr gate = CompositeGate::Create("test");
+		GatePtr notGate = BasicGates::NOTGate::Create();
 		ASSERT_EQ(nullptr, notGate->GetParent());
 
 		gate->AddGate("not", notGate);
@@ -270,7 +263,7 @@ namespace UnitTests
 		ASSERT_EQ(nullptr, gate->GetGate(" "));
 		ASSERT_EQ(nullptr, gate->GetGate(" ba"));
 		ASSERT_EQ(nullptr, gate->GetGate(" not"));
-		GateBase* child = gate->GetGate("not");
+		GatePtr child = gate->GetGate("not");
 		ASSERT_EQ(notGate, child);
 		ASSERT_STREQ("not", child->GetName().c_str());
 		ASSERT_EQ(gate, child->GetParent());
@@ -279,9 +272,9 @@ namespace UnitTests
 	TEST(TestCore, TestComponentToTopLevel)
 	{
 		//Logger::WriteMessage("TestComponentToTopLevel: Outside->Outside");
-		CompositeGate * gate = new CompositeGate("test");
+		CompositeGatePtr gate = CompositeGate::Create("test");;
 		gate->AddOutput("out");
-		CompositeGate * gate2 = new CompositeGate("test2");
+		CompositeGatePtr gate2 = CompositeGate::Create("test2");
 		gate2->AddInput("in");
 
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
@@ -289,14 +282,14 @@ namespace UnitTests
 
 	TEST(TestCore, TestInnerToComponent)
 	{
-		CompositeGate * gate = new CompositeGate("test");
+		CompositeGatePtr gate = CompositeGate::Create("test");
 		gate->AddInput("in");
 		gate->AddOutput("out");
-		BasicGates::NOTGate * not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate * not2 = new BasicGates::NOTGate();
-		BasicGates::NOTGate * not3 = new BasicGates::NOTGate();
-		BasicGates::NOTGate * not4 = new BasicGates::NOTGate();
-		BasicGates::NOTGate * not5 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
+		GatePtr not3 = BasicGates::NOTGate::Create();
+		GatePtr not4 = BasicGates::NOTGate::Create();
+		GatePtr not5 = BasicGates::NOTGate::Create();
 		gate->AddGate("not1", not1);
 		gate->AddGate("not2", not2);
 		gate->AddGate("not3", not3);
@@ -313,7 +306,7 @@ namespace UnitTests
 		ASSERT_EQ(IOState::LOW, not2->GetPin("out")->Get());
 
 		// Outside gate
-		GateBase * outsideNot = new BasicGates::NOTGate();
+		GatePtr outsideNot = BasicGates::NOTGate::Create();
 
 		//Logger::WriteMessage("TestInnerToComponent: Inside->Input pin (not allowed)");			
 		EXPECT_THROW(not3->GetPin("out")->ConnectTo(gate->GetPin("in")), std::invalid_argument);
@@ -339,7 +332,7 @@ namespace UnitTests
 		//Logger::WriteMessage("TestInnerToComponent: Outside gate->Inside (not allowed)");
 		EXPECT_THROW(outsideNot->GetPin("out")->ConnectTo(not5->GetPin("in")), std::invalid_argument);
 		
-		BasicGates::NOTGate * not6 = new BasicGates::NOTGate();
+		GatePtr not6 = BasicGates::NOTGate::Create();
 		//Logger::WriteMessage("TestInnerComponentToComponent: Outside gate->Outside pin (ok)");
 		not6->GetPin("out")->ConnectTo(gate->GetPin("in"));
 		//Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside gate->Outside pin");
@@ -348,7 +341,7 @@ namespace UnitTests
 		not6->GetPin("in")->Set(IOState::LOW);
 		ASSERT_EQ(IOState::LOW, gate->GetPin("out")->Get());
 
-		BasicGates::NOTGate * not7 = new BasicGates::NOTGate();
+		GatePtr not7 = BasicGates::NOTGate::Create();
 		//Logger::WriteMessage("TestInnerComponentToComponent: Outside pin->Outside gate (ok)");
 		gate->GetPin("out")->ConnectTo(not7->GetPin("in"));
 		//Logger::WriteMessage("TestInnerComponentToComponent: Validate Outside pin->Outside gate");
@@ -360,28 +353,28 @@ namespace UnitTests
 
 	TEST(TestCore, TestFullName)
 	{
-		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
+		GatePtr notGate = BasicGates::NOTGate::Create();
 
 		ASSERT_STREQ("not", notGate->GetName().c_str());
 		ASSERT_STREQ("not", notGate->GetFullName().c_str());
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("not.in", notGate->GetPin("in")->GetFullName().c_str());
 
-		CompositeGate* nested1 = NestGate("nest1", notGate);
+		CompositeGatePtr nested1 = NestGate("nest1", notGate);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest1.inner", notGate->GetFullName().c_str());
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("nest1.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 
-		CompositeGate* nested2 = NestGate("nest2", nested1);
+		CompositeGatePtr nested2 = NestGate("nest2", nested1);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest2.inner.inner", notGate->GetFullName().c_str());
 		ASSERT_STREQ("in", notGate->GetPin("in")->GetName().c_str());
 		ASSERT_STREQ("nest2.inner.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 		
-		CompositeGate* nested3 = NestGate("nest3", nested2);
+		CompositeGatePtr nested3 = NestGate("nest3", nested2);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_STREQ("inner", notGate->GetName().c_str());
 		ASSERT_STREQ("nest3.inner.inner.inner", notGate->GetFullName().c_str());
@@ -389,7 +382,7 @@ namespace UnitTests
 		ASSERT_STREQ("nest3.inner.inner.inner.in", notGate->GetPin("in")->GetFullName().c_str());
 	}
 
-	void AssertEqualOutputs(GateBase* g1, GateBase* g2)
+	void AssertEqualOutputs(GatePtr g1, GatePtr g2)
 	{
 		ASSERT_EQ(g1->GetPin("Y0")->Get(), g2->GetPin("Y0")->Get());
 		ASSERT_EQ(g1->GetPin("Y1")->Get(), g2->GetPin("Y1")->Get());
@@ -399,9 +392,9 @@ namespace UnitTests
 
 	TEST(TestCore, TestClone)
 	{
-		CompositeGate* base = BuildDecoder();
-		GateBase* clonedBase = base->Clone("clone");
-		CompositeGate* cloned = dynamic_cast<CompositeGate*>(clonedBase);
+		CompositeGatePtr base = std::dynamic_pointer_cast<CompositeGate>(BuildDecoder());
+		GatePtr clonedBase = base->Clone("clone");
+		CompositeGatePtr cloned = std::dynamic_pointer_cast<CompositeGate>(clonedBase);
 
 		ASSERT_NE(nullptr, cloned);
 		ASSERT_NE(base, cloned);
@@ -435,9 +428,9 @@ namespace UnitTests
 
 	TEST(TestCore, TestHiZOutput)
 	{
-		GateBase* b1 = new BasicGates::BufferGate();
-		GateBase* b2 = new BasicGates::BufferGate();
-		GateBase* wire = new BasicGates::WireGate();
+		GatePtr b1 = BasicGates::BufferGate::Create();
+		GatePtr b2 = BasicGates::BufferGate::Create();
+		GatePtr wire = BasicGates::WireGate::Create();
 
 		b1->GetPin("out")->ConnectTo(wire->GetPin("in"));
 		b2->GetPin("out")->ConnectTo(wire->GetPin("in"));
@@ -467,9 +460,9 @@ namespace UnitTests
 
 	TEST(TestCore, TestNested)
 	{
-		BasicGates::NOTGate* notGate = new BasicGates::NOTGate();
+		GatePtr notGate = BasicGates::NOTGate::Create();
 
-		CompositeGate* nested1 = NestGate("nest1", notGate);
+		CompositeGatePtr nested1 = NestGate("nest1", notGate);
 		ASSERT_NE(nullptr, nested1);
 		ASSERT_EQ(2, nested1->GetGateCount());
 		nested1->GetPin("in")->Set(IOState::HI);
@@ -477,7 +470,7 @@ namespace UnitTests
 		nested1->GetPin("in")->Set(IOState::LOW);
 		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
-		CompositeGate* nested2 = NestGate("nest2", nested1);
+		CompositeGatePtr nested2 = NestGate("nest2", nested1);
 		ASSERT_NE(nullptr, nested2);
 		ASSERT_EQ(2, nested2->GetGateCount());
 		nested1->GetPin("in")->Set(IOState::HI);
@@ -485,7 +478,7 @@ namespace UnitTests
 		nested1->GetPin("in")->Set(IOState::LOW);
 		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
-		CompositeGate* nested3 = NestGate("nest3", nested2);
+		CompositeGatePtr nested3 = NestGate("nest3", nested2);
 		ASSERT_NE(nullptr, nested3);
 		ASSERT_EQ(2, nested3->GetGateCount());
 		nested1->GetPin("in")->Set(IOState::HI);
@@ -494,7 +487,7 @@ namespace UnitTests
 		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 
 		// Now Clone it
-		GateBase* clone = nested3->Clone("clone");
+		GatePtr clone = nested3->Clone("clone");
 
 		// Check independance
 		nested1->GetPin("in")->Set(IOState::HI);
@@ -509,8 +502,8 @@ namespace UnitTests
 
 	TEST(TestCore, GetConnectedToPins)
 	{
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
 		EXPECT_THROW(not1->GetConnectedToPins((const char*)nullptr), std::invalid_argument);
@@ -528,8 +521,8 @@ namespace UnitTests
 	
 	TEST(TestLogicTools, GetConnectedFromPins)
 	{
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
 		EXPECT_THROW(not2->GetConnectedFromPins((const char*)nullptr), std::invalid_argument);
@@ -547,8 +540,8 @@ namespace UnitTests
 
 	TEST(TestLogicTools, GetConnectedFromToPins)
 	{
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
 		// Size is always number of pins

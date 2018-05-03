@@ -13,9 +13,9 @@ namespace UnitTests
 {
 	using namespace Core;
 
-	GateBase* BuildBuffer(size_t width)
+	GatePtr BuildBuffer(size_t width)
 	{
-		BasicGates::BufferGate* buffer = new BasicGates::BufferGate(width);
+		GatePtr buffer = BasicGates::BufferGate::Create(width);
 
 		IOPinPtr inPin = buffer->GetPin("in");
 		EXPECT_NE(nullptr, inPin);
@@ -30,7 +30,7 @@ namespace UnitTests
 
 	TEST(TestBus, BusCreate)
 	{
-		GateBase* buffer = BuildBuffer(4);
+		GatePtr buffer = BuildBuffer(4);
 
 		ASSERT_EQ(4, buffer->GetPin("in")->GetWidth());
 		ASSERT_EQ(4, buffer->GetPin("out")->GetWidth());
@@ -38,7 +38,7 @@ namespace UnitTests
 
 	TEST(TestBus, BusGetSetPin)
 	{
-		GateBase* buffer = BuildBuffer(4);
+		GatePtr buffer = BuildBuffer(4);
 
 		// Set all bus pins	
 		buffer->GetPin("in")->Set(IOState(IOState::HI, 4));
@@ -63,12 +63,12 @@ namespace UnitTests
 
 	TEST(TestBus, BusToBus)
 	{
-		GateBase* buffer1 = BuildBuffer(4);
-		GateBase* buffer2 = BuildBuffer(4);
-		GateBase* buffer3 = BuildBuffer(8);
+		GatePtr buffer1 = BuildBuffer(4);
+		GatePtr buffer2 = BuildBuffer(4);
+		GatePtr buffer3 = BuildBuffer(8);
 		
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
 
 		// 4 pin to 8-bus
 		ASSERT_THROW(buffer1->GetPin("out")->ConnectTo(buffer3->GetPin("in")), std::invalid_argument);
@@ -95,10 +95,10 @@ namespace UnitTests
 
 	TEST(TestBus, PinsToBus)
 	{
-		GateBase* buffer = BuildBuffer(4);
+		GatePtr buffer = BuildBuffer(4);
 
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
-		BasicGates::NOTGate* not2 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
+		GatePtr not2 = BasicGates::NOTGate::Create();
 
 		// 1 pin to 4-bus
 		ASSERT_THROW(not1->GetPin("out")->ConnectTo(buffer->GetPin("in")), std::invalid_argument);
@@ -126,16 +126,16 @@ namespace UnitTests
 		ASSERT_EQ(buffer->GetPin("out", 2)->Get(), IOState::LOW);
 	}
 
-	Core::GateBase* BuildGateInternalBus()
+	GatePtr BuildGateInternalBus()
 	{
-		Core::CompositeGate* gate = new Core::CompositeGate("bus");
+		CompositeGatePtr gate = CompositeGate::Create("bus");
 		gate->AddInput("in", 4);
 		gate->AddOutput("out", 4);
 
-		Core::GateBase* w0 = new BasicGates::WireGate();
-		Core::GateBase* w1 = new BasicGates::WireGate();
-		Core::GateBase* n2 = new BasicGates::NOTGate();
-		Core::GateBase* n3 = new BasicGates::NOTGate();
+		GatePtr w0 = BasicGates::WireGate::Create();
+		GatePtr w1 = BasicGates::WireGate::Create();
+		GatePtr n2 = BasicGates::NOTGate::Create();
+		GatePtr n3 = BasicGates::NOTGate::Create();
 
 		gate->AddGate("w0", w0);
 		gate->AddGate("w1", w1);
@@ -158,7 +158,7 @@ namespace UnitTests
 	{
 		TEST_COUT << "bus->pins->bus";
 
-		Core::GateBase * gate = BuildGateInternalBus();
+		GatePtr gate = BuildGateInternalBus();
 
 		gate->GetPin("in")->Set(IOState({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW}));
 		EXPECT_EQ(gate->GetPin("out")->Get(), IOState({ IOState::LOW, IOState::LOW, IOState::HI, IOState::HI }));
@@ -167,9 +167,9 @@ namespace UnitTests
 		EXPECT_EQ(gate->GetPin("out")->Get(), IOState({ IOState::HI, IOState::HI, IOState::LOW, IOState::LOW }));
 	}
 
-	Core::GateBase* BuildGateBus()
+	GatePtr BuildGateBus()
 	{
-		Core::CompositeGate* gate = new Core::CompositeGate("bus");
+		CompositeGatePtr gate = CompositeGate::Create("bus");
 		gate->AddInput("in0");
 		gate->AddInput("in1");
 		gate->AddInput("in2");
@@ -180,7 +180,7 @@ namespace UnitTests
 		gate->AddOutput("out2");
 		gate->AddOutput("out3");
 
-		Core::GateBase* buf = BuildBuffer(4);
+		GatePtr buf = BuildBuffer(4);
 		buf->GetPin("en")->Set(IOState::HI);
 		gate->AddGate("buf", buf);
 
@@ -205,7 +205,7 @@ namespace UnitTests
 	TEST(TestBus, ComponentBus2)
 	{
 		TEST_COUT << "pins->bus->pins";
-		Core::GateBase* gate = BuildGateBus();
+		GatePtr gate = BuildGateBus();
 
 		EXPECT_EQ(gate->GetPin("out0")->Get(), IOState::LOW);
 		EXPECT_EQ(gate->GetPin("out1")->Get(), IOState::LOW);
@@ -235,8 +235,8 @@ namespace UnitTests
 	TEST(TestBus, ComponentClone1)
 	{
 		TEST_COUT << "bus->pins->bus (Clone)";
-		Core::GateBase * gate = BuildGateInternalBus();
-		Core::GateBase* clone = gate->Clone("clone");
+		GatePtr gate = BuildGateInternalBus();
+		GatePtr clone = gate->Clone("clone");
 		std::cout << Tools::LogicTools::PrintInternalConnections(gate);
 		std::cout << Tools::LogicTools::PrintInternalConnections(clone);
 
@@ -250,8 +250,8 @@ namespace UnitTests
 	TEST(TestBus, ComponentClone2)
 	{
 		TEST_COUT << "pins->bus->pins (Clone)";
-		Core::GateBase* gate = BuildGateBus();
-		Core::GateBase* clone = gate->Clone("clone");
+		GatePtr gate = BuildGateBus();
+		GatePtr clone = gate->Clone("clone");
 		std::cout << Tools::LogicTools::PrintInternalConnections(gate);
 		std::cout << Tools::LogicTools::PrintInternalConnections(clone);
 
@@ -285,7 +285,7 @@ namespace UnitTests
 	
 	TEST(TestBus, PinRangeOnePin)
 	{
-		GateBase* buffer = BuildBuffer(4);
+		GatePtr buffer = BuildBuffer(4);
 
 		EXPECT_THROW(buffer->GetPin("in", -1), std::out_of_range);
 		EXPECT_THROW(buffer->GetPin("in", 5), std::out_of_range);
@@ -325,13 +325,13 @@ namespace UnitTests
 		EXPECT_EQ(singlePin0->Get(), inPin->Get().Get(0));
 		EXPECT_EQ(inPin->Get(), IOState({ IOState::HI_Z, IOState::LOW, IOState::UNDEF, IOState::LOW }));
 
-		BasicGates::NOTGate* not1 = new BasicGates::NOTGate();
+		GatePtr not1 = BasicGates::NOTGate::Create();
 		EXPECT_THROW(not1->GetPin("in", 0), std::invalid_argument);
 	}
 
 	TEST(TestBus, PinRangeMultiplePins)
 	{
-		GateBase* buffer = BuildBuffer(4);
+		GatePtr buffer = BuildBuffer(4);
 
 		EXPECT_THROW(buffer->GetPin("in", -1, -1), std::out_of_range);
 		EXPECT_THROW(buffer->GetPin("in", 0, -1), std::out_of_range);
@@ -384,9 +384,9 @@ namespace UnitTests
 	{
 		TEST_COUT << "2x4bus -> 8bus";
 
-		Core::GateBase* buf4a = BuildBuffer(4);
-		Core::GateBase* buf4b = BuildBuffer(4);
-		Core::GateBase* buf8 = BuildBuffer(8);
+		GatePtr buf4a = BuildBuffer(4);
+		GatePtr buf4b = BuildBuffer(4);
+		GatePtr buf8 = BuildBuffer(8);
 
 		buf4a->GetPin("out")->ConnectTo(buf8->GetPin("in", 0, 3));
 		buf4b->GetPin("out")->ConnectTo(buf8->GetPin("in", 4, 7));
@@ -410,9 +410,9 @@ namespace UnitTests
 	{
 		TEST_COUT << "8bus -> 2x4bus";
 
-		Core::GateBase* buf4a = BuildBuffer(4);
-		Core::GateBase* buf4b = BuildBuffer(4);
-		Core::GateBase* buf8 = BuildBuffer(8);
+		GatePtr buf4a = BuildBuffer(4);
+		GatePtr buf4b = BuildBuffer(4);
+		GatePtr buf8 = BuildBuffer(8);
 
 		buf8->GetPin("out", 0, 3)->ConnectTo(buf4a->GetPin("in"));
 		buf8->GetPin("out", 4, 7)->ConnectTo(buf4b->GetPin("in"));

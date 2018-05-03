@@ -15,17 +15,18 @@
 
 namespace UnitTests
 {
+	using namespace Core;
+
 	// Not validated for now, just for code coverage
 	TEST(TestLogicTools, PrintTruthTable)
 	{
-		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
-		Tools::LogicTools::PrintTruthTable(andGate);
+		Tools::LogicTools::PrintTruthTable(BasicGates::ANDGate::Create());
 	}
 
 	// Not validated for now, just for code coverage
 	TEST(TestLogicTools, PrintTruthTable2)
 	{
-		BasicGates::ANDGate* andGate = new BasicGates::ANDGate();
+		GatePtr andGate = BasicGates::ANDGate::Create();
 		Tools::LogicTools::PrintTruthTable({ andGate->GetPin("in1") }, { andGate->GetPin("out") });
 
 		Tools::LogicTools::PrintTruthTable({ andGate->GetPin("in1") }, {  });
@@ -42,6 +43,6 @@ namespace UnitTests
 	TEST(TestLogicTools, PrintPinInfo)
 	{
 		Tools::LogicTools::PrintPinInfo(BuildDecoder());
-		Tools::LogicTools::PrintPinInfo(new BasicGates::BufferGate(4));
+		Tools::LogicTools::PrintPinInfo(BasicGates::BufferGate::Create(4));
 	}
 }
