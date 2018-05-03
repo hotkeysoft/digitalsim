@@ -47,7 +47,7 @@ namespace DigiLib
 
 			GatePtr thisGate = this->shared_from_this();
 			size_t newPinID = m_ioPinCount;
-			m_ioPins.push_back(std::make_shared<IOPin>(shared_from_this(), newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
+			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
 			m_inputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
@@ -69,7 +69,7 @@ namespace DigiLib
 
 			GatePtr thisGate = this->shared_from_this();
 			size_t newPinID = m_ioPinCount;
-			m_ioPins.push_back(std::make_shared<IOPin>(shared_from_this(), newPinID, name, width, dir));
+			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, dir));
 			m_outputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
@@ -115,7 +115,7 @@ namespace DigiLib
 				}
 
 				//IOPinSubset* subset = new IOPinSubset();
-				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin, offset);
+				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin.get(), offset);
 				
 				return subset;
 			}
@@ -135,7 +135,7 @@ namespace DigiLib
 					throw std::out_of_range("invalid pin index");
 				}
 
-				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin, low, hi);
+				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin.get(), low, hi);
 
 				return subset;
 			}
@@ -175,7 +175,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			if (pin->GetParent().get() != this)
+			if (pin->GetParent() != this)
 			{
 				throw std::invalid_argument("pin belongs to another gate");
 			}
@@ -215,7 +215,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			if (pin->GetParent().get() != this)
+			if (pin->GetParent() != this)
 			{
 				throw std::invalid_argument("pin belongs to another gate");
 			}
@@ -223,7 +223,7 @@ namespace DigiLib
 			return m_connectedFromPins[pin->GetID()];
 		}
 
-		void GateBase::SetParent(GatePtr parent)
+		void GateBase::SetParent(GateRef parent)
 		{
 			if (m_parent != NULL)
 			{
@@ -240,7 +240,7 @@ namespace DigiLib
 				throw std::invalid_argument("source or target is null");
 			}
 
-			if (target->GetParent().get() == this)
+			if (target->GetParent() == this)
 			{
 				throw std::invalid_argument("cannot connect to self");
 			}
@@ -252,7 +252,7 @@ namespace DigiLib
 
 			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
 			const bool insideToParent = (GetParent() == target->GetParent());
-			const bool parentToInside = (this == target->GetParent()->GetParent().get());
+			const bool parentToInside = (this == target->GetParent()->GetParent());
 
 			InitAllowedConnectionMaps();
 			if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||

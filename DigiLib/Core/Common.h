@@ -8,12 +8,14 @@ namespace DigiLib
 	{
 		class GateBase;
 		typedef std::shared_ptr<GateBase> GatePtr;
+		typedef GateBase* GateRef;
 
 		class CompositeGate;
 		typedef std::shared_ptr<CompositeGate> CompositeGatePtr;
+		typedef CompositeGate* CompositeGateRef;
 
 		class IOPin;
 		typedef std::shared_ptr<IOPin> IOPinPtr;
-
+		typedef IOPin* IOPinRef;
 	}
 }

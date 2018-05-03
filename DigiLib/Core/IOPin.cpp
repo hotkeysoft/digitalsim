@@ -6,21 +6,20 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		IOPin::IOPin(GatePtr parentGate, size_t id, const char* name, size_t width, IO_DIRECTION direction) :
+		IOPin::IOPin(GateRef parentGate, size_t id, const char* name, size_t width, IO_DIRECTION direction) :
 			m_name(name), m_id(id), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
 		{
-			assert(parentGate != NULL);
 			assert(name != NULL);
 		}
 
-		IOPinPtr IOPin::Clone(GatePtr cloneParent)
+		IOPinPtr IOPin::Clone(GateRef cloneParent)
 		{
 			return cloneParent->GetPin(GetRawName().c_str());
 		}
 
 		std::string IOPin::GetFullName()
 		{
-			std::ostringstream os;
+			std::ostringstream os;	
 			os << m_parentGate->GetFullName() << "." << GetName();
 			return os.str();
 		}
@@ -31,7 +30,7 @@ namespace DigiLib
 			{
 				throw std::invalid_argument("pin width mismatch");
 			}
-
+			
 			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
 
 			m_state = state;

@@ -266,7 +266,7 @@ namespace UnitTests
 		GatePtr child = gate->GetGate("not");
 		ASSERT_EQ(notGate, child);
 		ASSERT_STREQ("not", child->GetName().c_str());
-		ASSERT_EQ(gate, child->GetParent());
+		ASSERT_EQ(gate.get(), child->GetParent());
 	}
 
 	TEST(TestCore, TestComponentToTopLevel)

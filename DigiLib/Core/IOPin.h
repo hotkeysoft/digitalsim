@@ -21,7 +21,7 @@ namespace DigiLib
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
 		public:
-			IOPin(GatePtr parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
+			IOPin(GateRef parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
 
 			virtual ~IOPin() = default;
 			IOPin(const IOPin&) = delete;
@@ -29,13 +29,13 @@ namespace DigiLib
 			IOPin(IOPin&&) = delete;
 			IOPin& operator=(IOPin&&) = delete;
 
-			virtual IOPinPtr Clone(GatePtr cloneParent);
+			virtual IOPinPtr Clone(GateRef cloneParent);
 
 			size_t GetID() { return m_id;  }
 			virtual std::string GetRawName() { return m_name; }
 			virtual std::string GetName() { return m_name; }
 			virtual std::string GetFullName();			
-			GatePtr GetParent() noexcept { return m_parentGate; }
+			GateRef GetParent() noexcept { return m_parentGate; }
 			IO_DIRECTION GetDirection() noexcept { return m_direction; }
 
 			virtual size_t GetWidth() { return m_width; }
@@ -48,7 +48,7 @@ namespace DigiLib
 			virtual size_t GetOffset() { return 0; }
 			size_t m_id;
 			size_t m_width;
-			GatePtr m_parentGate;
+			GateRef m_parentGate;
 
 			std::string m_name;
 			IO_DIRECTION m_direction;

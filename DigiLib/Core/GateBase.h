@@ -61,8 +61,8 @@ namespace DigiLib
 			virtual ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
 			virtual ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
 
-			GatePtr GetParent() noexcept { return m_parent; }
-			virtual void SetParent(GatePtr parent);
+			GateRef GetParent() noexcept { return m_parent; }
+			virtual void SetParent(GateRef parent);
 
 			virtual void ComputeState() noexcept(false) {}
 
@@ -79,7 +79,7 @@ namespace DigiLib
 			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 			std::string m_name;
-			GatePtr m_parent;
+			GateRef m_parent;
 			size_t m_ioPinCount;
 
 			ConnectedPinsType m_connectedToPins;

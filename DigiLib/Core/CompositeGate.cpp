@@ -52,7 +52,7 @@ namespace DigiLib
 				throw std::invalid_argument("Cannot add self");
 			}
 			
-			gate->SetParent(shared_from_this());
+			gate->SetParent(this);
 			gate->SetName(name);
 
 			m_internalGates[name] = gate;
@@ -158,7 +158,7 @@ namespace DigiLib
 					IOPinPtr sourcePin = links.GetSource();
 					IOPinPtr targetPin = links.GetTarget();
 
-					clonedSource = sourcePin->Clone(clone);
+					clonedSource = sourcePin->Clone(clone.get());
 
 					if (targetPin->GetParent() == source->GetParent())
 					{
@@ -169,14 +169,14 @@ namespace DigiLib
 					{
 						// Target is outside component
 						std::string gateName = targetPin->GetParent()->GetName();
-						CompositeGatePtr comp = std::dynamic_pointer_cast<CompositeGate>(clone->GetParent());
-						clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()));
+						CompositeGateRef comp = dynamic_cast<CompositeGateRef>(clone->GetParent());
+						clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()).get());
 					}
 					else
 					{
 						// Target is an internal gate below
 						std::string gateName = targetPin->GetParent()->GetName();
-						clonedTarget = targetPin->Clone(compositeClone->GetGate(gateName.c_str()));
+						clonedTarget = targetPin->Clone(compositeClone->GetGate(gateName.c_str()).get());
 					}
 
 					clone->ConnectPins(clonedSource, clonedTarget);
