@@ -3,6 +3,7 @@
 #include <set>
 #include <map>
 #include <memory>
+#include "Common.h"
 #include "IOPin.h"
 #include "IOConnection.h"
 #pragma warning ( disable:26426 )
@@ -25,7 +26,7 @@ namespace DigiLib
 		typedef std::vector<PinConnectionsType> ConnectedPinsType;
 		typedef std::map<IOPin::IO_DIRECTION, std::map<IOPin::IO_DIRECTION, bool> > AllowedConnectionMapType;
 
-		class DllExport GateBase
+		class DllExport GateBase : public std::enable_shared_from_this<GateBase>
 		{
 		public:
 			GateBase(const char* name);
@@ -35,11 +36,13 @@ namespace DigiLib
 			GateBase(GateBase&&) = delete;
 			GateBase& operator=(GateBase&&) = delete;
 
+			virtual void Init() {}
+
 			std::string GetName() { return m_name; }
 			std::string GetFullName();
 			virtual void SetName(const char*);
 
-			virtual GateBase* Clone(const char* name) = 0;
+			virtual GatePtr Clone(const char* name) = 0;
 
 			virtual IOPinPtr GetPin(size_t pinID) { return m_ioPins[pinID]; }
 			virtual IOPinPtr GetPin(const char* name);
@@ -58,8 +61,8 @@ namespace DigiLib
 			virtual ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
 			virtual ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
 
-			GateBase* GetParent() noexcept { return m_parent; }
-			virtual void SetParent(GateBase* parent);
+			GatePtr GetParent() noexcept { return m_parent; }
+			virtual void SetParent(GatePtr parent);
 
 			virtual void ComputeState() noexcept(false) {}
 
@@ -76,7 +79,7 @@ namespace DigiLib
 			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 			std::string m_name;
-			GateBase* m_parent;
+			GatePtr m_parent;
 			size_t m_ioPinCount;
 
 			ConnectedPinsType m_connectedToPins;

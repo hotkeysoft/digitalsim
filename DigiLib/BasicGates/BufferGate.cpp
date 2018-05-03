@@ -8,14 +8,29 @@ namespace DigiLib {
 
 		BufferGate::BufferGate(size_t width) : GateBase("buffer"), m_width(width)
 		{
-			m_in = AddInput("in", width);
+		}
+		
+		void BufferGate::Init()
+		{
+			m_in = AddInput("in", m_width);
 			m_en = AddInput("en");
-			m_out = AddOutput("out", width, IOPin::OUTPUT_HI_Z);
+			m_out = AddOutput("out", m_width, IOPin::OUTPUT_HI_Z);
 		}
 
-		GateBase * BufferGate::Clone(const char * name)
+		Core::GatePtr BufferGate::Create(size_t width)
 		{
-			return new BufferGate(this->m_width);
+			auto ptr = std::make_shared<shared_enabler>(width);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+		}
+
+		Core::GatePtr BufferGate::Clone(const char * name)
+		{
+			auto ptr = std::make_shared<shared_enabler>(this->m_width);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
 		}
 
 		void BufferGate::ComputeState()
@@ -30,5 +45,14 @@ namespace DigiLib {
 				m_out->Set(m_in->Get());
 			}
 		}
+
+		struct BufferGate::shared_enabler : public BufferGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: BufferGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

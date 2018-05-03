@@ -8,13 +8,28 @@ namespace DigiLib {
 
 		NOTGate::NOTGate() noexcept : GateBase("not")
 		{
+		}
+
+		void NOTGate::Init()
+		{
 			m_in = AddInput("in");
 			m_out = AddOutput("out");
 		}
 
-		GateBase * NOTGate::Clone(const char * name)
+		Core::GatePtr NOTGate::Create()
 		{
-			return new NOTGate();
+			auto ptr = std::make_shared<shared_enabler>();
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+		}
+
+		Core::GatePtr NOTGate::Clone(const char * name)
+		{
+			auto ptr = std::make_shared<shared_enabler>();
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
 		}
 
 		void NOTGate::ComputeState()
@@ -28,5 +43,14 @@ namespace DigiLib {
 				m_out->Set(IOState::HI);
 			}
 		}
+
+		struct NOTGate::shared_enabler : public NOTGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: NOTGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

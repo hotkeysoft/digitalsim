@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "Common.h"
 #include "IOState.h"
 
 #ifdef  DIGILIB_EXPORTS 
@@ -14,33 +15,27 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		class GateBase;
-
-		class IOPin;
-		typedef std::shared_ptr<IOPin> IOPinPtr;
-
 		class DllExport IOPin : public std::enable_shared_from_this<IOPin>
 		{
 		public:
 			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
 
 		public:
-			IOPin(GateBase *parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
-			//static IOPinPtr Create(GateBase *parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
+			IOPin(GatePtr parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);
 
 			virtual ~IOPin() = default;
 			IOPin(const IOPin&) = delete;
 			IOPin& operator=(const IOPin&) = delete;
 			IOPin(IOPin&&) = delete;
-			GateBase& operator=(IOPin&&) = delete;
+			IOPin& operator=(IOPin&&) = delete;
 
-			virtual IOPinPtr Clone(GateBase *cloneParent);
+			virtual IOPinPtr Clone(GatePtr cloneParent);
 
 			size_t GetID() { return m_id;  }
 			virtual std::string GetRawName() { return m_name; }
 			virtual std::string GetName() { return m_name; }
 			virtual std::string GetFullName();			
-			GateBase* GetParent() noexcept { return m_parentGate; }
+			GatePtr GetParent() noexcept { return m_parentGate; }
 			IO_DIRECTION GetDirection() noexcept { return m_direction; }
 
 			virtual size_t GetWidth() { return m_width; }
@@ -53,7 +48,7 @@ namespace DigiLib
 			virtual size_t GetOffset() { return 0; }
 			size_t m_id;
 			size_t m_width;
-			GateBase * m_parentGate;
+			GatePtr m_parentGate;
 
 			std::string m_name;
 			IO_DIRECTION m_direction;
@@ -61,10 +56,6 @@ namespace DigiLib
 			IOState m_state;
 
 			void ComputePinState();
-
-		protected:			
-//			IOPin() {};
-
 		};
 	}
 }

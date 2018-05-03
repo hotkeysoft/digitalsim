@@ -16,15 +16,20 @@ namespace DigiLib {
 		class DllExport WireGate : public Core::GateBase
 		{
 		public:
-			WireGate() noexcept;
+			static Core::GatePtr Create();
 
-			GateBase* Clone(const char* name) override;
+			Core::GatePtr Clone(const char* name) override;
 
 			void ComputeState() override;
 
 		protected:
+			WireGate() noexcept;
+			void Init() override;
+
 			Core::IOPinPtr m_in;
 			Core::IOPinPtr m_out;
+
+			struct shared_enabler;
 		};
 	}
 }

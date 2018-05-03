@@ -18,15 +18,20 @@ namespace DigiLib {
 		class DllExport NANDGate : public Core::GateBase
 		{
 		public:
-			NANDGate(size_t inputs = 2) noexcept;
-
-			GateBase* Clone(const char* name) override;
+			static Core::GatePtr Create(size_t inputs = 2);
+			Core::GatePtr Clone(const char* name) override;
 
 			void ComputeState() override;
 
 		protected:
+			NANDGate(size_t pins = 2) noexcept;
+			void Init() override;
+
+			size_t m_inputs;
 			std::vector<Core::IOPinPtr> m_inputPins;
 			Core::IOPinPtr m_out;
+
+			struct shared_enabler;
 		};
 	}
 }

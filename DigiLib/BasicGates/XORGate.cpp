@@ -8,14 +8,31 @@ namespace DigiLib {
 
 		XORGate::XORGate() noexcept : GateBase("xor")
 		{
+		}
+
+		void XORGate::Init()
+		{
 			m_in1 = AddInput("in1");
 			m_in2 = AddInput("in2");
 			m_out = AddOutput("out");
 		}
 
-		GateBase * XORGate::Clone(const char * name)
+		Core::GatePtr XORGate::Create()
 		{
-			return new XORGate();
+			auto ptr = std::make_shared<shared_enabler>();
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+
+		}
+
+		Core::GatePtr XORGate::Clone(const char * name)
+		{
+			auto ptr = std::make_shared<shared_enabler>();
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+
 		}
 
 		void XORGate::ComputeState()
@@ -29,7 +46,15 @@ namespace DigiLib {
 			{
 				m_out->Set(IOState::LOW);
 			}
-
 		}
+
+		struct XORGate::shared_enabler : public XORGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: XORGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

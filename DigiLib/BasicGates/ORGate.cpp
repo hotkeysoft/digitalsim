@@ -6,10 +6,14 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		ORGate::ORGate(size_t inputs/* = 2 */) noexcept : GateBase("or")
+		ORGate::ORGate(size_t inputs) noexcept : GateBase("or"), m_inputs(inputs)
 		{
 			assert(inputs > 1);
-			for (size_t i = 1; i <= inputs; ++i)
+		}
+
+		void ORGate::Init()
+		{
+			for (size_t i = 1; i <= m_inputs; ++i)
 			{
 				std::ostringstream ss;
 				ss << "in" << i;
@@ -19,11 +23,22 @@ namespace DigiLib {
 			m_out = AddOutput("out");
 		}
 
-		GateBase * ORGate::Clone(const char * name)
+		Core::GatePtr ORGate::Create(size_t inputs)
 		{
-			return new ORGate(this->GetInputCount());
+			auto ptr = std::make_shared<shared_enabler>(inputs);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
 		}
 
+		Core::GatePtr ORGate::Clone(const char * name)
+		{
+			auto ptr = std::make_shared<shared_enabler>(this->m_inputs);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+		}
+		
 		void ORGate::ComputeState()
 		{
 			for (auto & pin : m_inputPins)
@@ -37,5 +52,14 @@ namespace DigiLib {
 
 			m_out->Set(IOState::LOW);
 		}
+
+		struct ORGate::shared_enabler : public ORGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: ORGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

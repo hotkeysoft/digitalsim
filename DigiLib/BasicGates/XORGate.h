@@ -16,16 +16,21 @@ namespace DigiLib {
 		class DllExport XORGate : public Core::GateBase
 		{
 		public:
-			XORGate() noexcept;
+			static Core::GatePtr Create();
 
-			GateBase* Clone(const char* name) override;
+			Core::GatePtr Clone(const char* name) override;
 
 			void ComputeState() override;
 
 		protected:
+			XORGate() noexcept;
+			void Init() override;
+
 			Core::IOPinPtr m_in1;
 			Core::IOPinPtr m_in2;
 			Core::IOPinPtr m_out;
+
+			struct shared_enabler;
 		};
 	}
 }

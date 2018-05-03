@@ -57,7 +57,7 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		std::string LogicTools::PrintInternalConnections(GateBase * gate)
+		std::string LogicTools::PrintInternalConnections(GatePtr gate)
 		{
 			std::ostringstream os;
 			for (auto & input : gate->GetInputPins())
@@ -76,19 +76,19 @@ namespace DigiLib {
 				}
 			}
 
-			CompositeGate* composite = dynamic_cast<CompositeGate*>(gate);
+			CompositeGatePtr composite = std::dynamic_pointer_cast<CompositeGate>(gate);
 			if (composite)
 			{
 				for (auto & subGate : composite->GetInternalGates())
 				{
-					os << PrintInternalConnections(subGate.second.get());
+					os << PrintInternalConnections(subGate.second);
 				}
 			}
 
 			return os.str();
 		}
 
-		void LogicTools::PrintPinInfo(std::ostream& os, Core::GateBase * gate, const Core::IOPinNameToIDMapType& pins)
+		void LogicTools::PrintPinInfo(std::ostream& os, GatePtr gate, const IOPinNameToIDMapType& pins)
 		{
 			const char* prefix = "";
 			for (auto & pinId : pins)
@@ -104,7 +104,7 @@ namespace DigiLib {
 			os << std::endl;
 		}
 
-		std::string LogicTools::PrintPinInfo(Core::GateBase * gate)
+		std::string LogicTools::PrintPinInfo(GatePtr gate)
 		{
 			std::ostringstream os;
 			os << "Input pins:" << std::endl;
@@ -116,7 +116,7 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		std::string LogicTools::PrintTruthTable(GateBase* gate)
+		std::string LogicTools::PrintTruthTable(GatePtr gate)
 		{
 			std::ostringstream os;
 			std::vector<IOPinPtr> inputsVect;
@@ -143,7 +143,7 @@ namespace DigiLib {
 			return os.str();
 		}
 
-		void LogicTools::GetTruthTable(size_t level, std::vector<IOPinPtr> const& inputs, GateBase * gate, const IOPinNameToIDMapType& outputs, LogicTools::ResultListType& result)
+		void LogicTools::GetTruthTable(size_t level, std::vector<IOPinPtr> const& inputs, GatePtr gate, const IOPinNameToIDMapType& outputs, LogicTools::ResultListType& result)
 		{
 			if (level <= inputs.size() - 1)
 			{
@@ -163,7 +163,7 @@ namespace DigiLib {
 			}
 		}
 
-		LogicTools::ResultListType LogicTools::GetTruthTable(GateBase * gate)
+		LogicTools::ResultListType LogicTools::GetTruthTable(GatePtr gate)
 		{
 			const IOPinNameToIDMapType & inputs = gate->GetInputPins();
 			const IOPinNameToIDMapType & outputs = gate->GetOutputPins();

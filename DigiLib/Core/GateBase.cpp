@@ -45,8 +45,9 @@ namespace DigiLib
 			ValidatePinName(name);
 			ValidatePinWidth(width);
 
+			GatePtr thisGate = this->shared_from_this();
 			size_t newPinID = m_ioPinCount;
-			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
+			m_ioPins.push_back(std::make_shared<IOPin>(shared_from_this(), newPinID, name, width, IOPin::IO_DIRECTION::INPUT));
 			m_inputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
@@ -66,8 +67,9 @@ namespace DigiLib
 				throw std::invalid_argument("bad output direction");
 			}
 
+			GatePtr thisGate = this->shared_from_this();
 			size_t newPinID = m_ioPinCount;
-			m_ioPins.push_back(std::make_shared<IOPin>(this, newPinID, name, width, dir));
+			m_ioPins.push_back(std::make_shared<IOPin>(shared_from_this(), newPinID, name, width, dir));
 			m_outputPinsNames[name] = newPinID;
 			m_ioPinCount++;
 			m_connectedFromPins.resize(m_ioPinCount);
@@ -173,7 +175,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			if (pin->GetParent() != this)
+			if (pin->GetParent().get() != this)
 			{
 				throw std::invalid_argument("pin belongs to another gate");
 			}
@@ -213,7 +215,7 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
-			if (pin->GetParent() != this)
+			if (pin->GetParent().get() != this)
 			{
 				throw std::invalid_argument("pin belongs to another gate");
 			}
@@ -221,7 +223,7 @@ namespace DigiLib
 			return m_connectedFromPins[pin->GetID()];
 		}
 
-		void GateBase::SetParent(GateBase * parent)
+		void GateBase::SetParent(GatePtr parent)
 		{
 			if (m_parent != NULL)
 			{
@@ -238,7 +240,7 @@ namespace DigiLib
 				throw std::invalid_argument("source or target is null");
 			}
 
-			if (target->GetParent() == this)
+			if (target->GetParent().get() == this)
 			{
 				throw std::invalid_argument("cannot connect to self");
 			}
@@ -250,7 +252,7 @@ namespace DigiLib
 
 			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
 			const bool insideToParent = (GetParent() == target->GetParent());
-			const bool parentToInside = (this == target->GetParent()->GetParent());
+			const bool parentToInside = (this == target->GetParent()->GetParent().get());
 
 			InitAllowedConnectionMaps();
 			if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||

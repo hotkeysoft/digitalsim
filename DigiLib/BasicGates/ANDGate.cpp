@@ -6,11 +6,15 @@ namespace DigiLib {
 	namespace BasicGates {
 
 		using namespace DigiLib::Core;
-
-		ANDGate::ANDGate(size_t inputs/* = 2 */) noexcept : GateBase("and")
+		
+		ANDGate::ANDGate(size_t inputs) noexcept : GateBase("and"), m_inputs(inputs)
 		{
 			assert(inputs > 1);
-			for (size_t i = 1; i <= inputs; ++i)
+		}
+
+		void ANDGate::Init()
+		{
+			for (size_t i = 1; i <= m_inputs; ++i)
 			{
 				std::ostringstream ss;
 				ss << "in" << i;
@@ -20,9 +24,20 @@ namespace DigiLib {
 			m_out = AddOutput("out");
 		}
 
-		GateBase * ANDGate::Clone(const char * name)
+		Core::GatePtr ANDGate::Create(size_t inputs)
 		{
-			return new ANDGate(this->GetInputCount());
+			auto ptr = std::make_shared<shared_enabler>(inputs);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
+		}
+
+		Core::GatePtr ANDGate::Clone(const char * name)
+		{
+			auto ptr = std::make_shared<shared_enabler>(this->m_inputs);
+			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
+			gate->Init();
+			return gate;
 		}
 
 		void ANDGate::ComputeState()
@@ -38,5 +53,14 @@ namespace DigiLib {
 
 			m_out->Set(IOState::HI);
 		}
+
+		struct ANDGate::shared_enabler : public ANDGate
+		{
+			template <typename... Args>
+			shared_enabler(Args &&... args)
+				: ANDGate(std::forward<Args>(args)...)
+			{
+			}
+		};
 	}
 }

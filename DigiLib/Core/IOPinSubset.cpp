@@ -18,7 +18,7 @@ namespace DigiLib
 		{
 		}
 
-		IOPinPtr IOPinSubset::Clone(GateBase * cloneParent)
+		IOPinPtr IOPinSubset::Clone(GatePtr cloneParent)
 		{
 			return cloneParent->GetPin(GetRawName().c_str(), m_low, m_hi);
 		}

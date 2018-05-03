@@ -5,8 +5,7 @@
 #include <string>
 #include <ostream>
 #include <initializer_list>
-
-#define MAX_PINS 16
+#include "Common.h"
 
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/

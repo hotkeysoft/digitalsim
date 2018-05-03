@@ -17,39 +17,39 @@ namespace DigiLib
 			this->m_name = name;
 		}
 
-		GateBase * CompositeGate::Clone(const char* name)
+		GatePtr CompositeGate::Clone(const char* name)
 		{
 			ValidateGateName(name, false);
-			CompositeGate* clone = new CompositeGate(name);
+			CompositeGatePtr clone = std::make_shared<CompositeGate>(name);
 
-			InternalCloneInputs(this, clone);
-			InternalCloneOutputs(this, clone);
-			InternalCloneGates(this, clone);
-			InternalCloneLinks(this, clone);
+			CompositeGatePtr source = thisCompositeGate();
+			InternalCloneInputs(source, clone);
+			InternalCloneOutputs(source, clone);
+			InternalCloneGates(source, clone);
+			InternalCloneLinks(source, clone);
 
 			return clone;
 		}
 
-		void CompositeGate::AddGate(const char* name, GateBase* gate)
+		void CompositeGate::AddGate(const char* name, GatePtr gate)
 		{
 			ValidateGateName(name);
 			if (gate == NULL)
 			{
 				throw std::invalid_argument("Cannot add null gate");
 			}
-			else if (gate == this)
+			else if (gate.get() == this)
 			{
 				throw std::invalid_argument("Cannot add self");
 			}
-
-			gate->SetParent(this);
+			
+			gate->SetParent(shared_from_this());
 			gate->SetName(name);
 
-			std::unique_ptr<GateBase> ptr(gate);
-			m_internalGates[name] = std::move(ptr);
+			m_internalGates[name] = gate;
 		}
 
-		GateBase * CompositeGate::GetGate(const char* name)
+		GatePtr CompositeGate::GetGate(const char* name)
 		{
 			if (!name)
 			{
@@ -59,7 +59,7 @@ namespace DigiLib
 			GateMapType::iterator it = m_internalGates.find(name);
 			if (it != m_internalGates.end())
 			{
-				return it->second.get();
+				return it->second;
 			}
 
 			return nullptr;
@@ -78,7 +78,7 @@ namespace DigiLib
 			}
 		}
 
-		void CompositeGate::InternalCloneInputs(CompositeGate* source, CompositeGate * clone)
+		void CompositeGate::InternalCloneInputs(CompositeGatePtr source, CompositeGatePtr clone)
 		{
 			// Clone input pins
 			for (auto & inputs : source->m_inputPinsNames)
@@ -89,7 +89,7 @@ namespace DigiLib
 			}
 		}
 
-		void CompositeGate::InternalCloneOutputs(CompositeGate* source, CompositeGate * clone)
+		void CompositeGate::InternalCloneOutputs(CompositeGatePtr source, CompositeGatePtr clone)
 		{
 			for (auto & outputs: source->m_outputPinsNames)
 			{
@@ -98,15 +98,15 @@ namespace DigiLib
 			}
 		}
 
-		void CompositeGate::InternalCloneGates(CompositeGate* source, CompositeGate* clone)
+		void CompositeGate::InternalCloneGates(CompositeGatePtr source, CompositeGatePtr clone)
 		{
 			for (auto & gate : source->m_internalGates)
 			{
 				const char* gateName = gate.first.c_str();
-				CompositeGate* innerSource = dynamic_cast<CompositeGate*>(gate.second.get());
+				CompositeGatePtr innerSource = std::dynamic_pointer_cast<CompositeGate>(gate.second);
 				if (innerSource)
 				{
-					CompositeGate* innerClone = new CompositeGate(gateName);
+					CompositeGatePtr innerClone = std::make_shared<CompositeGate>(gateName);
 					InternalCloneGates(innerSource, innerClone);
 					InternalCloneInputs(innerSource, innerClone);
 					InternalCloneOutputs(innerSource, innerClone);
@@ -114,30 +114,30 @@ namespace DigiLib
 				}
 				else
 				{
-					GateBase* innerClone = gate.second->Clone(gateName);
+					GatePtr innerClone = gate.second->Clone(gateName);
 					clone->AddGate(gateName, innerClone);
 				}
 			}
 		}
 
-		void CompositeGate::InternalCloneLinks(GateBase* source, GateBase* clone)
+		void CompositeGate::InternalCloneLinks(GatePtr source, GatePtr clone)
 		{
-			CompositeGate* compositeSource = dynamic_cast<CompositeGate*>(source);
-			CompositeGate* compositeClone = dynamic_cast<CompositeGate*>(clone);
+			CompositeGatePtr compositeSource = std::dynamic_pointer_cast<CompositeGate>(source);
+			CompositeGatePtr compositeClone = std::dynamic_pointer_cast<CompositeGate>(clone);
 			if (compositeSource)
 			{
 				for (auto & gate : compositeSource->m_internalGates)
 				{
-					InternalCloneLinks(gate.second.get(), compositeClone->GetGate(gate.first.c_str()));
+					InternalCloneLinks(gate.second, compositeClone->GetGate(gate.first.c_str()));
 				}
 			}
 
 			InternalCloneInnerLinks(source, clone);
 		}
 
-		void CompositeGate::InternalCloneInnerLinks(GateBase* source, GateBase* clone)
+		void CompositeGate::InternalCloneInnerLinks(GatePtr source, GatePtr clone)
 		{
-			CompositeGate* compositeClone = dynamic_cast<CompositeGate*>(clone);
+			CompositeGatePtr compositeClone = std::dynamic_pointer_cast<CompositeGate>(clone);
 
 			for (auto connections : source->GetConnectedToPins())
 			{
@@ -160,7 +160,7 @@ namespace DigiLib
 					{
 						// Target is outside component
 						std::string gateName = targetPin->GetParent()->GetName();
-						CompositeGate* comp = dynamic_cast<CompositeGate*>(clone->GetParent());
+						CompositeGatePtr comp = std::dynamic_pointer_cast<CompositeGate>(clone->GetParent());
 						clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()));
 					}
 					else

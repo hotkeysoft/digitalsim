@@ -16,15 +16,19 @@ namespace DigiLib {
 		class DllExport NOTGate : public Core::GateBase
 		{
 		public:
-			NOTGate() noexcept;
-
-			GateBase* Clone(const char* name) override;
+			static Core::GatePtr Create();
+			Core::GatePtr Clone(const char* name) override;
 
 			void ComputeState() override;
 
 		protected:
+			NOTGate() noexcept;
+			void Init() override;
+
 			Core::IOPinPtr m_in;
 			Core::IOPinPtr m_out;
+
+			struct shared_enabler;
 		};
 	}
 }

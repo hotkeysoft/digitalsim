@@ -2,6 +2,7 @@
 
 #include <set>
 #include <map>
+#include "Common.h"
 #include "IOPin.h"
 #include "IOConnection.h"
 #include "GateBase.h"
@@ -18,7 +19,7 @@ namespace DigiLib
 {
 	namespace Core
 	{
-		typedef std::map<std::string, std::unique_ptr<GateBase> > GateMapType;
+		typedef std::map<std::string, GatePtr > GateMapType;
 
 		class DllExport CompositeGate : public GateBase
 		{
@@ -26,24 +27,26 @@ namespace DigiLib
 			CompositeGate(const char* name);
 			void SetName(const char *name) override;
 
-			GateBase* Clone(const char* name) override;
+			GatePtr Clone(const char* name) override;
 
 			using GateBase::AddInput;
 			using GateBase::AddOutput;
 
-			virtual void AddGate(const char* name, GateBase* gate);
+			virtual void AddGate(const char* name, GatePtr gate);
 			virtual size_t GetGateCount() noexcept { return m_internalGates.size(); }
-			virtual GateBase* GetGate(const char*  name);
+			virtual GatePtr GetGate(const char*  name);
 			virtual GateMapType& GetInternalGates() noexcept { return m_internalGates; }
 
 		protected:
 			GateMapType m_internalGates;
 
-			static void InternalCloneOutputs(CompositeGate* source, CompositeGate* clone);
-			static void InternalCloneInputs(CompositeGate* source, CompositeGate* clone);
-			static void InternalCloneGates(CompositeGate* source, CompositeGate* clone);
-			static void InternalCloneLinks(GateBase* source, GateBase* clone);
-			static void InternalCloneInnerLinks(GateBase* source, GateBase* clone);
+			CompositeGatePtr thisCompositeGate() { return std::dynamic_pointer_cast<CompositeGate>(shared_from_this()); }
+
+			static void InternalCloneOutputs(CompositeGatePtr source, CompositeGatePtr clone);
+			static void InternalCloneInputs(CompositeGatePtr source, CompositeGatePtr clone);
+			static void InternalCloneGates(CompositeGatePtr source, CompositeGatePtr clone);
+			static void InternalCloneLinks(GatePtr source, GatePtr clone);
+			static void InternalCloneInnerLinks(GatePtr source, GatePtr clone);
 
 			void ValidateGateName(const char* name, bool checkDuplicate = true);
 		};

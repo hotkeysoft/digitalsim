@@ -163,6 +163,7 @@
     <ClInclude Include="BasicGates\ORGate.h" />
     <ClInclude Include="BasicGates\WireGate.h" />
     <ClInclude Include="BasicGates\XORGate.h" />
+    <ClInclude Include="Core\Common.h" />
     <ClInclude Include="Core\CompositeGate.h" />
     <ClInclude Include="Core\GateBase.h" />
     <ClInclude Include="Core\IOConnection.h" />

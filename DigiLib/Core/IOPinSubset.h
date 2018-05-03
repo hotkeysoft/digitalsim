@@ -1,5 +1,6 @@
 #pragma once
 #include <set>
+#include "Common.h"
 #include "IOPin.h"
 #include "IOState.h"
 
@@ -25,7 +26,7 @@ namespace DigiLib
 			IOPinSubset(IOPinPtr parentPin, size_t offset);
 			IOPinSubset(IOPinPtr parentPin, size_t low, size_t hi);
 
-			IOPinPtr Clone(GateBase *cloneParent) override;
+			IOPinPtr Clone(GatePtr cloneParent) override;
 
 			std::string GetName() override;
 
