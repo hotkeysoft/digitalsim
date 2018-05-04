@@ -11,6 +11,11 @@
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
 #include "BasicGates\BufferGate.h"
+#include "BasicGates\SRLatch.h"
+#include "BasicGates\DLatch.h"
+#include "BasicGates\DFlipFlop.h"
+#include "BasicGates\JKFlipFlop.h"
+#include "BasicGates\TFlipFlop.h"
 #include "Tools\LogicTools.h"
 
 namespace UnitTests
@@ -419,4 +424,189 @@ namespace UnitTests
 		ASSERT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
 		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
 	}
+
+	TEST(TestGates, TestSRLatch)
+	{
+		GatePtr gate = BasicGates::SRLatch::Create();
+
+		gate->GetPin("s")->Set(IOState::LOW);
+		gate->GetPin("r")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		gate->GetPin("s")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		gate->GetPin("s")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		gate->GetPin("r")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		gate->GetPin("r")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		// Bistable?
+	//	gate->GetPin("r")->Set(IOState::HI);
+	//	gate->GetPin("s")->Set(IOState::HI);
+		
+	}
+
+	TEST(TestGates, TestDLatch)
+	{
+		GatePtr gate = BasicGates::DLatch::Create();
+
+		gate->GetPin("c")->Set(IOState::HI);
+		gate->GetPin("d")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set d hi";
+		gate->GetPin("d")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+		
+		TEST_COUT << "Set C low, ignore D";
+		gate->GetPin("c")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set D low (ignore)";
+		gate->GetPin("d")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set D hi (ignore)";
+		gate->GetPin("d")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set D low (ignore)";
+		gate->GetPin("d")->Set(IOState::LOW);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set C hi, Q = D = 0";
+		gate->GetPin("c")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set D hi, Q = D = 1 ";
+		gate->GetPin("d")->Set(IOState::HI);
+
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+	}
+
+	void Clock(IOPinPtr clk)
+	{
+		TEST_COUT << "Clock Hi";
+		clk->Set(IOState::HI);
+		TEST_COUT << "Clock low";
+		clk->Set(IOState::LOW);
+	}
+
+	TEST(TestGates, TestDFlipFlop)
+	{
+		GatePtr gate = BasicGates::DFlipFlop::Create();
+
+		TEST_COUT << "Set D low";
+		gate->GetPin("d")->Set(IOState::LOW);
+
+		Clock(gate->GetPin("clk"));
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		TEST_COUT << "Set D hi";
+		gate->GetPin("d")->Set(IOState::HI);
+
+		Clock(gate->GetPin("clk"));
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		Clock(gate->GetPin("clk"));
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		gate->GetPin("d")->Set(IOState::LOW);
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+
+		Clock(gate->GetPin("clk"));
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+
+		Clock(gate->GetPin("clk"));
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+	}
+
+	TEST(TestGates, DISABLED_TestTFlipFlop)
+	{
+		GatePtr gate = BasicGates::TFlipFlop::Create();
+
+		//Clock(gate->GetPin("t"));
+		gate->GetPin("t")->Set(IOState::LOW);
+
+		gate->GetPin("t")->Set(IOState::HI);
+		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+	}
+
+	TEST(TestGates, DISABLED_TestJKFlipFlop)
+	{
+		GatePtr gate = BasicGates::JKFlipFlop::Create();
+
+		TEST_COUT << "j=k=0";
+		gate->GetPin("j")->Set(IOState::LOW);
+		gate->GetPin("k")->Set(IOState::LOW);
+
+		Clock(gate->GetPin("clk"));
+		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
+
+		TEST_COUT << "j=0, k=1";
+		gate->GetPin("k")->Set(IOState::HI);
+		Clock(gate->GetPin("clk"));
+		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
+
+		TEST_COUT << "j=1, k=0";
+		gate->GetPin("k")->Set(IOState::LOW);
+		gate->GetPin("j")->Set(IOState::HI);
+		Clock(gate->GetPin("clk"));
+		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
+
+		TEST_COUT << "j=1, k=1";
+		gate->GetPin("k")->Set(IOState::HI);
+		gate->GetPin("j")->Set(IOState::HI);
+		for (auto& in : gate->GetInputPins())
+		{
+			std::cout << "Pin: " << gate->GetPin(in.second)->GetFullName() << ", Get=" << gate->GetPin(in.second)->Get() << std::endl;
+		}
+		for (auto& in : gate->GetOutputPins())
+		{
+			std::cout << "Pin: " << gate->GetPin(in.second)->GetFullName() << ", Get=" << gate->GetPin(in.second)->Get() << std::endl;
+		}
+
+		Clock(gate->GetPin("clk"));
+		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
+
+	}
+
+
 }

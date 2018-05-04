@@ -24,9 +24,9 @@ namespace DigiLib
 			return os.str();
 		}
 
-		void IOPin::Reset()
+		void IOPin::Reset(IOState::IO_STATE state)
 		{
-			m_state = IOState(IOState::UNDEF, m_width);
+			m_state = IOState(state, m_width);
 		}
 
 		void IOPin::Set(IOState state)
@@ -36,6 +36,8 @@ namespace DigiLib
 				throw std::invalid_argument("pin width mismatch");
 			}
 			
+			//std::cout << this->GetFullName() << "->Set(" << state << ")" << std::endl;
+
 			if (m_state == state)
 			{
 				return;

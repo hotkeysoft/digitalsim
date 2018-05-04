@@ -158,11 +158,15 @@
   <ItemGroup>
     <ClInclude Include="BasicGates\ANDGate.h" />
     <ClInclude Include="BasicGates\BufferGate.h" />
+    <ClInclude Include="BasicGates\DFlipFlop.h" />
+    <ClInclude Include="BasicGates\DLatch.h" />
+    <ClInclude Include="BasicGates\JKFlipFlop.h" />
     <ClInclude Include="BasicGates\NANDGate.h" />
     <ClInclude Include="BasicGates\NORGate.h" />
     <ClInclude Include="BasicGates\NOTGate.h" />
     <ClInclude Include="BasicGates\ORGate.h" />
     <ClInclude Include="BasicGates\SRLatch.h" />
+    <ClInclude Include="BasicGates\TFlipFlop.h" />
     <ClInclude Include="BasicGates\WireGate.h" />
     <ClInclude Include="BasicGates\XORGate.h" />
     <ClInclude Include="Core\Common.h" />
@@ -179,11 +183,15 @@
   <ItemGroup>
     <ClCompile Include="BasicGates\ANDGate.cpp" />
     <ClCompile Include="BasicGates\BufferGate.cpp" />
+    <ClCompile Include="BasicGates\DFlipFlop.cpp" />
+    <ClCompile Include="BasicGates\DLatch.cpp" />
+    <ClCompile Include="BasicGates\JKFlipFlop.cpp" />
     <ClCompile Include="BasicGates\NANDGate.cpp" />
     <ClCompile Include="BasicGates\NORGate.cpp" />
     <ClCompile Include="BasicGates\NOTGate.cpp" />
     <ClCompile Include="BasicGates\ORGate.cpp" />
     <ClCompile Include="BasicGates\SRLatch.cpp" />
+    <ClCompile Include="BasicGates\TFlipFlop.cpp" />
     <ClCompile Include="BasicGates\WireGate.cpp" />
     <ClCompile Include="BasicGates\XORGate.cpp" />
     <ClCompile Include="Core\CompositeGate.cpp" />

@@ -81,6 +81,18 @@
     <ClInclude Include="BasicGates\NORGate.h">
       <Filter>BasicGates</Filter>
     </ClInclude>
+    <ClInclude Include="BasicGates\DLatch.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\DFlipFlop.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\TFlipFlop.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGates\JKFlipFlop.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -138,6 +150,18 @@
       <Filter>BasicGates</Filter>
     </ClCompile>
     <ClCompile Include="BasicGates\NORGate.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\DLatch.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\DFlipFlop.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\TFlipFlop.cpp">
+      <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\JKFlipFlop.cpp">
       <Filter>BasicGates</Filter>
     </ClCompile>
   </ItemGroup>
