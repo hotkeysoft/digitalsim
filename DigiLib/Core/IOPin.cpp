@@ -75,7 +75,7 @@ namespace DigiLib
 
 			const auto mode = m_parentGate->GetMode();
 
-			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
+			auto & connectedPins = m_parentGate->GetConnectedToPin(m_id);
 			
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
 			{
@@ -119,7 +119,7 @@ namespace DigiLib
 
 		void IOPin::ComputePinState()
 		{
-			auto & connectedFrom = m_parentGate->GetConnectedFromPins(m_id);
+			auto & connectedFrom = m_parentGate->GetConnectedFromPin(m_id);
 			if (connectedFrom.size() > 1)
 			{
 				m_state = IOState(IOState::HI_Z, m_width);

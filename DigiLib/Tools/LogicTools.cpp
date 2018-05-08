@@ -64,7 +64,7 @@ namespace DigiLib {
 			std::ostringstream os;
 			for (auto & input : gate->GetInputPins())
 			{
-				for (auto connection : gate->GetConnectedToPins(input.second))
+				for (auto connection : gate->GetConnectedToPin(input.second))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -72,7 +72,7 @@ namespace DigiLib {
 
 			for (auto & output : gate->GetOutputPins())
 			{
-				for (auto connection : gate->GetConnectedToPins(output.second))
+				for (auto connection : gate->GetConnectedToPin(output.second))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}

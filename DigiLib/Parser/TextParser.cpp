@@ -61,6 +61,7 @@ namespace DigiLib {
 			}
 
 			//TODO how to indicate 'negative' connections?
+			std::cout << "connect " << pin1->GetFullName() << " -> " << pin2->GetFullName() << std::endl;
 			pin1->ConnectTo(pin2);
 		}
 	}

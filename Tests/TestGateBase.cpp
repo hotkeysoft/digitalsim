@@ -178,23 +178,23 @@ namespace UnitTests
 		//Logger::WriteMessage("TestConnectTo: Connect to self (in to out)");
 		EXPECT_THROW(gate->GetPin("in")->ConnectTo(gate->GetPin("out")), std::invalid_argument);
 
-		EXPECT_EQ(0, gate->GetConnectedToPins("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
-		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
-		EXPECT_EQ(0, gate2->GetConnectedFromPins("in").size());
+		EXPECT_EQ(0, gate->GetConnectedToPin("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
+		EXPECT_EQ(0, gate2->GetConnectedFromPin("in").size());
 
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
-		EXPECT_EQ(1, gate->GetConnectedToPins("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
-		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
-		EXPECT_EQ(1, gate2->GetConnectedFromPins("in").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
+		EXPECT_EQ(1, gate2->GetConnectedFromPin("in").size());
 
 		// Same link
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate2->GetPin("in")), std::invalid_argument);
-		EXPECT_EQ(1, gate->GetConnectedToPins("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
-		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
-		EXPECT_EQ(1, gate2->GetConnectedFromPins("in").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
+		EXPECT_EQ(1, gate2->GetConnectedFromPin("in").size());
 	}
 
 	TEST(TestIOConnection, ConnectToEdgeCases)
@@ -512,7 +512,7 @@ namespace UnitTests
 		b1->GetPin("out")->ConnectTo(wire->GetPin("in"));
 		b2->GetPin("out")->ConnectTo(wire->GetPin("in"));
 
-		ASSERT_EQ(2, wire->GetConnectedFromPins("in").size());
+		ASSERT_EQ(2, wire->GetConnectedFromPin("in").size());
 
 		b1->GetPin("en")->Set(IOState::LOW);
 		b2->GetPin("en")->Set(IOState::LOW);
@@ -577,45 +577,45 @@ namespace UnitTests
 		ASSERT_EQ(IOState::LOW, nested1->GetPin("out")->Get());
 	}
 
-	TEST(TestCore, GetConnectedToPins)
+	TEST(TestCore, GetConnectedToPin)
 	{
 		GatePtr not1 = BasicGates::NOTGate::Create();
 		GatePtr not2 = BasicGates::NOTGate::Create();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
-		EXPECT_THROW(not1->GetConnectedToPins((const char*)nullptr), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins(nullptr), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins(IOPinPtr()), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins(""), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins("bad"), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins(not2->GetPin("in")), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPins(not1->GetConnectedToPins().size()), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin((const char*)nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin(nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin(IOPinPtr()), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin(""), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin("bad"), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin(not2->GetPin("in")), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPin(not1->GetConnectedToPins().size()), std::invalid_argument);
 		
-		EXPECT_EQ(0, not1->GetConnectedToPins("in").size());
-		EXPECT_EQ(0, not1->GetConnectedToPins(not1->GetPin("in")).size());
+		EXPECT_EQ(0, not1->GetConnectedToPin("in").size());
+		EXPECT_EQ(0, not1->GetConnectedToPin(not1->GetPin("in")).size());
 
-		EXPECT_EQ(1, not1->GetConnectedToPins("out").size());
-		EXPECT_EQ(1, not1->GetConnectedToPins(not1->GetPin("out")).size());
+		EXPECT_EQ(1, not1->GetConnectedToPin("out").size());
+		EXPECT_EQ(1, not1->GetConnectedToPin(not1->GetPin("out")).size());
 	}
 	
-	TEST(TestCore, GetConnectedFromPins)
+	TEST(TestCore, GetConnectedFromPin)
 	{
 		GatePtr not1 = BasicGates::NOTGate::Create();
 		GatePtr not2 = BasicGates::NOTGate::Create();
 		not1->GetPin("out")->ConnectTo(not2->GetPin("in"));
 
-		EXPECT_THROW(not2->GetConnectedFromPins((const char*)nullptr), std::invalid_argument);
-		EXPECT_THROW(not2->GetConnectedFromPins((IOPinPtr)nullptr), std::invalid_argument);
-		EXPECT_THROW(not2->GetConnectedFromPins(""), std::invalid_argument);
-		EXPECT_THROW(not2->GetConnectedFromPins("bad"), std::invalid_argument);
-		EXPECT_THROW(not2->GetConnectedFromPins(not1->GetPin("in")), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedFromPins(not1->GetConnectedFromPins().size()), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPin((const char*)nullptr), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPin((IOPinPtr)nullptr), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPin(""), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPin("bad"), std::invalid_argument);
+		EXPECT_THROW(not2->GetConnectedFromPin(not1->GetPin("in")), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedFromPin(not1->GetConnectedFromPins().size()), std::invalid_argument);
 
-		EXPECT_EQ(1, not2->GetConnectedFromPins("in").size());
-		EXPECT_EQ(1, not2->GetConnectedFromPins(not2->GetPin("in")).size());
+		EXPECT_EQ(1, not2->GetConnectedFromPin("in").size());
+		EXPECT_EQ(1, not2->GetConnectedFromPin(not2->GetPin("in")).size());
 
-		EXPECT_EQ(0, not2->GetConnectedFromPins("out").size());
-		EXPECT_EQ(0, not2->GetConnectedFromPins(not2->GetPin("out")).size());
+		EXPECT_EQ(0, not2->GetConnectedFromPin("out").size());
+		EXPECT_EQ(0, not2->GetConnectedFromPin(not2->GetPin("out")).size());
 	}
 
 	TEST(TestCore, GetConnectedFromToPins)

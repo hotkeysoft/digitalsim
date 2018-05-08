@@ -64,14 +64,14 @@ namespace DigiLib
 			virtual IOPinPtr GetPin(const char* name, size_t pin);
 			virtual IOPinPtr GetPin(const char* name, size_t low, size_t hi);
 
-			virtual PinConnectionsType& GetConnectedFromPins(size_t pinID);
-			virtual PinConnectionsType& GetConnectedToPins(size_t pinID);
+			virtual PinConnectionsType& GetConnectedFromPin(size_t pinID);
+			virtual PinConnectionsType& GetConnectedToPin(size_t pinID);
 
-			virtual PinConnectionsType& GetConnectedFromPins(const char* sourcePin);
-			virtual PinConnectionsType& GetConnectedToPins(const char* sourcePin);
+			virtual PinConnectionsType& GetConnectedFromPin(const char* sourcePin);
+			virtual PinConnectionsType& GetConnectedToPin(const char* sourcePin);
 			
-			virtual PinConnectionsType& GetConnectedFromPins(IOPinPtr sourcePin);
-			virtual PinConnectionsType& GetConnectedToPins(IOPinPtr sourcePin);
+			virtual PinConnectionsType& GetConnectedFromPin(IOPinPtr sourcePin);
+			virtual PinConnectionsType& GetConnectedToPin(IOPinPtr sourcePin);
 
 			ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
 			ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }

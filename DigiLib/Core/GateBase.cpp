@@ -170,7 +170,7 @@ namespace DigiLib
 			return nullptr;
 		}
 
-		PinConnectionsType& GateBase::GetConnectedToPins(size_t pinID)
+		PinConnectionsType& GateBase::GetConnectedToPin(size_t pinID)
 		{
 			if (pinID < 0 || pinID >= m_ioPinCount)
 			{
@@ -179,7 +179,7 @@ namespace DigiLib
 
 			return m_connectedToPins[pinID];
 		}
-		PinConnectionsType& GateBase::GetConnectedToPins(const char * pinName)
+		PinConnectionsType& GateBase::GetConnectedToPin(const char * pinName)
 		{
 			if (pinName == nullptr)
 			{
@@ -192,10 +192,10 @@ namespace DigiLib
 				throw std::invalid_argument("source pin not found");
 			}
 
-			return GetConnectedToPins(pin->GetID());
+			return GetConnectedToPin(pin->GetID());
 		}
 
-		PinConnectionsType& GateBase::GetConnectedToPins(IOPinPtr pin)
+		PinConnectionsType& GateBase::GetConnectedToPin(IOPinPtr pin)
 		{
 			if (pin == nullptr)
 			{
@@ -210,7 +210,7 @@ namespace DigiLib
 			return m_connectedToPins[pin->GetID()];
 		}
 
-		PinConnectionsType& GateBase::GetConnectedFromPins(size_t pinID)
+		PinConnectionsType& GateBase::GetConnectedFromPin(size_t pinID)
 		{
 			if (pinID < 0 || pinID >= m_ioPinCount)
 			{
@@ -219,7 +219,7 @@ namespace DigiLib
 
 			return m_connectedFromPins[pinID];
 		}
-		PinConnectionsType& GateBase::GetConnectedFromPins(const char * pinName)
+		PinConnectionsType& GateBase::GetConnectedFromPin(const char * pinName)
 		{
 			if (pinName == nullptr)
 			{
@@ -232,10 +232,10 @@ namespace DigiLib
 				throw std::invalid_argument("source pin not found");
 			}
 
-			return GetConnectedFromPins(pin->GetID());
+			return GetConnectedFromPin(pin->GetID());
 		}
 
-		PinConnectionsType& GateBase::GetConnectedFromPins(IOPinPtr pin)
+		PinConnectionsType& GateBase::GetConnectedFromPin(IOPinPtr pin)
 		{
 			if (pin == nullptr)
 			{
@@ -365,7 +365,7 @@ namespace DigiLib
 			GateRef targetGate = target->GetParent();
 
 			IOState mask = IOState(IOState::UNDEF, target->GetMask().GetWidth());
-			for (const auto & t : targetGate->GetConnectedFromPins(target))
+			for (const auto & t : targetGate->GetConnectedFromPin(target))
 			{
 				mask = mask | t.GetTarget()->GetMask();
 			}

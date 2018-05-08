@@ -71,8 +71,8 @@ namespace UnitTests
 		EXPECT_THROW(parser.ParseConnection(" ->in2-> "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseConnection(" in1->i2- > "), std::invalid_argument);
 
-		EXPECT_EQ(0, gate->GetConnectedFromPins("in2").size());
-		EXPECT_EQ(0, gate->GetConnectedToPins("in2").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPin("in2").size());
+		EXPECT_EQ(0, gate->GetConnectedToPin("in2").size());
 
 		//TODO how to indicate 'negative' connections?
 		parser.ParseConnection("in1 -> and1.in1");
@@ -82,9 +82,9 @@ namespace UnitTests
 		parser.ParseConnection(" busin[1] -> \n\n\tbuffer.in[1] ");
 		parser.ParseConnection("buffer.out ->busout ");
 
-		EXPECT_EQ(2, gate->GetConnectedFromPins("in1").size());
-		EXPECT_EQ(2, gate->GetConnectedFromPins("in2").size());
-		EXPECT_EQ(1, gate->GetConnectedFromPins("busin").size());
-		EXPECT_EQ(1, gate->GetConnectedToPins("busout").size());
+		EXPECT_EQ(2, gate->GetConnectedToPin("in1").size());
+		EXPECT_EQ(2, gate->GetConnectedToPin("in2").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("busin").size());
+		EXPECT_EQ(1, gate->GetConnectedFromPin("busout").size());
 	}
 }
