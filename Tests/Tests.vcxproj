@@ -52,6 +52,7 @@
     <ClCompile Include="TestIOPin.cpp" />
     <ClCompile Include="TestIOState.cpp" />
     <ClCompile Include="TestLogicTools.cpp" />
+    <ClCompile Include="TestParser.cpp" />
     <ClCompile Include="TestSimulator.cpp" />
   </ItemGroup>
   <ItemGroup>

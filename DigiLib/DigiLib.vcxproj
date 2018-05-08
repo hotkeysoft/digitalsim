@@ -177,6 +177,7 @@
     <ClInclude Include="Core\IOPinSubset.h" />
     <ClInclude Include="Core\IOState.h" />
     <ClInclude Include="Core\Simulator.h" />
+    <ClInclude Include="Parser\TextParser.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tools\LogicTools.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="Core\Simulator.cpp" />
     <ClCompile Include="DigiLib.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Parser\TextParser.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

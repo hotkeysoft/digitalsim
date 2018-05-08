@@ -22,6 +22,9 @@
     <Filter Include="BasicGates">
       <UniqueIdentifier>{0d6454b4-34ce-49e7-a985-351e14064504}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{24c74dd8-a15e-4f9f-ad7f-983b457a799d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -96,6 +99,9 @@
     <ClInclude Include="Core\Simulator.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Parser\TextParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -169,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="Core\Simulator.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\TextParser.cpp">
+      <Filter>Parser</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
