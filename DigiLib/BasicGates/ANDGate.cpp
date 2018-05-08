@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "ANDGate.h"
 #include <sstream>
 
@@ -32,7 +33,7 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr ANDGate::Clone(const char * name)
+		Core::GatePtr ANDGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>(this->m_inputs);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
@@ -42,16 +43,29 @@ namespace DigiLib {
 
 		void ANDGate::ComputeState()
 		{
+			IOState newState = IOState::HI;
 			for (auto & pin : m_inputPins)
 			{
+				if (pin->Get() == IOState::UNDEF)
+				{
+					newState = IOState::UNDEF;
+					break;
+				}
 				if (pin->Get() == IOState::LOW)
 				{
-					m_out->Set(IOState::LOW);
-					return;
+					newState = IOState::LOW;
+					break;
 				}
 			}
 
-			m_out->Set(IOState::HI);
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEvent({ newState, m_out });
+			}
 		}
 
 		struct ANDGate::shared_enabler : public ANDGate

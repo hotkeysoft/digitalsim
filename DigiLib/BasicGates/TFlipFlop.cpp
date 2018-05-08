@@ -17,16 +17,15 @@ namespace DigiLib {
 		{
 			AddInput("t");
 			AddOutput("q");
-			AddOutput("notq");
+			AddOutput("/q");
 
-			AddGate("dflipflop", DFlipFlop::Create());
-			AddGate("wire", WireGate::Create());
+			AddGate("dflip", DFlipFlop::Create());
 
-			GetPin("t")->ConnectTo(GetGate("dflipflop")->GetPin("clk"));
-			GetGate("dflipflop")->GetPin("q")->ConnectTo(GetPin("q"));
-			GetGate("dflipflop")->GetPin("notq")->ConnectTo(GetGate("wire")->GetPin("in"));
-			GetGate("wire")->GetPin("out")->ConnectTo(GetGate("dflipflop")->GetPin("d"));
-			GetGate("dflipflop")->GetPin("notq")->ConnectTo(GetPin("notq"));
+			GetPin("t")->ConnectTo(GetGate("dflip")->GetPin("clk"));
+			GetGate("dflip")->GetPin("q")->ConnectTo(GetPin("q"));
+
+			GetGate("dflip")->GetPin("/q")->ConnectTo(GetGate("dflip")->GetPin("d"));
+			GetGate("dflip")->GetPin("/q")->ConnectTo(GetPin("/q"));
 		}
 
 		Core::GatePtr TFlipFlop::Create()
@@ -37,16 +36,12 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr TFlipFlop::Clone(const char * name)
+		Core::GatePtr TFlipFlop::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
-		}
-
-		void TFlipFlop::ComputeState()
-		{
 		}
 
 		struct TFlipFlop::shared_enabler : public TFlipFlop

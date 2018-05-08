@@ -16,6 +16,15 @@ namespace DigiLib
 			ValidateGateName(name, false);
 			this->m_name = name;
 		}
+
+		void CompositeGate::SetMode(Mode mode, SimulatorRef simulator)
+		{
+			GateBase::SetMode(mode, simulator);
+			for (auto gate : m_internalGates)
+			{
+				gate.second->SetMode(mode, simulator);
+			}
+		}
 		
 		CompositeGatePtr CompositeGate::Create(const char* name)
 		{
@@ -25,9 +34,10 @@ namespace DigiLib
 			return gate;
 		}
 
-		GatePtr CompositeGate::Clone(const char * name)
+		GatePtr CompositeGate::Clone(const char * name, bool deep)
 		{
 			ValidateGateName(name, false);
+
 			auto ptr = std::make_shared<shared_enabler>(name);
 			CompositeGatePtr clone = std::static_pointer_cast<CompositeGate>(ptr);
 			clone->Init();
@@ -35,9 +45,32 @@ namespace DigiLib
 			InternalCloneInputs(source, clone);
 			InternalCloneOutputs(source, clone);
 			InternalCloneGates(source, clone);
-			InternalCloneLinks(source, clone);
+			if (deep)
+			{
+				InternalCloneLinks(source, clone);
+			}
 
 			return clone;
+		}
+
+
+		size_t CompositeGate::GetGateCount(bool recursive) noexcept
+		{
+			size_t count = m_internalGates.size();
+			if (recursive)
+			{
+				// Should we include CompositeGate as one gate or 
+				// count only Basic Gates...
+				// Since links between compositeGate and inner gate have 
+				// a non-zero delay, let's count them.
+
+				for (auto & gate : m_internalGates)
+				{
+					count += gate.second->GetGateCount(true);
+				}
+			}
+
+			return count;
 		}
 
 		void CompositeGate::ResetPins()
@@ -46,6 +79,14 @@ namespace DigiLib
 			for (auto child : m_internalGates)
 			{
 				child.second->ResetPins();
+			}
+		}
+
+		void CompositeGate::InitializeState()
+		{
+			for (auto gate : m_internalGates)
+			{
+				gate.second->InitializeState();
 			}
 		}
 
@@ -65,6 +106,56 @@ namespace DigiLib
 			gate->SetName(name);
 
 			m_internalGates[name] = gate;
+		}
+
+		bool CompositeGate::ExtractGatePinName(const std::string in, std::string& gate, std::string& pin)
+		{
+			size_t dot = in.find_first_of('.');
+			if (dot == 0)
+			{
+				return false;
+			}
+			if (dot == -1)
+			{
+				pin = in;
+			}
+			else
+			{
+				gate = in.substr(0, dot);
+				pin = in.substr(dot + 1);
+
+				if (pin.empty() || gate.empty())
+					return false;
+			}
+			return true;
+		}
+
+		IOPinPtr CompositeGate::FindPin(const char * name)
+		{
+			if (name == nullptr)
+			{
+				throw std::invalid_argument("name cannot be null");
+			}
+
+			std::string gateName;
+			std::string pinName;
+			if (!ExtractGatePinName(name, gateName, pinName))
+			{
+				return nullptr;
+			}
+
+			if (gateName.empty())
+			{
+				return GateBase::FindPin(name);
+			}
+
+			GatePtr gate = GetGate(gateName.c_str());
+			if (gate != nullptr)
+			{
+				return gate->FindPin(pinName.c_str());
+			}
+
+			return nullptr;
 		}
 
 		GatePtr CompositeGate::GetGate(const char* name)
@@ -121,20 +212,8 @@ namespace DigiLib
 			for (auto & gate : source->m_internalGates)
 			{
 				const char* gateName = gate.first.c_str();
-				CompositeGatePtr innerSource = std::dynamic_pointer_cast<CompositeGate>(gate.second);
-				if (innerSource)
-				{
-					CompositeGatePtr innerClone = CompositeGate::Create(gateName);
-					InternalCloneGates(innerSource, innerClone);
-					InternalCloneInputs(innerSource, innerClone);
-					InternalCloneOutputs(innerSource, innerClone);
-					clone->AddGate(gateName, innerClone);
-				}
-				else
-				{
-					GatePtr innerClone = gate.second->Clone(gateName);
-					clone->AddGate(gateName, innerClone);
-				}
+				GatePtr innerClone = gate.second->Clone(gateName, false);
+				clone->AddGate(gateName, innerClone);
 			}
 		}
 
@@ -159,13 +238,13 @@ namespace DigiLib
 
 			for (auto connections : source->GetConnectedToPins())
 			{
-				for (auto links : connections)
+				for (auto link : connections)
 				{
 					IOPinPtr clonedSource = nullptr;
 					IOPinPtr clonedTarget = nullptr;
 					
-					IOPinPtr sourcePin = links.GetSource();
-					IOPinPtr targetPin = links.GetTarget();
+					IOPinPtr sourcePin = link.GetSource();
+					IOPinPtr targetPin = link.GetTarget();
 
 					clonedSource = sourcePin->Clone(clone.get());
 

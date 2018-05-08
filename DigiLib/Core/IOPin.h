@@ -34,16 +34,18 @@ namespace DigiLib
 			size_t GetID() { return m_id;  }
 			virtual std::string GetRawName() { return m_name; }
 			virtual std::string GetName() { return m_name; }
-			virtual std::string GetFullName();			
+			virtual std::string GetFullName();
 			GateRef GetParent() noexcept { return m_parentGate; }
 			IO_DIRECTION GetDirection() noexcept { return m_direction; }
+			virtual IOState GetMask() noexcept;
+			virtual bool Overlaps(IOState);
 
 			virtual size_t GetWidth() { return m_width; }
 			virtual IOState Get() noexcept { return m_state; };
 			virtual void Reset(IOState::IO_STATE = IOState::UNDEF);
 			virtual void Set(IOState state);
 
-			virtual void ConnectTo(IOPinPtr);
+			virtual void ConnectTo(IOPinPtr, bool inverted = false);
 
 		protected:					
 			virtual size_t GetOffset() { return 0; }

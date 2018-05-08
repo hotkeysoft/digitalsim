@@ -25,16 +25,22 @@ namespace DigiLib
 		{
 		public:
 			static CompositeGatePtr Create(const char*name);
-			GatePtr Clone(const char* name) override;
+			GatePtr Clone(const char * name, bool deep = true) override;
 
 			void ResetPins() override;
+			void InitializeState() override;
 
 			using GateBase::AddInput;
 			using GateBase::AddOutput;
 
+			IOPinPtr FindPin(const char* name) override;
+
 			void SetName(const char *name) override;
+
+			void SetMode(Mode mode, SimulatorRef simulator) override;
+
 			virtual void AddGate(const char* name, GatePtr gate);
-			virtual size_t GetGateCount() noexcept { return m_internalGates.size(); }
+			size_t GetGateCount(bool recursive = false) noexcept override;
 			virtual GatePtr GetGate(const char*  name);
 			virtual GateMapType& GetInternalGates() noexcept { return m_internalGates; }
 
@@ -51,6 +57,8 @@ namespace DigiLib
 			static void InternalCloneInnerLinks(GatePtr source, GatePtr clone);
 
 			void ValidateGateName(const char* name, bool checkDuplicate = true);
+
+			static bool ExtractGatePinName(const std::string in, std::string& gate, std::string& pin);
 
 			struct shared_enabler;
 		};

@@ -17,5 +17,9 @@ namespace DigiLib
 		class IOPin;
 		typedef std::shared_ptr<IOPin> IOPinPtr;
 		typedef IOPin* IOPinRef;
+
+		class Simulator;
+		typedef std::shared_ptr<Simulator> SimulatorPtr;
+		typedef Simulator* SimulatorRef;
 	}
 }

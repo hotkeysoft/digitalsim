@@ -18,7 +18,7 @@ namespace DigiLib {
 			AddInput("d");
 			AddInput("c");
 			AddOutput("q");
-			AddOutput("notq");
+			AddOutput("/q");
 			AddGate("nand1", NANDGate::Create());
 			AddGate("nand2", NANDGate::Create());
 			AddGate("nand3", NANDGate::Create());
@@ -34,8 +34,18 @@ namespace DigiLib {
 			GetGate("nand2")->GetPin("out")->ConnectTo(GetGate("nand4")->GetPin("in2"));
 			GetGate("nand3")->GetPin("out")->ConnectTo(GetPin("q"));
 			GetGate("nand3")->GetPin("out")->ConnectTo(GetGate("nand4")->GetPin("in1"));
-			GetGate("nand4")->GetPin("out")->ConnectTo(GetPin("notq"));
+			GetGate("nand4")->GetPin("out")->ConnectTo(GetPin("/q"));
 			GetGate("nand4")->GetPin("out")->ConnectTo(GetGate("nand3")->GetPin("in2"));
+		}
+
+		void DLatch::InitializeState()
+		{
+			CompositeGate::InitializeState();
+			
+			// To avoid initial oscillation, we set Q and notQ to opposite states.
+			static IOState initialState = IOState::HI;
+			GetGate("nand4")->GetPin("in1")->Set(initialState);
+			GetGate("nand3")->GetPin("in2")->Set(!initialState);
 		}
 
 		Core::GatePtr DLatch::Create()
@@ -46,16 +56,12 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr DLatch::Clone(const char * name)
+		Core::GatePtr DLatch::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
-		}
-
-		void DLatch::ComputeState()
-		{
 		}
 
 		struct DLatch::shared_enabler : public DLatch

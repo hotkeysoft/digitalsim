@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "IOPin.h"
 #include "GateBase.h"
+#include "Simulator.h"
 
 namespace DigiLib
 {
@@ -24,6 +25,36 @@ namespace DigiLib
 			return os.str();
 		}
 
+		IOState IOPin::GetMask() noexcept
+		{
+			IOState::IO_STATE state = IOState::UNDEF;
+			switch (m_direction)
+			{
+			case INPUT:
+				state = IOState::LOW; break;
+			case OUTPUT: 
+				state = IOState::HI; break;
+			case OUTPUT_HI_Z:
+				state = IOState::HI_Z; break;
+			}
+
+			return IOState(state, m_width);
+		}
+
+		bool IOPin::Overlaps(IOState state)
+		{
+			if (state.GetWidth() != m_width)
+				throw std::invalid_argument("pin width mismatch");
+
+			for (size_t i = 0; i < m_width; ++i)
+			{
+				if (state[i] != IOState::UNDEF)
+					return true;
+			}
+
+			return false;
+		}
+
 		void IOPin::Reset(IOState::IO_STATE state)
 		{
 			m_state = IOState(state, m_width);
@@ -36,14 +67,14 @@ namespace DigiLib
 				throw std::invalid_argument("pin width mismatch");
 			}
 			
-			//std::cout << this->GetFullName() << "->Set(" << state << ")" << std::endl;
-
 			if (m_state == state)
 			{
 				return;
 			}
 			m_state = state;
-			
+
+			const auto mode = m_parentGate->GetMode();
+
 			auto & connectedPins = m_parentGate->GetConnectedToPins(m_id);
 			
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
@@ -51,7 +82,14 @@ namespace DigiLib
 				// Connect to internal gates
 				for (auto & connected : connectedPins)
 				{
-					connected.GetTarget()->Set(connected.GetSource()->Get());
+					if (mode == GateBase::ASYNC)
+					{
+						connected.GetTarget()->Set(connected.GetSource()->Get());
+					}
+					else
+					{
+						m_parentGate->GetSimulator()->PostEvent(connected);
+					}					
 				}
 			}
 			// TODO: Not sure about this.. could it be both?
@@ -67,7 +105,14 @@ namespace DigiLib
 			{
 				for (auto & connected : connectedPins)
 				{
-					connected.GetTarget()->Set(connected.GetSource()->Get());
+					if (mode == GateBase::ASYNC)
+					{
+						connected.GetTarget()->Set(connected.GetSource()->Get());
+					}
+					else
+					{
+						m_parentGate->GetSimulator()->PostEvent(connected);
+					}
 				}
 			}
 		}
@@ -103,10 +148,13 @@ namespace DigiLib
 			}
 		}
 
-		void IOPin::ConnectTo(IOPinPtr target)
+		void IOPin::ConnectTo(IOPinPtr target, bool inverted)
 		{
 			IOPinPtr source = this->shared_from_this();
-			m_parentGate->ConnectPins(source, target);
+			if (!m_parentGate->ConnectPins(source, target, inverted))
+			{
+				throw std::invalid_argument("can not create connnection");
+			}
 		}
 	}
 }

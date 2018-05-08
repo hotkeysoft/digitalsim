@@ -17,7 +17,7 @@ namespace DigiLib {
 			AddInput("r");
 			AddInput("s");
 			AddOutput("q");
-			AddOutput("notq");
+			AddOutput("/q");
 			AddGate("nor1", NORGate::Create());
 			AddGate("nor2", NORGate::Create());
 
@@ -25,8 +25,18 @@ namespace DigiLib {
 			GetPin("s")->ConnectTo(GetGate("nor2")->GetPin("in2"));
 			GetGate("nor1")->GetPin("out")->ConnectTo(GetPin("q"));
 			GetGate("nor1")->GetPin("out")->ConnectTo(GetGate("nor2")->GetPin("in1"));
-			GetGate("nor2")->GetPin("out")->ConnectTo(GetPin("notq"));
+			GetGate("nor2")->GetPin("out")->ConnectTo(GetPin("/q"));
 			GetGate("nor2")->GetPin("out")->ConnectTo(GetGate("nor1")->GetPin("in2"));
+		}
+
+		void SRLatch::InitializeState()
+		{
+			CompositeGate::InitializeState();
+			// To avoit initial oscillation, we set Q and notQ to opposite (random) states.
+			IOState initialState = IOState::IOState::Random();
+			IOState notState = !initialState;
+			GetPin("q")->Set(initialState);
+			GetPin("/q")->Set(!initialState);
 		}
 
 		Core::GatePtr SRLatch::Create()
@@ -37,16 +47,12 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr SRLatch::Clone(const char * name)
+		Core::GatePtr SRLatch::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
-		}
-
-		void SRLatch::ComputeState()
-		{
 		}
 
 		struct SRLatch::shared_enabler : public SRLatch

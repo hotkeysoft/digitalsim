@@ -78,9 +78,11 @@ namespace UnitTests
 		IOState state6(IOState::HI, 8);
 		IOState state7(IOState::LOW, 8);
 
+		ASSERT_FALSE(state4 == state5);
 		ASSERT_EQ(state4, state6);
 		ASSERT_EQ(state6, state4);
 
+		ASSERT_FALSE(state4 != state6);
 		ASSERT_NE(state4, state5);
 		ASSERT_NE(state5, state4);
 
@@ -286,5 +288,30 @@ namespace UnitTests
 		EXPECT_EQ(IOState({ IOState::HI, IOState::LOW}), IOState::FromInt(1, 2));
 		EXPECT_EQ(IOState({ IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI }), IOState::FromInt(255, 8));
+	}
+
+	TEST(TestIOState, Random)
+	{
+		EXPECT_THROW(IOState::Random(0), std::out_of_range);
+		EXPECT_THROW(IOState::Random(MAX_PINS+1), std::out_of_range);
+		EXPECT_EQ(16, IOState::Random(MAX_PINS).GetWidth());
+		EXPECT_EQ(1, IOState::Random(1).GetWidth());
+
+		int total = 0;
+		for (int i = 0; i < 1000; ++i)
+		{
+			total +=  IOState::Random(16).ToInt16();
+		}
+		int avg1 = total / 1000;
+
+		total = 0;
+		for (int i = 0; i < 1000; ++i)
+		{
+			total += IOState::Random(16).ToInt16();
+		}
+		int avg2 = total / 1000;
+
+		ASSERT_NE(avg1, avg2);
+		ASSERT_NEAR(avg1, 32768, 2000);
 	}
 }

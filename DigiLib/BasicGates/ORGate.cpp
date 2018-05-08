@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "ORGate.h"
 
 namespace DigiLib {
@@ -31,7 +32,7 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr ORGate::Clone(const char * name)
+		Core::GatePtr ORGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>(this->m_inputs);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
@@ -41,16 +42,29 @@ namespace DigiLib {
 		
 		void ORGate::ComputeState()
 		{
+			IOState newState = IOState::LOW;
 			for (auto & pin : m_inputPins)
 			{
+				if (pin->Get() == IOState::UNDEF)
+				{
+					newState = IOState::UNDEF;
+					break;
+				}
 				if (pin->Get() == IOState::HI)
 				{
-					m_out->Set(IOState::HI);
-					return;
+					newState = IOState::HI;
+					break;
 				}
 			}
 
-			m_out->Set(IOState::LOW);
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEvent({ newState, m_out });
+			}
 		}
 
 		struct ORGate::shared_enabler : public ORGate

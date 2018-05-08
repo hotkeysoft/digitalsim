@@ -11,12 +11,14 @@
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
 #include "BasicGates\BufferGate.h"
+#include "BasicGates\DFlipFLop.h"
+#include "BasicGates\TFlipFLop.h"
 #include "Tools\LogicTools.h"
 
 namespace UnitTests
 {		
 	using namespace Core;
-
+	
 	CompositeGatePtr NestGate(const char* name, GatePtr toNest)
 	{
 		CompositeGatePtr comp = CompositeGate::Create(name);
@@ -36,7 +38,7 @@ namespace UnitTests
 		return comp;
 	}
 
-	TEST(TestCore, TestAddInput)
+	TEST(TestCore, AddInput)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 
@@ -56,9 +58,13 @@ namespace UnitTests
 		//Logger::WriteMessage("TestAddInput: Good Input");
 		gate->AddInput("a");
 		ASSERT_EQ(2, (int)gate->GetInputCount());
-
+	
 		gate->AddInput("a12345");
 		ASSERT_EQ(3, (int)gate->GetInputCount());
+		ASSERT_EQ(0, (int)gate->GetOutputCount());
+
+		gate->AddInput("/a");
+		ASSERT_EQ(4, (int)gate->GetInputCount());
 		ASSERT_EQ(0, (int)gate->GetOutputCount());
 
 		ASSERT_NE(nullptr, gate->GetPin("a"));
@@ -67,8 +73,10 @@ namespace UnitTests
 		//Logger::WriteMessage("TestAddInput: Duplicate");
 		EXPECT_THROW(gate->AddInput("a"), std::invalid_argument);
 		EXPECT_THROW(gate->AddOutput("a"), std::invalid_argument);
+		EXPECT_THROW(gate->AddOutput("/a"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("/a"), std::invalid_argument);
 
-		ASSERT_EQ(3, (int)gate->GetInputCount());
+		ASSERT_EQ(4, (int)gate->GetInputCount());
 		ASSERT_EQ(0, (int)gate->GetOutputCount());
 
 		EXPECT_THROW(gate->AddInput("width", 0), std::out_of_range);
@@ -78,7 +86,7 @@ namespace UnitTests
 		ASSERT_NE(nullptr, gate->AddInput("width", 16));
 	}
 
-	TEST(TestCore, TestAddOutput)
+	TEST(TestCore, AddOutput)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 
@@ -103,14 +111,20 @@ namespace UnitTests
 		ASSERT_EQ(3, (int)gate->GetOutputCount());
 		ASSERT_EQ(0, (int)gate->GetInputCount());
 
+		gate->AddOutput("/a");
+		ASSERT_EQ(4, (int)gate->GetOutputCount());
+		ASSERT_EQ(0, (int)gate->GetInputCount());
+
 		ASSERT_NE(nullptr, gate->GetPin("a"));
 		ASSERT_NE(nullptr, gate->GetPin("a12345"));
 
 		//Logger::WriteMessage("TestAddOutput: Duplicate");
 		EXPECT_THROW(gate->AddOutput("a"), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("a"), std::invalid_argument);
+		EXPECT_THROW(gate->AddOutput("/a"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("/a"), std::invalid_argument);
 
-		ASSERT_EQ(3, (int)gate->GetOutputCount());
+		ASSERT_EQ(4, (int)gate->GetOutputCount());
 		ASSERT_EQ(0, (int)gate->GetInputCount());
 
 		EXPECT_THROW(gate->AddOutput("width", 0), std::out_of_range);
@@ -122,7 +136,7 @@ namespace UnitTests
 		ASSERT_NE(nullptr, gate->AddOutput("width", 16));
 	}
 
-	TEST(TestCore, TestGetPin)
+	TEST(TestCore, GetPin)
 	{
 		GatePtr gate = BasicGates::ANDGate::Create();
 
@@ -142,7 +156,7 @@ namespace UnitTests
 		ASSERT_EQ(gate->GetPin("out"), gate->GetPin("out"));
 	}
 
-	TEST(TestCore, TestConnectTo)
+	TEST(TestCore, ConnectTo)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 		gate->AddInput("in");
@@ -151,12 +165,9 @@ namespace UnitTests
 		CompositeGatePtr gate2 = CompositeGate::Create("test2");
 		gate2->AddInput("in");
 		gate2->AddOutput("out");
-
+		
 		//Logger::WriteMessage("TestConnectTo: Connect to nothing");
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(nullptr), std::invalid_argument);
-
-		//Logger::WriteMessage("TestConnectTo: Connect to self (out to in)");
-		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate->GetPin("in")), std::invalid_argument);
 
 		//Logger::WriteMessage("TestConnectTo: Connect to self (in to in)");
 		EXPECT_THROW(gate->GetPin("in")->ConnectTo(gate->GetPin("in")), std::invalid_argument);
@@ -167,25 +178,62 @@ namespace UnitTests
 		//Logger::WriteMessage("TestConnectTo: Connect to self (in to out)");
 		EXPECT_THROW(gate->GetPin("in")->ConnectTo(gate->GetPin("out")), std::invalid_argument);
 
-		//Logger::WriteMessage("TestConnectTo: Duplicate");
+		EXPECT_EQ(0, gate->GetConnectedToPins("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
+		EXPECT_EQ(0, gate2->GetConnectedFromPins("in").size());
+
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
+		EXPECT_EQ(1, gate->GetConnectedToPins("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
+		EXPECT_EQ(1, gate2->GetConnectedFromPins("in").size());
+
+		// Same link
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate2->GetPin("in")), std::invalid_argument);
+		EXPECT_EQ(1, gate->GetConnectedToPins("out").size());
+		EXPECT_EQ(0, gate->GetConnectedFromPins("out").size());
+		EXPECT_EQ(0, gate2->GetConnectedToPins("in").size());
+		EXPECT_EQ(1, gate2->GetConnectedFromPins("in").size());
 	}
 
-	TEST(TestCore, DISABLED_TestFeedback)
+	TEST(TestIOConnection, ConnectToEdgeCases)
 	{
-		GatePtr gate = BasicGates::NOTGate::Create();
-		GatePtr gate2 = BasicGates::NOTGate::Create();
-			
-		//Logger::WriteMessage("TestFeedback: gate->gate2->gate");
-		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
-		gate2->GetPin("out")->ConnectTo(gate->GetPin("in"));
+		CompositeGatePtr gate = CompositeGate::Create("gate");
 
-//			gate->GetPin("in")->Set(IOState::LOW);
-		FAIL();
+		gate->AddInput("in");
+		gate->AddInput("in2");
+		gate->AddInput("inBus", 8);
+		gate->AddInput("inBus2", 8);
+		gate->AddOutput("out");
+		gate->AddOutput("outBus", 8);
+		gate->AddInput("miniBus", 4);
+		gate->AddInput("miniBus2", 4);
+
+		gate->AddGate("buf", BasicGates::BufferGate::Create(8));
+
+		gate->FindPin("in")->ConnectTo(gate->FindPin("buf.in[0]"));
+		gate->FindPin("in")->ConnectTo(gate->FindPin("buf.in[1]"));
+		// Now connected: [11xxxxxx]"
+
+		// buf.in[0] is already connected
+		EXPECT_THROW(gate->FindPin("in2")->ConnectTo(gate->FindPin("buf.in[0]")), std::invalid_argument);
+		gate->FindPin("in2")->ConnectTo(gate->FindPin("buf.in[2]"));
+		// Now connected: [111xxxxx]"
+
+		// buf.in[0-2] already connected
+		EXPECT_THROW(gate->FindPin("inBus")->ConnectTo(gate->FindPin("buf.in")), std::invalid_argument);
+		gate->FindPin("miniBus")->ConnectTo(gate->FindPin("buf.in[4-7]"));
+
+		// Now connected [111x1111];
+		EXPECT_THROW(gate->FindPin("miniBus2")->ConnectTo(gate->FindPin("buf.in[4-7]")), std::invalid_argument);
+		gate->FindPin("miniBus2[0]")->ConnectTo(gate->FindPin("buf.in[3]"));
+
+		// Now connected [11111111];
+		EXPECT_THROW(gate->FindPin("inBus2")->ConnectTo(gate->FindPin("buf.in")), std::invalid_argument);
 	}
 
-	TEST(TestCore, TestSetName)
+	TEST(TestCore, SetName)
 	{
 		GatePtr notGate = BasicGates::NOTGate::Create();
 		ASSERT_STREQ("not", notGate->GetName().c_str());
@@ -204,7 +252,7 @@ namespace UnitTests
 		ASSERT_STREQ("a2345678901234567890123456789012", notGate->GetName().c_str());
 	}
 
-	TEST(TestCore, TestAddGate)
+	TEST(TestCore, AddGate)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 		GatePtr dummyGate = BasicGates::NOTGate::Create();
@@ -248,7 +296,7 @@ namespace UnitTests
 		EXPECT_THROW(gate->AddGate("not2", gate), std::invalid_argument);
 	}
 	
-	TEST(TestCore, TestGetGate)
+	TEST(TestCore, GetGate)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 		GatePtr notGate = BasicGates::NOTGate::Create();
@@ -269,7 +317,7 @@ namespace UnitTests
 		ASSERT_EQ(gate.get(), child->GetParent());
 	}
 
-	TEST(TestCore, TestComponentToTopLevel)
+	TEST(TestCore, ComponentToTopLevel)
 	{
 		//Logger::WriteMessage("TestComponentToTopLevel: Outside->Outside");
 		CompositeGatePtr gate = CompositeGate::Create("test");;
@@ -280,7 +328,7 @@ namespace UnitTests
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 	}
 
-	TEST(TestCore, TestInnerToComponent)
+	TEST(TestCore, InnerToComponent)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 		gate->AddInput("in");
@@ -351,7 +399,10 @@ namespace UnitTests
 		ASSERT_EQ(IOState::LOW, not7->GetPin("out")->Get());
 	}
 
-	TEST(TestCore, TestFullName)
+	//TODO: There could be some cases where ConnectTo validations won't work well,
+	//      Especially with pin subsets.  More tests should be added
+
+	TEST(TestCore, FullName)
 	{
 		GatePtr notGate = BasicGates::NOTGate::Create();
 
@@ -384,13 +435,13 @@ namespace UnitTests
 
 	void AssertEqualOutputs(GatePtr g1, GatePtr g2)
 	{
-		ASSERT_EQ(g1->GetPin("Y0")->Get(), g2->GetPin("Y0")->Get());
-		ASSERT_EQ(g1->GetPin("Y1")->Get(), g2->GetPin("Y1")->Get());
-		ASSERT_EQ(g1->GetPin("Y2")->Get(), g2->GetPin("Y2")->Get());
-		ASSERT_EQ(g1->GetPin("Y3")->Get(), g2->GetPin("Y3")->Get());
+		ASSERT_EQ(g1->GetPin("y0")->Get(), g2->GetPin("y0")->Get());
+		ASSERT_EQ(g1->GetPin("y1")->Get(), g2->GetPin("y1")->Get());
+		ASSERT_EQ(g1->GetPin("y2")->Get(), g2->GetPin("y2")->Get());
+		ASSERT_EQ(g1->GetPin("y3")->Get(), g2->GetPin("y3")->Get());
 	}
 
-	TEST(TestCore, TestClone)
+	TEST(TestCore, Clone)
 	{
 		CompositeGatePtr base = std::dynamic_pointer_cast<CompositeGate>(BuildDecoder());
 		GatePtr clonedBase = base->Clone("clone");
@@ -405,28 +456,54 @@ namespace UnitTests
 		ASSERT_EQ(base->GetGateCount(), cloned->GetGateCount());
 
 		// Compare behavior
-		base->GetPin("EN")->Set(IOState::LOW);
-		base->GetPin("I0")->Set(IOState::LOW);
-		base->GetPin("I1")->Set(IOState::LOW);
+		base->GetPin("en")->Set(IOState::LOW);
+		base->GetPin("i0")->Set(IOState::LOW);
+		base->GetPin("i1")->Set(IOState::LOW);
 
-		cloned->GetPin("EN")->Set(IOState::LOW);
-		cloned->GetPin("I0")->Set(IOState::LOW);
-		cloned->GetPin("I1")->Set(IOState::LOW);
-
-		AssertEqualOutputs(base, cloned);
-
-		base->GetPin("EN")->Set(IOState::HI);
-		cloned->GetPin("EN")->Set(IOState::HI);
+		cloned->GetPin("en")->Set(IOState::LOW);
+		cloned->GetPin("i0")->Set(IOState::LOW);
+		cloned->GetPin("i1")->Set(IOState::LOW);
 
 		AssertEqualOutputs(base, cloned);
 
-		base->GetPin("I0")->Set(IOState::HI);
-		cloned->GetPin("I0")->Set(IOState::HI);
+		base->GetPin("en")->Set(IOState::HI);
+		cloned->GetPin("en")->Set(IOState::HI);
+
+		AssertEqualOutputs(base, cloned);
+
+		base->GetPin("i0")->Set(IOState::HI);
+		cloned->GetPin("i0")->Set(IOState::HI);
 
 		AssertEqualOutputs(base, cloned);
 	}	
 
-	TEST(TestCore, TestHiZOutput)
+	TEST(TestCore, Clone2)
+	{
+		CompositeGatePtr comp = CompositeGate::Create("comp");
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<CompositeGate>(comp));
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<GateBase>(comp));
+
+		comp->AddGate("and", BasicGates::ANDGate::Create());
+		comp->AddGate("tflip", BasicGates::TFlipFlop::Create());
+
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::ANDGate>(comp->GetGate("and")));
+		CompositeGatePtr flip = std::dynamic_pointer_cast<CompositeGate>(comp->GetGate("tflip"));
+		EXPECT_NE(nullptr, flip);
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::TFlipFlop>(flip));
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::DFlipFlop>(flip->GetGate("dflip")));
+		
+		CompositeGatePtr clone = std::dynamic_pointer_cast<CompositeGate>(comp->Clone("clone"));
+		EXPECT_NE(nullptr, clone);
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<GateBase>(clone));
+
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::ANDGate>(clone->GetGate("and")));
+		CompositeGatePtr flipClone = std::dynamic_pointer_cast<CompositeGate>(clone->GetGate("tflip"));
+		EXPECT_NE(nullptr, flipClone);
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::TFlipFlop>(flipClone));
+		EXPECT_NE(nullptr, std::dynamic_pointer_cast<BasicGates::DFlipFlop>(flipClone->GetGate("dflip")));
+	}
+
+	TEST(TestCore, HiZOutput)
 	{
 		GatePtr b1 = BasicGates::BufferGate::Create();
 		GatePtr b2 = BasicGates::BufferGate::Create();
@@ -458,7 +535,7 @@ namespace UnitTests
 		ASSERT_EQ(IOState::UNDEF, wire->GetPin("out")->Get());
 	}
 
-	TEST(TestCore, TestNested)
+	TEST(TestCore, Nested)
 	{
 		GatePtr notGate = BasicGates::NOTGate::Create();
 
@@ -508,10 +585,12 @@ namespace UnitTests
 
 		EXPECT_THROW(not1->GetConnectedToPins((const char*)nullptr), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins(nullptr), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedToPins(IOPinPtr()), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins(""), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins("bad"), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPins(not2->GetPin("in")), std::invalid_argument);
-
+		EXPECT_THROW(not1->GetConnectedToPins(not1->GetConnectedToPins().size()), std::invalid_argument);
+		
 		EXPECT_EQ(0, not1->GetConnectedToPins("in").size());
 		EXPECT_EQ(0, not1->GetConnectedToPins(not1->GetPin("in")).size());
 
@@ -519,7 +598,7 @@ namespace UnitTests
 		EXPECT_EQ(1, not1->GetConnectedToPins(not1->GetPin("out")).size());
 	}
 	
-	TEST(TestLogicTools, GetConnectedFromPins)
+	TEST(TestCore, GetConnectedFromPins)
 	{
 		GatePtr not1 = BasicGates::NOTGate::Create();
 		GatePtr not2 = BasicGates::NOTGate::Create();
@@ -530,6 +609,7 @@ namespace UnitTests
 		EXPECT_THROW(not2->GetConnectedFromPins(""), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPins("bad"), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPins(not1->GetPin("in")), std::invalid_argument);
+		EXPECT_THROW(not1->GetConnectedFromPins(not1->GetConnectedFromPins().size()), std::invalid_argument);
 
 		EXPECT_EQ(1, not2->GetConnectedFromPins("in").size());
 		EXPECT_EQ(1, not2->GetConnectedFromPins(not2->GetPin("in")).size());
@@ -538,7 +618,7 @@ namespace UnitTests
 		EXPECT_EQ(0, not2->GetConnectedFromPins(not2->GetPin("out")).size());
 	}
 
-	TEST(TestLogicTools, GetConnectedFromToPins)
+	TEST(TestCore, GetConnectedFromToPins)
 	{
 		GatePtr not1 = BasicGates::NOTGate::Create();
 		GatePtr not2 = BasicGates::NOTGate::Create();
@@ -551,4 +631,159 @@ namespace UnitTests
 		EXPECT_EQ(2, not1->GetConnectedToPins().size());
 	}
 
+	TEST(TestCore, GateCount)
+	{
+		GatePtr gate = Build4BitAdder();
+		EXPECT_EQ(4, gate->GetGateCount(false));
+		EXPECT_EQ(52, gate->GetGateCount(true));
+
+		EXPECT_EQ(1, BasicGates::NOTGate::Create()->GetGateCount(false));
+		EXPECT_EQ(1, BasicGates::NOTGate::Create()->GetGateCount(true));
+	}
+
+	TEST(TestCore, FindPin)
+	{
+		GatePtr gate = BasicGates::ANDGate::Create(3);
+
+		//TEST_COUT << "Badly formed names";
+		EXPECT_THROW(gate->FindPin(nullptr), std::invalid_argument);
+		EXPECT_EQ(nullptr, gate->FindPin(""));
+		EXPECT_EQ(nullptr, gate->FindPin("a"));
+		EXPECT_EQ(nullptr, gate->FindPin(".a"));
+		EXPECT_EQ(nullptr, gate->FindPin(".in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in1."));
+		EXPECT_EQ(nullptr, gate->FindPin("in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin(" in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin("in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin("a.in1."));
+		EXPECT_EQ(nullptr, gate->FindPin("in1.a"));
+		EXPECT_EQ(nullptr, gate->FindPin("/in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in1/"));
+		EXPECT_EQ(nullptr, gate->FindPin("and"));
+		EXPECT_EQ(nullptr, gate->FindPin("AND."));
+		EXPECT_EQ(nullptr, gate->FindPin("AND.in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("and.IN1"));
+		EXPECT_EQ(nullptr, gate->FindPin("and.in"));
+		EXPECT_EQ(nullptr, gate->FindPin("and.iN1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in["));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[-1]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-1]"));
+		
+		IOPinPtr pin = gate->GetPin("in1");
+		EXPECT_NE(nullptr, pin);
+
+		//TEST_COUT << "Single pin in basic gate";
+		EXPECT_EQ(pin, gate->FindPin("in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("and.in1"));
+		EXPECT_NE(nullptr, gate->FindPin("in2"));
+		EXPECT_NE(pin, gate->FindPin("in2"));
+	}
+
+	TEST(TestCore, FindPin2)
+	{
+		//TEST_COUT << "Bus, pin index";
+		GatePtr gate = BasicGates::BufferGate::Create(8);
+
+		//TEST_COUT << "Badly formed indices";
+		EXPECT_EQ(nullptr, gate->FindPin("in["));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-2"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-2."));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[-1]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[1-2-]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-3-]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-.3]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2.3]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-3.]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-3]."));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2-3a]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[a2-3]"));
+		EXPECT_EQ(nullptr, gate->FindPin("in[2a-3]"));
+		EXPECT_THROW(gate->FindPin("in[2-1]"), std::out_of_range);
+		EXPECT_THROW(gate->FindPin("in[8]"), std::out_of_range);
+
+		//TEST_COUT << "Good indices";
+		EXPECT_EQ(8, gate->FindPin("in")->GetWidth());
+		EXPECT_EQ(1, gate->FindPin("in[0]")->GetWidth());
+		EXPECT_EQ(1, gate->FindPin("in[1]")->GetWidth());
+		EXPECT_EQ(1, gate->FindPin("in[7]")->GetWidth());
+		EXPECT_EQ(2, gate->FindPin("in[0-1]")->GetWidth());
+		EXPECT_EQ(2, gate->FindPin("in[2-3]")->GetWidth());
+		EXPECT_EQ(7, gate->FindPin("in[1-7]")->GetWidth());
+
+		EXPECT_NE(nullptr, gate->FindPin("en"));
+		EXPECT_NE(nullptr, gate->FindPin("en[0]"));
+		EXPECT_THROW(gate->FindPin("en[1]"), std::out_of_range);
+	}
+
+	TEST(TestCore, FindPin3)
+	{
+		// For compositegate objects
+
+		//TEST_COUT << "Multi-level";
+		CompositeGatePtr gate = std::dynamic_pointer_cast<CompositeGate>(Build74163Counter());
+		ASSERT_NE(nullptr, gate);
+		CompositeGatePtr d1 = std::dynamic_pointer_cast<CompositeGate>(gate->GetGate("d1"));
+		ASSERT_NE(nullptr, d1);
+		CompositeGatePtr d1d1 = std::dynamic_pointer_cast<CompositeGate>(d1->GetGate("d1"));
+		ASSERT_NE(nullptr, d1d1);
+		CompositeGatePtr d1d2 = std::dynamic_pointer_cast<CompositeGate>(d1->GetGate("d2"));
+		ASSERT_NE(nullptr, d1d2);
+
+		//TEST_COUT << "Level 0";
+		EXPECT_EQ(gate->FindPin("/ld").get(), gate->GetPin("/ld").get());
+		EXPECT_EQ(gate->FindPin("counter./ld"), nullptr);
+		EXPECT_EQ(gate->FindPin("counter.data[1]"), nullptr);
+
+		// Cannot compare pin subsets directly they are generated on demand
+		EXPECT_NE(nullptr, gate->FindPin("data[1]").get());
+
+		//TEST_COUT << "Level 1";
+		EXPECT_EQ(gate->FindPin("counter.not1.in"), nullptr);
+		EXPECT_EQ(gate->FindPin("not1.in").get(), gate->GetGate("not1")->GetPin("in").get());
+		EXPECT_EQ(gate->FindPin("counter.d1.q"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1.q").get(), d1->GetPin("q").get());
+		EXPECT_EQ(gate->FindPin("counter.d1./q"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1./q").get(), d1->GetPin("/q").get());
+
+		//TEST_COUT << "Level 2";
+		EXPECT_EQ(gate->FindPin("counter.d1.not2.in"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1.not2.in").get(), d1->GetGate("not2")->GetPin("in").get());
+		EXPECT_EQ(gate->FindPin("counter.d1.d1.q"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1.d1.q").get(), d1d1->GetPin("q").get());
+		EXPECT_EQ(gate->FindPin("counter.d1.d2./q"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1.d2./q").get(), d1d2->GetPin("/q").get());
+
+		//TEST_COUT << "Level 3";
+		EXPECT_EQ(gate->FindPin("counter.d1.d2.not.in"), nullptr);
+		EXPECT_EQ(gate->FindPin("d1.d2.not.in").get(), d1d2->GetGate("not")->GetPin("in").get());
+
+		//Bad cases
+		EXPECT_THROW(gate->FindPin(nullptr), std::invalid_argument);
+		EXPECT_EQ(nullptr, gate->FindPin(""));
+		EXPECT_EQ(nullptr, gate->FindPin("a"));
+		EXPECT_EQ(nullptr, gate->FindPin(".a"));
+		EXPECT_EQ(nullptr, gate->FindPin(".in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in1."));
+		EXPECT_EQ(nullptr, gate->FindPin("in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin(" in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin("in1 "));
+		EXPECT_EQ(nullptr, gate->FindPin("a.in1."));
+		EXPECT_EQ(nullptr, gate->FindPin("in1.a"));
+		EXPECT_EQ(nullptr, gate->FindPin("/in1"));
+		EXPECT_EQ(nullptr, gate->FindPin("in1/"));
+		EXPECT_EQ(nullptr, gate->FindPin("and"));
+		EXPECT_EQ(nullptr, gate->FindPin("AND."));
+		EXPECT_EQ(nullptr, gate->FindPin("d1."));
+		EXPECT_EQ(nullptr, gate->FindPin("d1.d2"));
+		EXPECT_EQ(nullptr, gate->FindPin(".d1.d2"));
+		EXPECT_EQ(nullptr, gate->FindPin("d1.[1]"));
+	}
 }

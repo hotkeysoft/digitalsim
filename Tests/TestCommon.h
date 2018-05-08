@@ -11,6 +11,9 @@ namespace UnitTests
 	using namespace DigiLib::Core;
 	
 	GatePtr BuildDecoder();
+	GatePtr BuildFullAdder();
+	GatePtr Build4BitAdder();
+	GatePtr Build74163Counter();
 }
 
 namespace testing

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "WireGate.h"
 
 namespace DigiLib {
@@ -6,7 +7,7 @@ namespace DigiLib {
 
 		using namespace DigiLib::Core;
 
-		WireGate::WireGate() noexcept : GateBase("wire")
+		WireGate::WireGate(size_t delay) noexcept : GateBase("wire", delay)
 		{
 		}
 
@@ -16,17 +17,17 @@ namespace DigiLib {
 			m_out = AddOutput("out");
 		}
 
-		Core::GatePtr WireGate::Create()
+		Core::GatePtr WireGate::Create(size_t delay)
 		{
-			auto ptr = std::make_shared<shared_enabler>();
+			auto ptr = std::make_shared<shared_enabler>(delay);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
 		}
 
-		Core::GatePtr WireGate::Clone(const char * name)
+		Core::GatePtr WireGate::Clone(const char * name, bool deep)
 		{
-			auto ptr = std::make_shared<shared_enabler>();
+			auto ptr = std::make_shared<shared_enabler>(this->m_delay);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
@@ -34,7 +35,15 @@ namespace DigiLib {
 
 		void WireGate::ComputeState()
 		{
-			m_out->Set(m_in->Get());
+			IOState newState = m_in->Get();
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEventRelative({ newState, m_out }, m_delay);
+			}
 		}
 
 		struct WireGate::shared_enabler : public WireGate

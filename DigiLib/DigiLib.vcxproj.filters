@@ -93,6 +93,9 @@
     <ClInclude Include="BasicGates\JKFlipFlop.h">
       <Filter>BasicGates</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Simulator.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="BasicGates\JKFlipFlop.cpp">
       <Filter>BasicGates</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Simulator.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

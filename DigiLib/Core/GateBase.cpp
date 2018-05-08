@@ -6,6 +6,10 @@
 #include <regex>
 #include <memory>
 
+#define PIN_NAME_REGEX "(\\/?[A-Za-z](?:\\w){0,31})"
+#define PIN_RANGE_REGEX "(?:\\[(\\d+)(?:-(\\d+))?\\])?"
+#define GATE_NAME_REGEX "([A-Za-z](?:\\w){0,31})"
+
 namespace DigiLib
 {
 	namespace Core
@@ -14,7 +18,7 @@ namespace DigiLib
 		AllowedConnectionMapType GateBase::m_insideParentMap;
 		AllowedConnectionMapType GateBase::m_parentInsideMap;
 
-		GateBase::GateBase(const char* name) : m_name(name), m_parent(NULL), m_ioPinCount(0)
+		GateBase::GateBase(const char* name, size_t delay) : m_name(name), m_parent(NULL), m_ioPinCount(0), m_mode(ASYNC), m_simulator(nullptr), m_delay(delay)
 		{
 			m_ioPins.reserve(MAX_PINS * 2);
 			m_connectedFromPins.reserve(MAX_PINS);
@@ -26,6 +30,30 @@ namespace DigiLib
 		{
 			ValidateGateName(name);
 			this->m_name = name;
+		}
+
+		void GateBase::SetMode(Mode mode, SimulatorRef simulator)
+		{
+			if (mode == SYNC)
+			{
+				if (simulator == nullptr)
+					throw std::invalid_argument("simulator not set");
+				if (this->m_simulator != nullptr)
+					throw std::invalid_argument("simulator already set");
+				if (this->m_parent == nullptr || this->m_parent->GetMode() != SYNC)
+					throw std::invalid_argument("gate should be child of simulator");
+				this->m_mode = mode;
+				this->m_simulator = simulator;
+			}
+			else
+			{
+				if (simulator != nullptr)
+					throw std::invalid_argument("simulator shouldn't be set");
+				if (this->m_parent != nullptr && this->m_parent->GetMode() == SYNC)
+					throw std::invalid_argument("parent and child should have same mode");
+				this->m_mode = mode;
+				this->m_simulator = nullptr;
+			}
 		}
 
 		std::string GateBase::GetFullName()
@@ -114,7 +142,6 @@ namespace DigiLib
 					throw std::out_of_range("invalid pin index");
 				}
 
-				//IOPinSubset* subset = new IOPinSubset();
 				IOPinPtr subset = std::make_shared<IOPinSubset>(ioPin.get(), offset);
 				
 				return subset;
@@ -241,16 +268,52 @@ namespace DigiLib
 			}
 		}
 
-		void GateBase::ConnectPins(IOPinPtr source, IOPinPtr target)
+		IOPinPtr GateBase::FindPin(const char * name)
+		{
+			static std::regex pinRegex("^" PIN_NAME_REGEX PIN_RANGE_REGEX "$");		
+
+			if (name == nullptr)
+			{
+				throw std::invalid_argument("name cannot be null");
+			}
+
+			std::cmatch base_match;
+			if (std::regex_match(name, base_match, pinRegex))
+			{
+				// Pin name
+				std::csub_match base_sub_match = base_match[1];
+				if (!base_sub_match.matched)
+				{
+					return nullptr;
+				}
+				std::string pinName = base_sub_match;
+
+				base_sub_match = base_match[2];
+				if (!base_sub_match.matched)
+				{
+					return GetPin(pinName.c_str());
+				}
+
+				size_t pinLow = atoi(base_sub_match.str().c_str());
+				size_t pinHi = pinLow;
+
+				base_sub_match = base_match[3];
+				if (base_sub_match.matched)
+				{
+					pinHi = atoi(base_sub_match.str().c_str());
+				}
+
+				return GetPin(pinName.c_str(), pinLow, pinHi);
+			}
+
+			return IOPinPtr();
+		}
+
+		bool GateBase::ConnectPins(IOPinPtr source, IOPinPtr target, bool inverted)
 		{
 			if (source == NULL || target == NULL)
 			{
 				throw std::invalid_argument("source or target is null");
-			}
-
-			if (target->GetParent() == this)
-			{
-				throw std::invalid_argument("cannot connect to self");
 			}
 
 			if (source->GetWidth() != target->GetWidth())
@@ -277,16 +340,42 @@ namespace DigiLib
 				throw std::invalid_argument("Not allowed by connection rules");
 			}
 
-			const IOConnection connection(source, target);
-			auto& connectedPins = m_connectedToPins[source->GetID()];
-			auto found = connectedPins.find(connection);
-			if (found != connectedPins.end())
+			const IOConnection connection(source, target, inverted);
+
+			if (CanConnectToTarget(connection))
 			{
-				throw std::invalid_argument("Connection already exists");
+				m_connectedToPins[source->GetID()].insert(connection);
+				target->GetParent()->m_connectedFromPins[target->GetID()].insert(connection);
+				return true;
 			}
 
-			m_connectedToPins[source->GetID()].insert(connection);
-			target->GetParent()->m_connectedFromPins[target->GetID()].insert(connection);
+			return false;
+		}
+
+		bool GateBase::CanConnectToTarget(const IOConnection & link)
+		{
+			if (link.GetSource()->GetDirection() == IOPin::OUTPUT_HI_Z)
+			{
+				// TODO: May need to be more subtle...
+				return true;
+			}
+
+			// Build target connections mask
+			IOPinPtr target = link.GetTarget();
+			GateRef targetGate = target->GetParent();
+
+			IOState mask = IOState(IOState::UNDEF, target->GetMask().GetWidth());
+			for (const auto & t : targetGate->GetConnectedFromPins(target))
+			{
+				mask = mask | t.GetTarget()->GetMask();
+			}
+			
+			if (target->Overlaps(mask))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		void GateBase::InitAllowedConnectionMaps()
@@ -340,12 +429,14 @@ namespace DigiLib
 
 		bool GateBase::IsValidPinName(const char* name)
 		{
+			static std::regex pinNameRegex(PIN_NAME_REGEX);
+
 			if (name == NULL)
 			{
 				return false;
 			}
 
-			if (!std::regex_match(name, std::regex("^[A-Za-z](\\w){0,31}$")))
+			if (!std::regex_match(name, pinNameRegex))
 			{
 				return false;
 			}
@@ -381,12 +472,14 @@ namespace DigiLib
 
 		bool GateBase::IsValidGateName(const char* name)
 		{
+			static std::regex gateNameRegex(GATE_NAME_REGEX);
+
 			if (name == NULL)
 			{
 				return false;
 			}
 
-			if (!std::regex_match(name, std::regex("^[A-Za-z](\\w){0,31}$")))
+			if (!std::regex_match(name, gateNameRegex))
 			{
 				return false;
 			}

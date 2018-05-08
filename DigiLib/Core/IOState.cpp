@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "IOState.h"
 #include <algorithm>
+#include <functional>
+#include <random>
 
 namespace DigiLib
 {
@@ -41,6 +43,41 @@ namespace DigiLib
 		{
 			Set(state);
 			return *this;
+		}
+
+		IOState IOState::operator!() const
+		{
+			IOState out(UNDEF, this->m_width);
+
+			for (size_t i = 0; i < m_width; ++i)
+			{
+				if (m_states[i] == LOW)
+				{
+					out[i] = HI;
+				}
+				else if (m_states[i] == HI)
+				{
+					out[i] = LOW;
+				}
+			}
+			return out;
+		}
+
+		IOState IOState::operator|(const IOState & rhs) const
+		{
+			IOState out = *this;
+
+			for (size_t i = 0; i < std::min(rhs.GetWidth(), GetWidth()); ++i)
+			{
+				switch (rhs[i])
+				{
+				case IOState::LOW:
+				case IOState::HI:
+				case IOState::HI_Z:
+					out[i] = rhs[i];
+				}
+			}
+			return out;
 		}
 
 		bool IOState::operator==(const IOState & rhs) const
@@ -165,6 +202,27 @@ namespace DigiLib
 			return ret;
 		}
 
+		IOState IOState::Random(size_t bitCount)
+		{
+			if (bitCount < 0 || bitCount > MAX_PINS)
+			{
+				throw std::out_of_range("invalid size");
+			}
+
+			static std::random_device rd;
+			static std::default_random_engine gen(rd());
+			static std::uniform_int_distribution<size_t> distribution(0, 1);
+
+			IOState ret(IOState::LOW, bitCount);
+
+			for (int i = 0; i < bitCount; ++i)
+			{
+				bool b = distribution(gen);
+				ret[i] = b ? IOState::HI : IOState::LOW;
+			}
+			return ret;
+		}
+
 		IOState::IO_STATE IOState::Get(size_t pin) const
 		{
 			if (pin < 0 || pin >= m_width)
@@ -225,6 +283,16 @@ namespace DigiLib
 			}
 
 			m_states[0] = state;
+		}
+
+		IOState::IO_STATE IOState::operator[](size_t pin) const
+		{
+			if (pin < 0 || pin >= m_width)
+			{
+				throw std::out_of_range("invalid pin");
+			}
+
+			return m_states[pin];
 		}
 
 		IOState::IO_STATE & IOState::operator[](size_t pin)

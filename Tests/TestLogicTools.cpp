@@ -45,4 +45,9 @@ namespace UnitTests
 		Tools::LogicTools::PrintPinInfo(BuildDecoder());
 		Tools::LogicTools::PrintPinInfo(BasicGates::BufferGate::Create(4));
 	}
+
+	TEST(TestLogicTools, PrintInternalStates)
+	{
+		Tools::LogicTools::PrintInternalStates(BuildDecoder());
+	}
 }

@@ -19,6 +19,15 @@
     <ClCompile Include="TestLogicTools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestSimulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestIOConnection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestIOPin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestCommon.h">

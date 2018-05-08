@@ -29,9 +29,10 @@ namespace DigiLib
 			IOPinPtr Clone(GateRef cloneParent) override;
 
 			std::string GetName() override;
-
 			IOPinRef GetParent() noexcept { return m_parentPin; }
-
+			IOState GetMask() noexcept override;
+			bool Overlaps(IOState) override;
+			
 			IOState Get() noexcept override;
 			void Set(IOState state) override;
 

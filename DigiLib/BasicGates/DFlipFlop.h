@@ -17,20 +17,16 @@ namespace DigiLib {
 		class DllExport DFlipFlop : public Core::CompositeGate
 		{
 		public:
-			static Core::GatePtr Create();
-
-			Core::GatePtr Clone(const char* name) override;
-
-			void ComputeState() override;
+			static Core::GatePtr Create(bool positiveTriggered = true);
+			Core::GatePtr Clone(const char * name, bool deep = true) override;
 
 		protected:
-			DFlipFlop() noexcept;
+			DFlipFlop(bool positiveTriggered = true) noexcept;
 			void Init() override;
 
-			Core::GatePtr m_nor1;
-			Core::GatePtr m_nor2;
-
 			struct shared_enabler;
+
+			bool m_positiveTriggered;
 		};
 	}
 }

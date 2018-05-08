@@ -176,6 +176,7 @@
     <ClInclude Include="Core\IOPin.h" />
     <ClInclude Include="Core\IOPinSubset.h" />
     <ClInclude Include="Core\IOState.h" />
+    <ClInclude Include="Core\Simulator.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tools\LogicTools.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Core\IOPin.cpp" />
     <ClCompile Include="Core\IOPinSubset.cpp" />
     <ClCompile Include="Core\IOState.cpp" />
+    <ClCompile Include="Core\Simulator.cpp" />
     <ClCompile Include="DigiLib.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp">

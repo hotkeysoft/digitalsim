@@ -8,6 +8,7 @@
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\NANDGate.h"
 #include "BasicGates\ORGate.h"
+#include "BasicGates\NORGate.h"
 #include "BasicGates\XORGate.h"
 #include "BasicGates\WireGate.h"
 #include "BasicGates\BufferGate.h"
@@ -21,6 +22,160 @@
 namespace UnitTests
 {
 	using namespace DigiLib::Core;
+
+	GatePtr Build74163Counter()
+	{
+		CompositeGatePtr component = CompositeGate::Create("counter");
+		component->AddInput("/ld");
+		component->AddInput("/clr");
+		component->AddInput("clk");
+		component->AddInput("enp");
+		component->AddInput("ent");
+		component->AddInput("data", 4);
+
+		component->AddOutput("q", 4);
+		component->AddOutput("rco");
+		
+		component->AddGate("not1", BasicGates::NOTGate::Create());
+		component->AddGate("not2", BasicGates::NOTGate::Create());
+		component->AddGate("not4", BasicGates::NOTGate::Create());
+
+		component->AddGate("a1", BasicGates::ANDGate::Create());
+		component->AddGate("a2", BasicGates::ANDGate::Create(3));
+		component->AddGate("a3", BasicGates::ANDGate::Create());
+		component->AddGate("a4", BasicGates::ANDGate::Create());
+		component->AddGate("a5", BasicGates::ANDGate::Create());
+		component->AddGate("a6", BasicGates::ANDGate::Create());
+		component->AddGate("a7", BasicGates::ANDGate::Create());
+		component->AddGate("a8", BasicGates::ANDGate::Create());
+		component->AddGate("a9", BasicGates::ANDGate::Create(5));
+		component->AddGate("a10", BasicGates::ANDGate::Create());
+		component->AddGate("a11", BasicGates::ANDGate::Create());
+		component->AddGate("a12", BasicGates::ANDGate::Create());
+		component->AddGate("a13", BasicGates::ANDGate::Create());
+		component->AddGate("a14", BasicGates::ANDGate::Create());
+		component->AddGate("a15", BasicGates::ANDGate::Create());
+		component->AddGate("a16", BasicGates::ANDGate::Create());
+		component->AddGate("a17", BasicGates::ANDGate::Create());
+
+		component->AddGate("o1", BasicGates::ORGate::Create());
+		component->AddGate("o2", BasicGates::ORGate::Create());
+		component->AddGate("o3", BasicGates::ORGate::Create());
+		component->AddGate("o4", BasicGates::ORGate::Create());
+
+		component->AddGate("x1", BasicGates::XORGate::Create());
+		component->AddGate("x2", BasicGates::XORGate::Create());
+		component->AddGate("x3", BasicGates::XORGate::Create());
+		component->AddGate("x4", BasicGates::XORGate::Create());
+
+		component->AddGate("d1", BasicGates::DFlipFlop::Create(false));
+		component->AddGate("d2", BasicGates::DFlipFlop::Create(false));
+		component->AddGate("d3", BasicGates::DFlipFlop::Create(false));
+		component->AddGate("d4", BasicGates::DFlipFlop::Create(false));
+		
+		// Clock
+		component->GetPin("clk")->ConnectTo(component->GetGate("not1")->GetPin("in"));
+		component->GetGate("not1")->GetPin("out")->ConnectTo(component->GetGate("d1")->GetPin("clk"));
+		component->GetGate("not1")->GetPin("out")->ConnectTo(component->GetGate("d2")->GetPin("clk"));
+		component->GetGate("not1")->GetPin("out")->ConnectTo(component->GetGate("d3")->GetPin("clk"));
+		component->GetGate("not1")->GetPin("out")->ConnectTo(component->GetGate("d4")->GetPin("clk"));
+
+		// Out
+		component->GetGate("d1")->GetPin("q")->ConnectTo(component->GetPin("q", 0));
+		component->GetGate("d2")->GetPin("q")->ConnectTo(component->GetPin("q", 1));
+		component->GetGate("d3")->GetPin("q")->ConnectTo(component->GetPin("q", 2));
+		component->GetGate("d4")->GetPin("q")->ConnectTo(component->GetPin("q", 3));
+
+		// LD
+		component->GetPin("/ld")->ConnectTo(component->GetGate("a7")->GetPin("in1"), true);
+
+		// CLR
+		component->GetPin("/clr")->ConnectTo(component->GetGate("not2")->GetPin("in"));
+		component->GetGate("not2")->GetPin("out")->ConnectTo(component->GetGate("a7")->GetPin("in2"), true);
+		component->GetGate("not2")->GetPin("out")->ConnectTo(component->GetGate("a8")->GetPin("in2"), true);
+		component->GetGate("a7")->GetPin("out")->ConnectTo(component->GetGate("a8")->GetPin("in1"), true);
+		component->GetGate("a7")->GetPin("out")->ConnectTo(component->GetGate("a10")->GetPin("in1"));
+		component->GetGate("a7")->GetPin("out")->ConnectTo(component->GetGate("a12")->GetPin("in1"));
+		component->GetGate("a7")->GetPin("out")->ConnectTo(component->GetGate("a14")->GetPin("in1"));
+		component->GetGate("a7")->GetPin("out")->ConnectTo(component->GetGate("a16")->GetPin("in1"));
+		component->GetGate("a8")->GetPin("out")->ConnectTo(component->GetGate("a11")->GetPin("in1"));
+		component->GetGate("a8")->GetPin("out")->ConnectTo(component->GetGate("a13")->GetPin("in1"));
+		component->GetGate("a8")->GetPin("out")->ConnectTo(component->GetGate("a15")->GetPin("in1"));
+		component->GetGate("a8")->GetPin("out")->ConnectTo(component->GetGate("a17")->GetPin("in1"));
+
+		// DATA
+		component->GetPin("data", 0)->ConnectTo(component->GetGate("a10")->GetPin("in2"));
+		component->GetPin("data", 1)->ConnectTo(component->GetGate("a12")->GetPin("in2"));
+		component->GetPin("data", 2)->ConnectTo(component->GetGate("a14")->GetPin("in2"));
+		component->GetPin("data", 3)->ConnectTo(component->GetGate("a16")->GetPin("in2"));
+
+		// flip-D
+		component->GetGate("a10")->GetPin("out")->ConnectTo(component->GetGate("o1")->GetPin("in1"));
+		component->GetGate("a12")->GetPin("out")->ConnectTo(component->GetGate("o2")->GetPin("in1"));
+		component->GetGate("a14")->GetPin("out")->ConnectTo(component->GetGate("o3")->GetPin("in1"));
+		component->GetGate("a16")->GetPin("out")->ConnectTo(component->GetGate("o4")->GetPin("in1"));
+
+		component->GetGate("a11")->GetPin("out")->ConnectTo(component->GetGate("o1")->GetPin("in2"));
+		component->GetGate("a13")->GetPin("out")->ConnectTo(component->GetGate("o2")->GetPin("in2"));
+		component->GetGate("a15")->GetPin("out")->ConnectTo(component->GetGate("o3")->GetPin("in2"));
+		component->GetGate("a17")->GetPin("out")->ConnectTo(component->GetGate("o4")->GetPin("in2"));
+
+		component->GetGate("o1")->GetPin("out")->ConnectTo(component->GetGate("d1")->GetPin("d"));
+		component->GetGate("o2")->GetPin("out")->ConnectTo(component->GetGate("d2")->GetPin("d"));
+		component->GetGate("o3")->GetPin("out")->ConnectTo(component->GetGate("d3")->GetPin("d"));
+		component->GetGate("o4")->GetPin("out")->ConnectTo(component->GetGate("d4")->GetPin("d"));
+
+		// ENP ENT
+		component->GetPin("enp")->ConnectTo(component->GetGate("a3")->GetPin("in1"));
+		component->GetPin("ent")->ConnectTo(component->GetGate("a3")->GetPin("in2"));
+		component->GetPin("ent")->ConnectTo(component->GetGate("not4")->GetPin("in"));
+		component->GetGate("not4")->GetPin("out")->ConnectTo(component->GetGate("a9")->GetPin("in5"), true);
+		
+		component->GetGate("a3")->GetPin("out")->ConnectTo(component->GetGate("x1")->GetPin("in1"));
+		component->GetGate("a3")->GetPin("out")->ConnectTo(component->GetGate("a4")->GetPin("in2"));
+		component->GetGate("a3")->GetPin("out")->ConnectTo(component->GetGate("a5")->GetPin("in2"));
+		component->GetGate("a3")->GetPin("out")->ConnectTo(component->GetGate("a6")->GetPin("in2"));
+
+		// notq1
+		component->GetGate("d1")->GetPin("/q")->ConnectTo(component->GetGate("x1")->GetPin("in2"), true);
+		component->GetGate("d1")->GetPin("/q")->ConnectTo(component->GetGate("a4")->GetPin("in1"), true);
+		component->GetGate("d1")->GetPin("/q")->ConnectTo(component->GetGate("a1")->GetPin("in2"), true);
+		component->GetGate("d1")->GetPin("/q")->ConnectTo(component->GetGate("a2")->GetPin("in3"), true);
+		component->GetGate("d1")->GetPin("/q")->ConnectTo(component->GetGate("a9")->GetPin("in4"), true);
+
+		// notq2
+		component->GetGate("d2")->GetPin("/q")->ConnectTo(component->GetGate("x2")->GetPin("in2"), true);
+		component->GetGate("d2")->GetPin("/q")->ConnectTo(component->GetGate("a1")->GetPin("in1"), true);
+		component->GetGate("d2")->GetPin("/q")->ConnectTo(component->GetGate("a2")->GetPin("in2"), true);
+		component->GetGate("d2")->GetPin("/q")->ConnectTo(component->GetGate("a9")->GetPin("in3"), true);
+
+		// notq3
+		component->GetGate("d3")->GetPin("/q")->ConnectTo(component->GetGate("x3")->GetPin("in2"), true);
+		component->GetGate("d3")->GetPin("/q")->ConnectTo(component->GetGate("a2")->GetPin("in1"), true);
+		component->GetGate("d3")->GetPin("/q")->ConnectTo(component->GetGate("a9")->GetPin("in2"), true);
+
+		// notq4
+		component->GetGate("d4")->GetPin("/q")->ConnectTo(component->GetGate("x4")->GetPin("in2"), true);
+		component->GetGate("d4")->GetPin("/q")->ConnectTo(component->GetGate("a9")->GetPin("in1"), true);
+
+		// misc
+		component->GetGate("a1")->GetPin("out")->ConnectTo(component->GetGate("a5")->GetPin("in1"));
+		component->GetGate("a4")->GetPin("out")->ConnectTo(component->GetGate("x2")->GetPin("in1"));
+		component->GetGate("a5")->GetPin("out")->ConnectTo(component->GetGate("x3")->GetPin("in1"));
+		component->GetGate("a2")->GetPin("out")->ConnectTo(component->GetGate("a6")->GetPin("in1"));
+		component->GetGate("a6")->GetPin("out")->ConnectTo(component->GetGate("x4")->GetPin("in1"));
+
+		// xor
+		component->GetGate("x1")->GetPin("out")->ConnectTo(component->GetGate("a11")->GetPin("in2"));
+		component->GetGate("x2")->GetPin("out")->ConnectTo(component->GetGate("a13")->GetPin("in2"));
+		component->GetGate("x3")->GetPin("out")->ConnectTo(component->GetGate("a15")->GetPin("in2"));
+		component->GetGate("x4")->GetPin("out")->ConnectTo(component->GetGate("a17")->GetPin("in2"));
+
+		// RCO
+		component->GetGate("a9")->GetPin("out")->ConnectTo(component->GetPin("rco"));
+
+		return component;
+	}
 
 	GatePtr BuildFullAdder()
 	{
@@ -112,73 +267,81 @@ namespace UnitTests
 	GatePtr BuildDecoder()
 	{
 		CompositeGatePtr component = CompositeGate::Create("DECODER");
-		component->AddInput("EN");
-		component->AddInput("I0");
-		component->AddInput("I1");
-		component->AddOutput("Y0");
-		component->AddOutput("Y1");
-		component->AddOutput("Y2");
-		component->AddOutput("Y3");
+		component->AddInput("en");
+		component->AddInput("i0");
+		component->AddInput("i1");
+		component->AddOutput("y0");
+		component->AddOutput("y1");
+		component->AddOutput("y2");
+		component->AddOutput("y3");
 
-		component->AddGate("NOTI0", BasicGates::NOTGate::Create());
-		component->AddGate("NOTI1", BasicGates::NOTGate::Create());
-		component->AddGate("AND0", BasicGates::ANDGate::Create(3));
-		component->AddGate("AND1", BasicGates::ANDGate::Create(3));
-		component->AddGate("AND2", BasicGates::ANDGate::Create(3));
-		component->AddGate("AND3", BasicGates::ANDGate::Create(3));
+		component->AddGate("noti0", BasicGates::NOTGate::Create());
+		component->AddGate("noti1", BasicGates::NOTGate::Create());
+		component->AddGate("and0", BasicGates::ANDGate::Create(3));
+		component->AddGate("and1", BasicGates::ANDGate::Create(3));
+		component->AddGate("and2", BasicGates::ANDGate::Create(3));
+		component->AddGate("and3", BasicGates::ANDGate::Create(3));
 
-		component->GetGate("AND0")->GetPin("out")->ConnectTo(component->GetPin("Y0"));
-		component->GetGate("AND1")->GetPin("out")->ConnectTo(component->GetPin("Y1"));
-		component->GetGate("AND2")->GetPin("out")->ConnectTo(component->GetPin("Y2"));
-		component->GetGate("AND3")->GetPin("out")->ConnectTo(component->GetPin("Y3"));
+		component->GetGate("and0")->GetPin("out")->ConnectTo(component->GetPin("y0"));
+		component->GetGate("and1")->GetPin("out")->ConnectTo(component->GetPin("y1"));
+		component->GetGate("and2")->GetPin("out")->ConnectTo(component->GetPin("y2"));
+		component->GetGate("and3")->GetPin("out")->ConnectTo(component->GetPin("y3"));
 
-		component->GetPin("EN")->ConnectTo(component->GetGate("AND0")->GetPin("in3"));
-		component->GetPin("EN")->ConnectTo(component->GetGate("AND1")->GetPin("in3"));
-		component->GetPin("EN")->ConnectTo(component->GetGate("AND2")->GetPin("in3"));
-		component->GetPin("EN")->ConnectTo(component->GetGate("AND3")->GetPin("in3"));
+		component->GetPin("en")->ConnectTo(component->GetGate("and0")->GetPin("in3"));
+		component->GetPin("en")->ConnectTo(component->GetGate("and1")->GetPin("in3"));
+		component->GetPin("en")->ConnectTo(component->GetGate("and2")->GetPin("in3"));
+		component->GetPin("en")->ConnectTo(component->GetGate("and3")->GetPin("in3"));
 
-		component->GetPin("I0")->ConnectTo(component->GetGate("NOTI0")->GetPin("in"));
-		component->GetPin("I0")->ConnectTo(component->GetGate("AND1")->GetPin("in1"));
-		component->GetPin("I0")->ConnectTo(component->GetGate("AND3")->GetPin("in1"));
+		component->GetPin("i0")->ConnectTo(component->GetGate("noti0")->GetPin("in"));
+		component->GetPin("i0")->ConnectTo(component->GetGate("and1")->GetPin("in1"));
+		component->GetPin("i0")->ConnectTo(component->GetGate("and3")->GetPin("in1"));
 
-		component->GetPin("I1")->ConnectTo(component->GetGate("NOTI1")->GetPin("in"));
-		component->GetPin("I1")->ConnectTo(component->GetGate("AND2")->GetPin("in2"));
-		component->GetPin("I1")->ConnectTo(component->GetGate("AND3")->GetPin("in2"));
+		component->GetPin("i1")->ConnectTo(component->GetGate("noti1")->GetPin("in"));
+		component->GetPin("i1")->ConnectTo(component->GetGate("and2")->GetPin("in2"));
+		component->GetPin("i1")->ConnectTo(component->GetGate("and3")->GetPin("in2"));
 
-		component->GetGate("NOTI0")->GetPin("out")->ConnectTo(component->GetGate("AND0")->GetPin("in1"));
-		component->GetGate("NOTI0")->GetPin("out")->ConnectTo(component->GetGate("AND2")->GetPin("in1"));
+		component->GetGate("noti0")->GetPin("out")->ConnectTo(component->GetGate("and0")->GetPin("in1"));
+		component->GetGate("noti0")->GetPin("out")->ConnectTo(component->GetGate("and2")->GetPin("in1"));
 
-		component->GetGate("NOTI1")->GetPin("out")->ConnectTo(component->GetGate("AND0")->GetPin("in2"));
-		component->GetGate("NOTI1")->GetPin("out")->ConnectTo(component->GetGate("AND1")->GetPin("in2"));
+		component->GetGate("noti1")->GetPin("out")->ConnectTo(component->GetGate("and0")->GetPin("in2"));
+		component->GetGate("noti1")->GetPin("out")->ConnectTo(component->GetGate("and1")->GetPin("in2"));
 
 		return component;
 	}
 
-	TEST(TestGates, TestNOTGate)
+	TEST(TestGates, NOTGate)
 	{
 		GatePtr gate = BasicGates::NOTGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::LOW });
-		ASSERT_EQ(compare, out);
+
+		EXPECT_EQ(compare, out);
+
+		gate->GetPin("in")->Set(IOState::UNDEF);
+		EXPECT_EQ(IOState::UNDEF, gate->GetPin("out")->Get().Get());
 	}
 
-	TEST(TestGates, TestWireGate)
+	TEST(TestGates, WireGate)
 	{
 		GatePtr gate = BasicGates::WireGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI });
-		ASSERT_EQ(compare, out);
+
+		EXPECT_EQ(compare, out);
+
+		gate->GetPin("in")->Set(IOState::UNDEF);
+		EXPECT_EQ(IOState::UNDEF, gate->GetPin("out")->Get().Get());
 	}
 
-	TEST(TestGates, TestANDGate)
+	TEST(TestGates, ANDGate)
 	{
 		GatePtr gate = BasicGates::ANDGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI });
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestANDGate4)
+	TEST(TestGates, ANDGate4)
 	{
 		GatePtr gate = BasicGates::ANDGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
@@ -188,18 +351,18 @@ namespace UnitTests
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
 		});
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestORGate)
+	TEST(TestGates, ORGate)
 	{
 		GatePtr gate = BasicGates::ORGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::HI });
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestORGate4)
+	TEST(TestGates, ORGate4)
 	{
 		GatePtr gate = BasicGates::ORGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
@@ -209,26 +372,26 @@ namespace UnitTests
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 		};
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestXORGate)
+	TEST(TestGates, XORGate)
 	{
 		GatePtr gate = BasicGates::XORGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::LOW });
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestNANDGate)
+	TEST(TestGates, NANDGate)
 	{
 		GatePtr gate = BasicGates::NANDGate::Create();
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
 		Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::HI, IOState::HI, IOState::LOW });
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestNANDGate4)
+	TEST(TestGates, NANDGate4)
 	{
 		GatePtr gate = BasicGates::NANDGate::Create(4);
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
@@ -238,10 +401,10 @@ namespace UnitTests
 			IOState::HI, IOState::HI, IOState::HI, IOState::HI,
 			IOState::HI, IOState::HI, IOState::HI, IOState::LOW,
 		});
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestCustomDecoder)
+	TEST(TestGates, CustomDecoder)
 	{
 		GatePtr component = BuildDecoder();
 		
@@ -258,10 +421,10 @@ namespace UnitTests
 			IOState::LOW, IOState::HI, IOState::LOW, IOState::LOW,
 			IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
 		};
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestCustomComplexComponent)
+	TEST(TestGates, CustomComplexComponent)
 	{
 		GatePtr decoder1 = BuildDecoder();
 		ASSERT_NE(nullptr, decoder1);
@@ -272,38 +435,38 @@ namespace UnitTests
 		GatePtr notI1 = BasicGates::NOTGate::Create();
 
 		CompositeGatePtr decoder3to8 = CompositeGate::Create("Decoder3to8");
-		decoder3to8->AddInput("I0");
-		decoder3to8->AddInput("I1");
-		decoder3to8->AddInput("I2");
-		decoder3to8->AddOutput("Y0");
-		decoder3to8->AddOutput("Y1");
-		decoder3to8->AddOutput("Y2");
-		decoder3to8->AddOutput("Y3");
-		decoder3to8->AddOutput("Y4");
-		decoder3to8->AddOutput("Y5");
-		decoder3to8->AddOutput("Y6");
-		decoder3to8->AddOutput("Y7");
+		decoder3to8->AddInput("i0");
+		decoder3to8->AddInput("i1");
+		decoder3to8->AddInput("i2");
+		decoder3to8->AddOutput("y0");
+		decoder3to8->AddOutput("y1");
+		decoder3to8->AddOutput("y2");
+		decoder3to8->AddOutput("y3");
+		decoder3to8->AddOutput("y4");
+		decoder3to8->AddOutput("y5");
+		decoder3to8->AddOutput("y6");
+		decoder3to8->AddOutput("y7");
 
 		decoder3to8->AddGate("dec1", decoder1);
 		decoder3to8->AddGate("dec2", decoder2);
 		decoder3to8->AddGate("notI1", notI1);
 
-		decoder1->GetPin("Y0")->ConnectTo(decoder3to8->GetPin("Y0"));
-		decoder1->GetPin("Y1")->ConnectTo(decoder3to8->GetPin("Y1"));
-		decoder1->GetPin("Y2")->ConnectTo(decoder3to8->GetPin("Y2"));
-		decoder1->GetPin("Y3")->ConnectTo(decoder3to8->GetPin("Y3"));
-		decoder2->GetPin("Y0")->ConnectTo(decoder3to8->GetPin("Y4"));
-		decoder2->GetPin("Y1")->ConnectTo(decoder3to8->GetPin("Y5"));
-		decoder2->GetPin("Y2")->ConnectTo(decoder3to8->GetPin("Y6"));
-		decoder2->GetPin("Y3")->ConnectTo(decoder3to8->GetPin("Y7"));
+		decoder1->GetPin("y0")->ConnectTo(decoder3to8->GetPin("y0"));
+		decoder1->GetPin("y1")->ConnectTo(decoder3to8->GetPin("y1"));
+		decoder1->GetPin("y2")->ConnectTo(decoder3to8->GetPin("y2"));
+		decoder1->GetPin("y3")->ConnectTo(decoder3to8->GetPin("y3"));
+		decoder2->GetPin("y0")->ConnectTo(decoder3to8->GetPin("y4"));
+		decoder2->GetPin("y1")->ConnectTo(decoder3to8->GetPin("y5"));
+		decoder2->GetPin("y2")->ConnectTo(decoder3to8->GetPin("y6"));
+		decoder2->GetPin("y3")->ConnectTo(decoder3to8->GetPin("y7"));
 
-		decoder3to8->GetPin("I0")->ConnectTo(decoder1->GetPin("I0"));
-		decoder3to8->GetPin("I0")->ConnectTo(decoder2->GetPin("I0"));
-		decoder3to8->GetPin("I1")->ConnectTo(decoder1->GetPin("I1"));
-		decoder3to8->GetPin("I1")->ConnectTo(decoder2->GetPin("I1"));
-		decoder3to8->GetPin("I2")->ConnectTo(decoder2->GetPin("EN"));
-		decoder3to8->GetPin("I2")->ConnectTo(notI1->GetPin("in"));
-		notI1->GetPin("out")->ConnectTo(decoder1->GetPin("EN"));
+		decoder3to8->GetPin("i0")->ConnectTo(decoder1->GetPin("i0"));
+		decoder3to8->GetPin("i0")->ConnectTo(decoder2->GetPin("i0"));
+		decoder3to8->GetPin("i1")->ConnectTo(decoder1->GetPin("i1"));
+		decoder3to8->GetPin("i1")->ConnectTo(decoder2->GetPin("i1"));
+		decoder3to8->GetPin("i2")->ConnectTo(decoder2->GetPin("en"));
+		decoder3to8->GetPin("i2")->ConnectTo(notI1->GetPin("in"));
+		notI1->GetPin("out")->ConnectTo(decoder1->GetPin("en"));
 
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(decoder3to8);
 
@@ -318,10 +481,10 @@ namespace UnitTests
 			IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::LOW,IOState::HI 
 		};
 
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 	}
 
-	TEST(TestGates, TestClone)
+	TEST(TestGates, Clone)
 	{
 		CompositeGatePtr comp = CompositeGate::Create("comp");
 
@@ -369,22 +532,28 @@ namespace UnitTests
 		comp->AddInput("bufferEN")->ConnectTo(bufferGate->GetPin("en"));
 		bufferGate->GetPin("out")->ConnectTo(comp->AddOutput("bufferout"));
 
-		ASSERT_EQ(7, comp->GetGateCount());
+		GatePtr norGate = BasicGates::NORGate::Create();
+		comp->AddGate("nor", norGate);
+		input->ConnectTo(norGate->GetPin("in1"));
+		comp->AddInput("nor2")->ConnectTo(norGate->GetPin("in2"));
+		norGate->GetPin("out")->ConnectTo(comp->AddOutput("norout"));
+
+		EXPECT_EQ(8, comp->GetGateCount());
 
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(comp);
-		ASSERT_EQ(448, out.size());
+		EXPECT_EQ(1024, out.size());
 
 		GatePtr clone = comp->Clone("clone");
 		ASSERT_NE(nullptr, clone);
-		ASSERT_NE(comp, clone);
+		EXPECT_NE(comp, clone);
 
 		Tools::LogicTools::ResultListType outClone = Tools::LogicTools::GetTruthTable(clone);
-		ASSERT_EQ(448, outClone.size());
+		EXPECT_EQ(1024, outClone.size());
 
-		ASSERT_EQ(out, outClone);
+		EXPECT_EQ(out, outClone);
 	}
 
-	TEST(TestGates, TestFullAdder)
+	TEST(TestGates, FullAdder)
 	{
 		GatePtr gate = BuildFullAdder();		
 		Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
@@ -392,7 +561,7 @@ namespace UnitTests
 			IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
 			IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
 			IOState::HI, IOState::LOW, IOState::HI, IOState::HI });
-		ASSERT_EQ(compare, out);
+		EXPECT_EQ(compare, out);
 
 		TEST_COUT << "Building 4 bit adder";
 		GatePtr adder4 = Build4BitAdder();
@@ -400,213 +569,68 @@ namespace UnitTests
 		adder4->GetPin("cin")->Set(IOState::LOW);
 		adder4->GetPin("x")->Set(IOState::FromInt(2, 4));
 		adder4->GetPin("y")->Set(IOState::FromInt(2, 4));
-		ASSERT_EQ(IOState::FromInt(4, 4), adder4->GetPin("s")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
+		EXPECT_EQ(IOState::FromInt(4, 4), adder4->GetPin("s")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
 
 		adder4->GetPin("x")->Set(IOState::FromInt(10, 4));
 		adder4->GetPin("y")->Set(IOState::FromInt(5, 4));
-		ASSERT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
+		EXPECT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), adder4->GetPin("cout")->Get());
 
 		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
 		adder4->GetPin("y")->Set(IOState::FromInt(1, 4));
-		ASSERT_EQ(IOState::FromInt(0, 4), adder4->GetPin("s")->Get());
-		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+		EXPECT_EQ(IOState::FromInt(0, 4), adder4->GetPin("s")->Get());
+		EXPECT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
 
 		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
 		adder4->GetPin("y")->Set(IOState::FromInt(15, 4));
-		ASSERT_EQ(IOState::FromInt(14, 4), adder4->GetPin("s")->Get());
-		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+		EXPECT_EQ(IOState::FromInt(14, 4), adder4->GetPin("s")->Get());
+		EXPECT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
 
 		adder4->GetPin("cin")->Set(IOState::HI);
 		adder4->GetPin("x")->Set(IOState::FromInt(15, 4));
 		adder4->GetPin("y")->Set(IOState::FromInt(15, 4));
-		ASSERT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
-		ASSERT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
+		EXPECT_EQ(IOState::FromInt(15, 4), adder4->GetPin("s")->Get());
+		EXPECT_EQ(IOState(IOState::HI), adder4->GetPin("cout")->Get());
 	}
 
-	TEST(TestGates, TestSRLatch)
+	TEST(TestGates, SRLatch)
 	{
 		GatePtr gate = BasicGates::SRLatch::Create();
-
 		gate->GetPin("s")->Set(IOState::LOW);
+		gate->GetPin("r")->Set(IOState::HI);
+
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("/q")->Get());
+
 		gate->GetPin("r")->Set(IOState::LOW);
 
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("/q")->Get());
 
 		gate->GetPin("s")->Set(IOState::HI);
 
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("/q")->Get());
 
 		gate->GetPin("s")->Set(IOState::LOW);
 
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("/q")->Get());
 
 		gate->GetPin("r")->Set(IOState::HI);
 
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("/q")->Get());
 
 		gate->GetPin("r")->Set(IOState::LOW);
 
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
+		EXPECT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
+		EXPECT_EQ(IOState(IOState::HI), gate->GetPin("/q")->Get());
 
 		// Bistable?
 	//	gate->GetPin("r")->Set(IOState::HI);
 	//	gate->GetPin("s")->Set(IOState::HI);
 		
 	}
-
-	TEST(TestGates, TestDLatch)
-	{
-		GatePtr gate = BasicGates::DLatch::Create();
-
-		gate->GetPin("c")->Set(IOState::HI);
-		gate->GetPin("d")->Set(IOState::LOW);
-
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set d hi";
-		gate->GetPin("d")->Set(IOState::HI);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-		
-		TEST_COUT << "Set C low, ignore D";
-		gate->GetPin("c")->Set(IOState::LOW);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set D low (ignore)";
-		gate->GetPin("d")->Set(IOState::LOW);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set D hi (ignore)";
-		gate->GetPin("d")->Set(IOState::HI);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set D low (ignore)";
-		gate->GetPin("d")->Set(IOState::LOW);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set C hi, Q = D = 0";
-		gate->GetPin("c")->Set(IOState::HI);
-
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set D hi, Q = D = 1 ";
-		gate->GetPin("d")->Set(IOState::HI);
-
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-	}
-
-	void Clock(IOPinPtr clk)
-	{
-		TEST_COUT << "Clock Hi";
-		clk->Set(IOState::HI);
-		TEST_COUT << "Clock low";
-		clk->Set(IOState::LOW);
-	}
-
-	TEST(TestGates, TestDFlipFlop)
-	{
-		GatePtr gate = BasicGates::DFlipFlop::Create();
-
-		TEST_COUT << "Set D low";
-		gate->GetPin("d")->Set(IOState::LOW);
-
-		Clock(gate->GetPin("clk"));
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-
-		TEST_COUT << "Set D hi";
-		gate->GetPin("d")->Set(IOState::HI);
-
-		Clock(gate->GetPin("clk"));
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		Clock(gate->GetPin("clk"));
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		gate->GetPin("d")->Set(IOState::LOW);
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("notq")->Get());
-
-		Clock(gate->GetPin("clk"));
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-
-		Clock(gate->GetPin("clk"));
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-	}
-
-	TEST(TestGates, DISABLED_TestTFlipFlop)
-	{
-		GatePtr gate = BasicGates::TFlipFlop::Create();
-
-		//Clock(gate->GetPin("t"));
-		gate->GetPin("t")->Set(IOState::LOW);
-
-		gate->GetPin("t")->Set(IOState::HI);
-		ASSERT_EQ(IOState(IOState::LOW), gate->GetPin("q")->Get());
-		ASSERT_EQ(IOState(IOState::HI), gate->GetPin("notq")->Get());
-	}
-
-	TEST(TestGates, DISABLED_TestJKFlipFlop)
-	{
-		GatePtr gate = BasicGates::JKFlipFlop::Create();
-
-		TEST_COUT << "j=k=0";
-		gate->GetPin("j")->Set(IOState::LOW);
-		gate->GetPin("k")->Set(IOState::LOW);
-
-		Clock(gate->GetPin("clk"));
-		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
-
-		TEST_COUT << "j=0, k=1";
-		gate->GetPin("k")->Set(IOState::HI);
-		Clock(gate->GetPin("clk"));
-		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
-
-		TEST_COUT << "j=1, k=0";
-		gate->GetPin("k")->Set(IOState::LOW);
-		gate->GetPin("j")->Set(IOState::HI);
-		Clock(gate->GetPin("clk"));
-		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
-
-		TEST_COUT << "j=1, k=1";
-		gate->GetPin("k")->Set(IOState::HI);
-		gate->GetPin("j")->Set(IOState::HI);
-		for (auto& in : gate->GetInputPins())
-		{
-			std::cout << "Pin: " << gate->GetPin(in.second)->GetFullName() << ", Get=" << gate->GetPin(in.second)->Get() << std::endl;
-		}
-		for (auto& in : gate->GetOutputPins())
-		{
-			std::cout << "Pin: " << gate->GetPin(in.second)->GetFullName() << ", Get=" << gate->GetPin(in.second)->Get() << std::endl;
-		}
-
-		Clock(gate->GetPin("clk"));
-		TEST_COUT << gate->GetPin("q")->Get() << "/" << gate->GetPin("notq")->Get();
-
-	}
-
-
 }

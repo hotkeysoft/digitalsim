@@ -18,14 +18,12 @@ namespace DigiLib {
 		{
 		public:
 			static Core::GatePtr Create();
-
-			Core::GatePtr Clone(const char* name) override;
-
-			void ComputeState() override;
+			Core::GatePtr Clone(const char * name, bool deep = true) override;
 
 		protected:
 			DLatch() noexcept;
 			void Init() override;
+			void InitializeState() override;
 
 			struct shared_enabler;
 		};

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "XORGate.h"
 
 namespace DigiLib {
@@ -26,7 +27,7 @@ namespace DigiLib {
 
 		}
 
-		Core::GatePtr XORGate::Clone(const char * name)
+		Core::GatePtr XORGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
@@ -37,15 +38,31 @@ namespace DigiLib {
 
 		void XORGate::ComputeState()
 		{
+			IOState newState;
 			if ((m_in1->Get() == IOState::LOW && m_in2->Get() == IOState::HI) ||
 				(m_in1->Get() == IOState::HI && m_in2->Get() == IOState::LOW))
 			{
-				m_out->Set(IOState::HI);
+				newState = IOState::HI;
 			}
 			else
 			{
-				m_out->Set(IOState::LOW);
+				newState = IOState::LOW;
 			}
+
+			if (m_in1->Get() == IOState::UNDEF || m_in2->Get() == IOState::UNDEF)
+			{
+				newState = IOState::UNDEF;
+			}
+
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEvent({ newState, m_out });
+			}
+
 		}
 
 		struct XORGate::shared_enabler : public XORGate

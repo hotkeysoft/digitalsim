@@ -54,5 +54,41 @@ namespace DigiLib
 						
 			m_parentPin->Set(parentState);
 		}
+
+		IOState IOPinSubset::GetMask() noexcept
+		{
+			IOState::IO_STATE state = IOState::UNDEF;
+			switch (m_direction)
+			{
+			case INPUT:
+				state = IOState::LOW; break;
+			case OUTPUT:
+				state = IOState::HI; break;
+			case OUTPUT_HI_Z:
+				state = IOState::HI_Z; break;
+			}
+
+			IOState ret(IOState::UNDEF, m_parentPin->GetWidth());
+			for (size_t i = m_low; i <= m_hi; ++i)
+			{
+				ret[i] = state;
+			}
+			return ret;
+		}
+
+		bool IOPinSubset::Overlaps(IOState state)
+		{
+			if (m_parentPin->GetWidth() != state.GetWidth())
+				throw std::invalid_argument("pin width mismatch");
+
+			for (size_t i = m_low; i <= m_hi; ++i)
+			{
+				if (state[i] != IOState::UNDEF)
+					return true;
+			}
+
+			return false;
+		}
+
 	}
 }

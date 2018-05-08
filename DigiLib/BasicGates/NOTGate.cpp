@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "NOTGate.h"
 
 namespace DigiLib {
@@ -24,7 +25,7 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr NOTGate::Clone(const char * name)
+		Core::GatePtr NOTGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
@@ -34,13 +35,27 @@ namespace DigiLib {
 
 		void NOTGate::ComputeState()
 		{
-			if (m_in->Get() == IOState::HI)
+			IOState newState;
+			if (m_in->Get() == IOState::UNDEF)
 			{
-				m_out->Set(IOState::LOW);
+				newState = IOState::UNDEF;
+			}
+			else if (m_in->Get() == IOState::HI)
+			{
+				newState = IOState::LOW;
 			}
 			else
 			{
-				m_out->Set(IOState::HI);
+				newState = IOState::HI;
+			}
+
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEvent({ newState, m_out });
 			}
 		}
 

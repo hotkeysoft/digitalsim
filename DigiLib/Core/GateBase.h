@@ -29,7 +29,9 @@ namespace DigiLib
 		class DllExport GateBase : public std::enable_shared_from_this<GateBase>
 		{
 		public:
-			GateBase(const char* name);
+			enum Mode {ASYNC, SYNC};
+
+			GateBase(const char* name, size_t delay = 1);
 			virtual ~GateBase() = default;
 			GateBase(const GateBase&) = delete;
 			GateBase& operator=(const GateBase&) = delete;
@@ -37,14 +39,25 @@ namespace DigiLib
 			GateBase& operator=(GateBase&&) = delete;
 
 			virtual void Init() {}
+			virtual void InitializeState() {}
 
 			std::string GetName() { return m_name; }
 			std::string GetFullName();
 			virtual void SetName(const char*);
 
-			virtual GatePtr Clone(const char* name) = 0;
+			virtual GatePtr Clone(const char* name, bool deep = true) = 0;
+
+			virtual Mode GetMode() { return this->m_mode; }
+			virtual void SetMode(Mode mode, SimulatorRef simulator = nullptr);
+			virtual SimulatorRef GetSimulator() { return m_simulator; }
+
+			size_t GetDelay() { return m_delay;  }
+
+			virtual size_t GetGateCount(bool recursive = false) noexcept { return 1; }
 
 			virtual void ResetPins();
+
+			virtual IOPinPtr FindPin(const char* name);
 
 			virtual IOPinPtr GetPin(size_t pinID) { return m_ioPins[pinID]; }
 			virtual IOPinPtr GetPin(const char* name);
@@ -60,8 +73,8 @@ namespace DigiLib
 			virtual PinConnectionsType& GetConnectedFromPins(IOPinPtr sourcePin);
 			virtual PinConnectionsType& GetConnectedToPins(IOPinPtr sourcePin);
 
-			virtual ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
-			virtual ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
+			ConnectedPinsType& GetConnectedFromPins() noexcept { return m_connectedFromPins; }
+			ConnectedPinsType& GetConnectedToPins() noexcept { return m_connectedToPins; }
 
 			GateRef GetParent() noexcept { return m_parent; }
 			virtual void SetParent(GateRef parent);
@@ -74,13 +87,16 @@ namespace DigiLib
 			const IOPinNameToIDMapType& GetInputPins() noexcept { return m_inputPinsNames; }
 			const IOPinNameToIDMapType& GetOutputPins() noexcept { return m_outputPinsNames; }
 
-			void ConnectPins(IOPinPtr source, IOPinPtr target);
+			bool ConnectPins(IOPinPtr source, IOPinPtr target, bool inverted = false);
 
 		protected:
 			virtual IOPinPtr AddInput(const char*  name, size_t width = 1);
 			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
 
 			std::string m_name;
+			Mode m_mode;
+			size_t m_delay;
+			SimulatorRef m_simulator;
 			GateRef m_parent;
 			size_t m_ioPinCount;
 
@@ -100,6 +116,8 @@ namespace DigiLib
 			bool IsValidPinName(const char* name);
 			void ValidatePinName(const char* name);
 			void ValidatePinWidth(size_t width);
+
+			bool CanConnectToTarget(const IOConnection & link);
 
 			virtual bool IsValidGateName(const char* name);
 			virtual void ValidateGateName(const char* name);

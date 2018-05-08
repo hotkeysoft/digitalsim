@@ -25,7 +25,7 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr BufferGate::Clone(const char * name)
+		Core::GatePtr BufferGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>(this->m_width);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core\Simulator.h"
 #include "NORGate.h"
 
 namespace DigiLib {
@@ -31,7 +32,7 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr NORGate::Clone(const char * name)
+		Core::GatePtr NORGate::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>(this->m_inputs);
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
@@ -41,16 +42,24 @@ namespace DigiLib {
 		
 		void NORGate::ComputeState()
 		{
+			IOState newState = IOState::HI;
 			for (auto & pin : m_inputPins)
 			{
 				if (pin->Get() == IOState::HI)
 				{
-					m_out->Set(IOState::LOW);
-					return;
+					newState = IOState::LOW;
+					break;
 				}
-			}
+			}		
 
-			m_out->Set(IOState::HI);
+			if (GetMode() == ASYNC)
+			{
+				m_out->Set(newState);
+			}
+			else
+			{
+				GetSimulator()->PostEvent({ newState, m_out });
+			}
 		}
 
 		struct NORGate::shared_enabler : public NORGate

@@ -30,6 +30,9 @@ namespace DigiLib
 			IOState operator=(const IOState&);
 			IOState operator=(IO_STATE);
 
+			IOState operator!() const;
+			IOState operator|(const IOState& rhs) const;
+
 			size_t GetWidth() const { return m_width; }
 
 			bool operator==(const IOState& rhs) const;
@@ -37,6 +40,7 @@ namespace DigiLib
 			bool operator==(IO_STATE rhs) const;
 			bool operator!=(IO_STATE rhs) const;
 
+			IO_STATE operator [](size_t pin) const;
 			IO_STATE & operator [](size_t pin);
 
 			IO_STATE Get(size_t pin = 0) const;
@@ -53,6 +57,8 @@ namespace DigiLib
 			uint16_t ToInt16() const;
 
 			static IOState FromInt(int value, size_t bitCount);
+
+			static IOState Random(size_t bitCount = 1);
 
 		protected:
 			IOState(size_t width) : m_width(width) {}

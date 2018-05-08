@@ -19,27 +19,35 @@ namespace DigiLib {
 			AddInput("k");
 			AddInput("clk");
 			AddOutput("q");
-			AddOutput("notq");
+			AddOutput("/q");
 
 			AddGate("dflipflop", DFlipFlop::Create());
 			AddGate("nand1", NANDGate::Create());
 			AddGate("nand2", NANDGate::Create());
 			AddGate("nand3", NANDGate::Create());
-			AddGate("not", NOTGate::Create());
 
-			GetPin("k")->ConnectTo(GetGate("not")->GetPin("in"));
-			GetGate("not")->GetPin("out")->ConnectTo(GetGate("nand2")->GetPin("in1"));
-			GetPin("j")->ConnectTo(GetGate("nand1")->GetPin("in2"));
-			GetPin("clk")->ConnectTo(GetGate("dflipflop")->GetPin("clk"));
+			FindPin("k")->ConnectTo(FindPin("nand2.in1"), true);					
+			FindPin("j")->ConnectTo(FindPin("nand1.in2"));
+			FindPin("clk")->ConnectTo(FindPin("dflipflop.clk"));
 
-			GetGate("nand1")->GetPin("out")->ConnectTo(GetGate("nand3")->GetPin("in1"));
-			GetGate("nand2")->GetPin("out")->ConnectTo(GetGate("nand3")->GetPin("in2"));
-			GetGate("nand3")->GetPin("out")->ConnectTo(GetGate("dflipflop")->GetPin("d"));
+			FindPin("nand1.out")->ConnectTo(FindPin("nand3.in1"));
+			FindPin("nand2.out")->ConnectTo(FindPin("nand3.in2"));
+			FindPin("nand3.out")->ConnectTo(FindPin("dflipflop.d"));
 
-			GetGate("dflipflop")->GetPin("q")->ConnectTo(GetPin("q"));
-			GetGate("dflipflop")->GetPin("q")->ConnectTo(GetGate("nand2")->GetPin("in2"));
-			GetGate("dflipflop")->GetPin("notq")->ConnectTo(GetPin("notq"));
-			GetGate("dflipflop")->GetPin("notq")->ConnectTo(GetGate("nand1")->GetPin("in1"));
+			FindPin("dflipflop.q")->ConnectTo(FindPin("q"));
+			FindPin("dflipflop.q")->ConnectTo(FindPin("nand2.in2"));
+			FindPin("dflipflop./q")->ConnectTo(FindPin("/q"));
+			FindPin("dflipflop./q")->ConnectTo(FindPin("nand1.in1"));
+		}
+
+		void JKFlipFlop::InitializeState()
+		{
+			CompositeGate::InitializeState();
+
+			// To avoid initial oscillation, we set Q and notQ to opposite states.
+			static IOState initialState = IOState::HI;
+			GetGate("nand1")->GetPin("in1")->Set(initialState);
+			GetGate("nand2")->GetPin("in2")->Set(initialState);
 		}
 
 		Core::GatePtr JKFlipFlop::Create()
@@ -50,16 +58,12 @@ namespace DigiLib {
 			return gate;
 		}
 
-		Core::GatePtr JKFlipFlop::Clone(const char * name)
+		Core::GatePtr JKFlipFlop::Clone(const char * name, bool deep)
 		{
 			auto ptr = std::make_shared<shared_enabler>();
 			GatePtr gate = std::static_pointer_cast<GateBase>(ptr);
 			gate->Init();
 			return gate;
-		}
-
-		void JKFlipFlop::ComputeState()
-		{
 		}
 
 		struct JKFlipFlop::shared_enabler : public JKFlipFlop

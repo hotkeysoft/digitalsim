@@ -17,7 +17,7 @@ namespace DigiLib {
 		{
 		public:
 			static Core::GatePtr Create();
-			Core::GatePtr Clone(const char* name) override;
+			Core::GatePtr Clone(const char * name, bool deep = true) override;
 
 			void ComputeState() override;
 
