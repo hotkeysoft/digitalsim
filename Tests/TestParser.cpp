@@ -303,6 +303,14 @@ namespace UnitTests
 
 		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: "), std::invalid_argument);
 		parser.ParseGate("Inputs: ; Outputs: ; Wires: ;");
+		
+		// Invalid order, missing sections
+		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Wires: ; Parts: ; Inputs: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Wires: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Inputs: ; "), std::invalid_argument);
 
 		parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ;");
 	}
