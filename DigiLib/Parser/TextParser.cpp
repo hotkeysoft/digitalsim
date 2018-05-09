@@ -8,6 +8,7 @@
 #include "PartsBin.h"
 
 #define PIN_DEF_REGEX "^(\\/?[A-Za-z](?:\\w){0,31})(?:\\[(\\d+)\\])?$"
+#define PART_DEF_REGEX "^([A-Za-z](?:\\w){0,31})\\s+([A-Za-z](?:\\w){0,31})$"
 
 namespace DigiLib {
 	namespace Parser {
@@ -25,7 +26,9 @@ namespace DigiLib {
 			auto sections = GetSections(in);
 			for (const auto & section : sections)
 			{
-				if (section.Name == "Inputs")
+				if (section.Name == "Parts")
+					ParsePartsSection(section.Data.c_str());
+				else if (section.Name == "Inputs")
 					ParseInputsSection(section.Data.c_str());
 				else if (section.Name == "Outputs")
 					ParseOutputsSection(section.Data.c_str());
@@ -87,6 +90,37 @@ namespace DigiLib {
 			pin1->ConnectTo(pin2);
 		}
 
+		void TextParser::ParsePartsSection(const char * in)
+		{
+			if (m_parts == nullptr)
+			{
+				throw std::invalid_argument("no parts");
+			}
+
+			TextParser::SectionElement partsSection = ParseSection(in);
+			for (const auto & part : partsSection)
+			{
+				auto out = ExtractPartDef(part);
+
+				std::string type = std::get<0>(out);
+				std::string name = std::get<1>(out);
+
+				// Check if name matches a part type
+				if (m_parts->Find(name.c_str()))
+				{
+					throw std::invalid_argument("there is a part with this name");
+				}
+
+				GatePtr part = m_parts->Find(type.c_str());
+				if (part == nullptr)
+				{
+					throw std::invalid_argument("part not found");
+				}
+
+				m_gate->AddGate(name.c_str(), part->Clone(name.c_str()));
+			}
+		}
+
 		void TextParser::ParseWireSection(const char * in)
 		{
 			TextParser::SectionElement wireSection = ParseSection(in);
@@ -107,17 +141,13 @@ namespace DigiLib {
 			if (std::regex_match(in, base_match, pinRegex))
 			{
 				// Pin name
-				std::ssub_match base_sub_match = base_match[1];
-				if (!base_sub_match.matched)
-				{
-					throw std::invalid_argument("pin name");
-				}
-				std::string pinName = base_sub_match;
+				assert(base_match[1].matched);
+				std::string pinName = base_match[1];
 
-				base_sub_match = base_match[2];
-				if (base_sub_match.matched)
+				// Pin width
+				if (base_match[2].matched)
 				{
-					size = atoi(base_sub_match.str().c_str());
+					size = atoi(base_match[2].str().c_str());
 				}
 				else
 				{
@@ -132,14 +162,32 @@ namespace DigiLib {
 			}
 		}
 
+		TextParser::PartDefType TextParser::ExtractPartDef(const std::string & in)
+		{
+			static std::regex pinRegex(PART_DEF_REGEX);
+
+			std::smatch base_match;
+			if (std::regex_match(in, base_match, pinRegex))
+			{
+				assert(base_match[1].matched);
+				assert(base_match[2].matched);
+
+				return std::make_tuple(base_match[1], base_match[2]);
+			}
+			else
+			{
+				throw std::invalid_argument("invalid part definition");
+			}
+		}
+
 		void TextParser::ParseInputsSection(const char * in)
 		{
 			TextParser::SectionElement inputsSection = ParseSection(in);
-			for (const auto & in : inputsSection)
+			for (const auto & section : inputsSection)
 			{
-				if (!in.empty())
+				if (!section.empty())
 				{
-					auto out = ExtractPinDef(in);
+					auto out = ExtractPinDef(section);
 
 					std::string name = std::get<0>(out);
 					size_t size = std::get<1>(out);

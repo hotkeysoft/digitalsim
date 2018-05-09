@@ -6,13 +6,28 @@
 #include "Core\GateBase.h"
 #include "Core\Simulator.h"
 #include "BasicGates\ANDGate.h"
+#include "BasicGates\ORGate.h"
 #include "BasicGates\BufferGate.h"
 #include "Parser\TextParser.h"
+#include "Parser\PartsBin.h"
 
 namespace UnitTests
 {
 	using namespace Core;
 	using namespace Parser;
+
+	PartsBinPtr BuildPartsBin(bool populate = true)
+	{
+		PartsBinPtr parts = PartsBin::Create();
+		
+		if (populate)
+		{
+			parts->AddPart("AND", BasicGates::ANDGate::Create());
+			parts->AddPart("OR", BasicGates::ORGate::Create());
+		}
+
+		return parts;
+	}
 
 	CompositeGatePtr BuildTestGate(bool addInputs = true, bool addOutputs = true, bool addGates = true)
 	{
@@ -210,6 +225,43 @@ namespace UnitTests
 		EXPECT_EQ(16, gate->GetPin("in12")->GetWidth());
 	}
 
+	TEST(TestParser, PartsStatement)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate(false, false, false);
+		PartsBinPtr parts = BuildPartsBin(true);
+
+		parser.Attach(gate, parts);
+		
+		EXPECT_EQ(0, gate->GetGateCount());
+		parser.ParsePartsSection("AND and, AND and2, OR or");
+		EXPECT_EQ(3, gate->GetGateCount());
+		parser.ParsePartsSection("  OR anotherOr  ");
+		EXPECT_EQ(4, gate->GetGateCount());
+		
+		// Already defined part name
+		EXPECT_THROW(parser.ParsePartsSection("AND and2"), std::invalid_argument);
+		EXPECT_EQ(4, gate->GetGateCount());
+
+		// name is part type
+		EXPECT_THROW(parser.ParsePartsSection("AND OR"), std::invalid_argument);
+		EXPECT_EQ(4, gate->GetGateCount());
+
+		// part not found
+		EXPECT_THROW(parser.ParsePartsSection("NXAND nxand"), std::invalid_argument);
+		EXPECT_EQ(4, gate->GetGateCount());
+		
+		gate->Reset();
+		EXPECT_EQ(0, gate->GetGateCount());
+
+		EXPECT_THROW(parser.ParsePartsSection(nullptr), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection(""), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("  "), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection(" , "), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection(" ,,"), std::invalid_argument);
+		EXPECT_EQ(0, gate->GetGateCount());
+	}
+	
 	TEST(TestParser, Statement)
 	{
 		TextParser parser;

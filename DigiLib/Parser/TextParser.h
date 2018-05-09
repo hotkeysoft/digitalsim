@@ -20,6 +20,7 @@ namespace DigiLib {
 			using Sections = std::vector<Section>;
 			using SectionElement = std::vector<std::string>;
 			using PinDefType = std::tuple<std::string, size_t>;
+			using PartDefType = std::tuple<std::string, std::string>;
 
 			void Attach(Core::CompositeGatePtr gate, PartsBinPtr parts = nullptr)
 			{
@@ -31,6 +32,7 @@ namespace DigiLib {
 
 			void ParseGate(const char*);
 			void ParseConnection(const char *);
+			void ParsePartsSection(const char *);
 			void ParseWireSection(const char *);
 			void ParseInputsSection(const char *);
 			void ParseOutputsSection(const char *);
@@ -40,6 +42,7 @@ namespace DigiLib {
 		protected:
 			static SectionElement ParseSection(const char *in);
 			static PinDefType ExtractPinDef(const std::string & in);
+			static PartDefType ExtractPartDef(const std::string & in);
 			static Section ExtractSection(const std::string & in);
 
 		private:
