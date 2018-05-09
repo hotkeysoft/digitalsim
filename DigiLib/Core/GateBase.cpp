@@ -260,6 +260,17 @@ namespace DigiLib
 			m_parent = parent;
 		}
 
+		void GateBase::Reset()
+		{
+			this->m_connectedFromPins.clear();
+			this->m_connectedToPins.clear();
+			this->m_delay = 1;
+			this->m_inputPinsNames.clear();
+			this->m_outputPinsNames.clear();
+			this->m_ioPins.clear();
+			this->m_ioPinCount = 0;
+		}
+
 		void GateBase::ResetPins()
 		{
 			for (auto pin : m_ioPins)
@@ -270,7 +281,7 @@ namespace DigiLib
 
 		IOPinPtr GateBase::FindPin(const char * name)
 		{
-			static std::regex pinRegex("^" PIN_NAME_REGEX PIN_RANGE_REGEX "$");		
+			static std::regex pinRegex(PIN_NAME_REGEX PIN_RANGE_REGEX);		
 
 			if (name == nullptr)
 			{

@@ -55,6 +55,7 @@ namespace DigiLib
 
 			virtual size_t GetGateCount(bool recursive = false) noexcept { return 1; }
 
+			virtual void Reset();
 			virtual void ResetPins();
 
 			virtual IOPinPtr FindPin(const char* name);

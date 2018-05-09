@@ -1,9 +1,7 @@
 #pragma once
+#include "Core\Common.h"
 #include <vector>
 #include <sstream>
-#include "Core\Common.h"
-#include "Core\IOState.h"
-#include "Core\IOPin.h"
 
 #ifdef  DIGILIB_EXPORTS 
 /*Enabled as "export" while compiling the dll project*/
@@ -18,19 +16,27 @@ namespace DigiLib {
 		class DllExport TextParser
 		{
 		public:
-			TextParser() {};
+			using SectionType = std::vector<std::string>;
+			using PinDefType = std::tuple<std::string, size_t>;
 
-			void Attach(Core::GatePtr gate) 
+			void Attach(Core::CompositeGatePtr gate)
 			{
 				m_gate = gate;
 			}
 
-			Core::GatePtr Get() { return m_gate;  }
+			Core::CompositeGatePtr Get() { return m_gate;  }
 
 			void ParseConnection(const char *);
+			void ParseWireSection(const char *);
+			void ParseInputsSection(const char *);
+			void ParseOutputsSection(const char *);
 			
+		protected:
+			static SectionType ParseSection(const char *in);
+			static PinDefType ExtractPinDef(const std::string & in);
+
 		private:
-			Core::GatePtr m_gate;
+			Core::CompositeGatePtr m_gate;
 		};
 	}
 }

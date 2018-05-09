@@ -27,6 +27,7 @@ namespace DigiLib
 			static CompositeGatePtr Create(const char*name);
 			GatePtr Clone(const char * name, bool deep = true) override;
 
+			void Reset() override;
 			void ResetPins() override;
 			void InitializeState() override;
 

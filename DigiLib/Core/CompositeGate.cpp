@@ -73,6 +73,13 @@ namespace DigiLib
 			return count;
 		}
 
+		void CompositeGate::Reset()
+		{
+			// TODO: Can this leak?
+			m_internalGates.clear();
+			GateBase::Reset();
+		}
+
 		void CompositeGate::ResetPins()
 		{
 			GateBase::ResetPins();

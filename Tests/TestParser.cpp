@@ -14,7 +14,7 @@ namespace UnitTests
 	using namespace Core;
 	using namespace Parser;
 
-	GatePtr BuildTestGate(bool addInputs = true, bool addOutputs = true, bool addGates = true)
+	CompositeGatePtr BuildTestGate(bool addInputs = true, bool addOutputs = true, bool addGates = true)
 	{
 		CompositeGatePtr gate = CompositeGate::Create("gate");
 
@@ -50,7 +50,7 @@ namespace UnitTests
 		parser.Attach(nullptr);
 		EXPECT_EQ(nullptr, parser.Get());
 
-		GatePtr gate = BuildTestGate();
+		CompositeGatePtr gate = BuildTestGate();
 		parser.Attach(gate);
 		EXPECT_EQ(gate, parser.Get());
 	}
@@ -58,7 +58,7 @@ namespace UnitTests
 	TEST(TestParser, ParseConnections)
 	{
 		TextParser parser;
-		GatePtr gate = BuildTestGate();
+		CompositeGatePtr gate = BuildTestGate();
 		parser.Attach(gate);
 
 		EXPECT_THROW(parser.ParseConnection(nullptr), std::invalid_argument);
@@ -71,6 +71,8 @@ namespace UnitTests
 		EXPECT_THROW(parser.ParseConnection(" ->in2-> "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseConnection(" in1->i2- > "), std::invalid_argument);
 
+		EXPECT_EQ(0, gate->GetConnectedToPin("in1").size());
+		EXPECT_EQ(0, gate->GetConnectedToPin("in2").size());
 		EXPECT_EQ(0, gate->GetConnectedFromPin("in2").size());
 		EXPECT_EQ(0, gate->GetConnectedToPin("in2").size());
 
@@ -86,5 +88,124 @@ namespace UnitTests
 		EXPECT_EQ(2, gate->GetConnectedToPin("in2").size());
 		EXPECT_EQ(1, gate->GetConnectedToPin("busin").size());
 		EXPECT_EQ(1, gate->GetConnectedFromPin("busout").size());
+	}
+
+	TEST(TestParser, WireStatement)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate();
+		parser.Attach(gate);
+
+		EXPECT_THROW(parser.ParseWireSection(nullptr), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(""), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" in1-> and1.in1, "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" , in1-> and1.in1, "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" in1-> and1.in1,, in1-> and1.in2"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" in1-> and1.in1 in1-> and1.in2,,"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseWireSection(" in1->and1.in2 , in1, -> and1.in2"), std::invalid_argument);
+
+		// Rebuild gate some valid connections could be there
+		gate = BuildTestGate();
+		parser.Attach(gate);
+
+		parser.ParseWireSection("  in1 -> and1.in1 ,\n in1-> and1.in2 ");
+		parser.ParseWireSection(" in2-> \n\t and2.in1 , in2 \n -> \n and2.in2 ");
+		parser.ParseWireSection(" \n\tbusin[1] -> \n\n\t buffer.in[1] , \n\t\t buffer.out ->busout \n");
+
+		EXPECT_EQ(2, gate->GetConnectedToPin("in1").size());
+		EXPECT_EQ(2, gate->GetConnectedToPin("in2").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("busin").size());
+		EXPECT_EQ(1, gate->GetConnectedFromPin("busout").size());
+	}
+
+	TEST(TestParser, InputsStatement)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate(false, false, false);
+		parser.Attach(gate);
+
+		EXPECT_THROW(parser.ParseInputsSection(nullptr), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(""), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in1 in2, "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" , in3 "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in4 ,, /in5"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in6[4] ,,"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in7, //in8, in9"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in10[4:8]"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseInputsSection(" in11[17]"), std::out_of_range);
+
+		// Rebuild gate some valid connections could be there
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate);
+
+		parser.ParseInputsSection("in1");
+		EXPECT_EQ(1, gate->GetInputCount());
+		parser.ParseInputsSection("in2, in3");
+		EXPECT_EQ(3, gate->GetInputCount());
+		parser.ParseInputsSection("in4[6], /in5[2]");
+		EXPECT_EQ(5, gate->GetInputCount());
+		parser.ParseInputsSection("in6[15], /input7, /en \n\n\t ");
+		EXPECT_EQ(8, gate->GetInputCount());
+		parser.ParseInputsSection(" in11[1], in12[16]");
+		EXPECT_EQ(10, gate->GetInputCount());
+
+		EXPECT_EQ(1, gate->GetPin("in1")->GetWidth());
+		EXPECT_EQ(IOPin::INPUT, gate->GetPin("in1")->GetDirection());
+		EXPECT_EQ(1, gate->GetPin("in2")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("in3")->GetWidth());
+		EXPECT_EQ(6, gate->GetPin("in4")->GetWidth());
+		EXPECT_EQ(2, gate->GetPin("/in5")->GetWidth());
+		EXPECT_EQ(15, gate->GetPin("in6")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("/input7")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("/en")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("in11")->GetWidth());
+		EXPECT_EQ(16, gate->GetPin("in12")->GetWidth());
+	}
+
+	TEST(TestParser, OutputsStatement)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate(false, false, false);
+		parser.Attach(gate);
+
+		EXPECT_THROW(parser.ParseOutputsSection(nullptr), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(""), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in1 in2, "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" , in3 "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in4 ,, /in5"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in6[4] ,,"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in7, //in8, in9"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in10[4:8]"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" in11[17]"), std::out_of_range);
+
+		// Rebuild gate some valid connections could be there
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate);
+
+		parser.ParseOutputsSection("in1");
+		EXPECT_EQ(1, gate->GetOutputCount());
+		parser.ParseOutputsSection("in2, in3");
+		EXPECT_EQ(3, gate->GetOutputCount());
+		parser.ParseOutputsSection("in4[6], /in5[2]");
+		EXPECT_EQ(5, gate->GetOutputCount());
+		parser.ParseOutputsSection("in6[15], /input7, /en \n\n\t ");
+		EXPECT_EQ(8, gate->GetOutputCount());
+		parser.ParseOutputsSection(" in11[1], in12[16]");
+		EXPECT_EQ(10, gate->GetOutputCount());
+
+		EXPECT_EQ(1, gate->GetPin("in1")->GetWidth());
+		EXPECT_EQ(IOPin::OUTPUT, gate->GetPin("in1")->GetDirection());
+		EXPECT_EQ(1, gate->GetPin("in2")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("in3")->GetWidth());
+		EXPECT_EQ(6, gate->GetPin("in4")->GetWidth());
+		EXPECT_EQ(2, gate->GetPin("/in5")->GetWidth());
+		EXPECT_EQ(15, gate->GetPin("in6")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("/input7")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("/en")->GetWidth());
+		EXPECT_EQ(1, gate->GetPin("in11")->GetWidth());
+		EXPECT_EQ(16, gate->GetPin("in12")->GetWidth());
 	}
 }

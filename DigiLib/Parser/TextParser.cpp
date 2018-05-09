@@ -2,7 +2,11 @@
 #include "TextParser.h"
 #include "Core\IOPin.h"
 #include "Core\GateBase.h"
+#include "Core\CompositeGate.h"
 #include <cctype>
+#include <regex>
+
+#define PIN_DEF_REGEX "^(\\/?[A-Za-z](?:\\w){0,31})(?:\\[(\\d+)\\])?$"
 
 namespace DigiLib {
 	namespace Parser {
@@ -21,7 +25,7 @@ namespace DigiLib {
 
 			if (m_gate == nullptr)
 			{
-				return; // nothing to do
+				throw std::invalid_argument("parser not connected to gate");
 			}
 
 			if (in == nullptr)
@@ -61,8 +65,106 @@ namespace DigiLib {
 			}
 
 			//TODO how to indicate 'negative' connections?
-			std::cout << "connect " << pin1->GetFullName() << " -> " << pin2->GetFullName() << std::endl;
 			pin1->ConnectTo(pin2);
+		}
+
+		void TextParser::ParseWireSection(const char * in)
+		{
+			TextParser::SectionType wireSection = ParseSection(in);
+			for (const auto & wire : wireSection)
+			{
+				ParseConnection(wire.c_str());
+			}
+		}
+
+		TextParser::PinDefType TextParser::ExtractPinDef(const std::string & in)
+		{
+			static std::regex pinRegex(PIN_DEF_REGEX);
+
+			std::string name;
+			size_t size;
+
+			std::smatch base_match;
+			if (std::regex_match(in, base_match, pinRegex))
+			{
+				// Pin name
+				std::ssub_match base_sub_match = base_match[1];
+				if (!base_sub_match.matched)
+				{
+					throw std::invalid_argument("pin name");
+				}
+				std::string pinName = base_sub_match;
+
+				base_sub_match = base_match[2];
+				if (base_sub_match.matched)
+				{
+					size = atoi(base_sub_match.str().c_str());
+				}
+				else
+				{
+					size = 1;
+				}
+
+				return std::make_tuple(pinName, size);
+			}
+			else
+			{
+				throw std::invalid_argument("invalid pin definition");
+			}
+		}
+
+		void TextParser::ParseInputsSection(const char * in)
+		{
+			TextParser::SectionType inputsSection = ParseSection(in);
+			for (const auto & in : inputsSection)
+			{
+				auto out = ExtractPinDef(in);
+
+				std::string name = std::get<0>(out);
+				size_t size = std::get<1>(out);
+
+				m_gate->AddInput(name.c_str(), size);
+			}
+		}
+
+		void TextParser::ParseOutputsSection(const char * in)
+		{
+			TextParser::SectionType outputsSection = ParseSection(in);
+			for (const auto & in : outputsSection)
+			{
+				auto out = ExtractPinDef(in);
+
+				std::string name = std::get<0>(out);
+				size_t size = std::get<1>(out);
+
+				//TODO:HI_Z
+				m_gate->AddOutput(name.c_str(), size);
+			}
+		}
+
+		TextParser::SectionType TextParser::ParseSection(const char * in)
+		{
+			if (in == nullptr)
+			{
+				throw std::invalid_argument("null parameter");
+			}
+
+			TextParser::SectionType section;
+
+			std::stringstream ss(in);
+			while (ss.good())
+			{
+				std::string substr;
+				std::getline(ss, substr, ',');
+				substr = trim(substr);
+				if (substr.empty())
+				{
+					throw std::invalid_argument("empty element in statement");
+				}
+				section.push_back(substr);
+			}	
+
+			return section;
 		}
 	}
 }
