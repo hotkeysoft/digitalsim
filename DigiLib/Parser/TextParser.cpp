@@ -19,6 +19,21 @@ namespace DigiLib {
 			return (wsback <= wsfront ? std::string() : std::string(wsfront, wsback));
 		}
 
+		void TextParser::ParseGate(const char * in)
+		{
+			auto sections = GetSections(in);
+			for (const auto & section : sections)
+			{
+				if (section.Name == "Inputs")
+					ParseInputsSection(section.Data.c_str());
+				else if (section.Name == "Outputs")
+					ParseOutputsSection(section.Data.c_str());
+				else if (section.Name == "Wires")
+					ParseWireSection(section.Data.c_str());
+				else throw std::invalid_argument("unknown section");
+			}
+		}
+
 		void TextParser::ParseConnection(const char * in)
 		{
 			static const std::string separator = "->";
@@ -70,7 +85,7 @@ namespace DigiLib {
 
 		void TextParser::ParseWireSection(const char * in)
 		{
-			TextParser::SectionType wireSection = ParseSection(in);
+			TextParser::SectionElement wireSection = ParseSection(in);
 			for (const auto & wire : wireSection)
 			{
 				ParseConnection(wire.c_str());
@@ -115,7 +130,7 @@ namespace DigiLib {
 
 		void TextParser::ParseInputsSection(const char * in)
 		{
-			TextParser::SectionType inputsSection = ParseSection(in);
+			TextParser::SectionElement inputsSection = ParseSection(in);
 			for (const auto & in : inputsSection)
 			{
 				auto out = ExtractPinDef(in);
@@ -129,7 +144,7 @@ namespace DigiLib {
 
 		void TextParser::ParseOutputsSection(const char * in)
 		{
-			TextParser::SectionType outputsSection = ParseSection(in);
+			TextParser::SectionElement outputsSection = ParseSection(in);
 			for (const auto & in : outputsSection)
 			{
 				auto out = ExtractPinDef(in);
@@ -142,14 +157,59 @@ namespace DigiLib {
 			}
 		}
 
-		TextParser::SectionType TextParser::ParseSection(const char * in)
+		TextParser::Sections TextParser::GetSections(const char * in)
 		{
 			if (in == nullptr)
 			{
 				throw std::invalid_argument("null parameter");
 			}
 
-			TextParser::SectionType section;
+			TextParser::Sections sections;
+
+			std::stringstream ss(in);
+			while (ss.good())
+			{
+				std::string substr;
+				std::getline(ss, substr, ';');
+				substr = trim(substr);
+				if (!substr.empty())
+				{
+					sections.push_back(ExtractSection(substr));
+				}
+			}
+
+			return sections;
+		}
+
+		TextParser::Section TextParser::ExtractSection(const std::string & in)
+		{
+			size_t index = in.find_first_of(':');
+			if (index == -1)
+			{
+				throw std::invalid_argument("section label not found");
+			}
+			if (in.find_first_of(':', index + 1) != -1)
+			{
+				throw std::invalid_argument("Unexpected ':' character");
+			}
+			Section section;
+			section.Name = trim(in.substr(0, index));
+			section.Data = trim(in.substr(index + 1));
+			if (section.Name.empty())
+			{
+				throw std::invalid_argument("missing section label");
+			}
+			return section;
+		}
+
+		TextParser::SectionElement TextParser::ParseSection(const char * in)
+		{
+			if (in == nullptr)
+			{
+				throw std::invalid_argument("null parameter");
+			}
+
+			TextParser::SectionElement section;
 
 			std::stringstream ss(in);
 			while (ss.good())

@@ -16,7 +16,9 @@ namespace DigiLib {
 		class DllExport TextParser
 		{
 		public:
-			using SectionType = std::vector<std::string>;
+			struct Section { std::string Name;  std::string Data; };
+			using Sections = std::vector<Section>;
+			using SectionElement = std::vector<std::string>;
 			using PinDefType = std::tuple<std::string, size_t>;
 
 			void Attach(Core::CompositeGatePtr gate)
@@ -26,14 +28,18 @@ namespace DigiLib {
 
 			Core::CompositeGatePtr Get() { return m_gate;  }
 
+			void ParseGate(const char* );
 			void ParseConnection(const char *);
 			void ParseWireSection(const char *);
 			void ParseInputsSection(const char *);
 			void ParseOutputsSection(const char *);
 			
+			Sections GetSections(const char*);
+
 		protected:
-			static SectionType ParseSection(const char *in);
+			static SectionElement ParseSection(const char *in);
 			static PinDefType ExtractPinDef(const std::string & in);
+			static Section ExtractSection(const std::string & in);
 
 		private:
 			Core::CompositeGatePtr m_gate;
