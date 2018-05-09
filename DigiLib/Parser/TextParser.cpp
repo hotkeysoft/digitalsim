@@ -138,28 +138,25 @@ namespace DigiLib {
 			size_t size;
 
 			std::smatch base_match;
-			if (std::regex_match(in, base_match, pinRegex))
-			{
-				// Pin name
-				assert(base_match[1].matched);
-				std::string pinName = base_match[1];
-
-				// Pin width
-				if (base_match[2].matched)
-				{
-					size = atoi(base_match[2].str().c_str());
-				}
-				else
-				{
-					size = 1;
-				}
-
-				return std::make_tuple(pinName, size);
-			}
-			else
+			if (!std::regex_match(in, base_match, pinRegex))
 			{
 				throw std::invalid_argument("invalid pin definition");
 			}
+			// Pin name
+			assert(base_match[1].matched);
+			std::string pinName = base_match[1];
+
+			// Pin width
+			if (base_match[2].matched)
+			{
+				size = atoi(base_match[2].str().c_str());
+			}
+			else
+			{
+				size = 1;
+			}
+
+			return std::make_tuple(pinName, size);
 		}
 
 		TextParser::PartDefType TextParser::ExtractPartDef(const std::string & in)
@@ -167,17 +164,15 @@ namespace DigiLib {
 			static std::regex pinRegex(PART_DEF_REGEX);
 
 			std::smatch base_match;
-			if (std::regex_match(in, base_match, pinRegex))
-			{
-				assert(base_match[1].matched);
-				assert(base_match[2].matched);
-
-				return std::make_tuple(base_match[1], base_match[2]);
-			}
-			else
+			if (!std::regex_match(in, base_match, pinRegex))
 			{
 				throw std::invalid_argument("invalid part definition");
 			}
+
+			assert(base_match[1].matched);
+			assert(base_match[2].matched);
+
+			return std::make_tuple(base_match[1], base_match[2]);
 		}
 
 		void TextParser::ParseInputsSection(const char * in)

@@ -194,6 +194,8 @@ namespace UnitTests
 		EXPECT_THROW(parser.ParseOutputsSection(" in7, //in8, in9"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseOutputsSection(" in10[4:8]"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseOutputsSection(" in11[17]"), std::out_of_range);
+		EXPECT_THROW(parser.ParseOutputsSection(" i/n12 "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseOutputsSection(" 13in "), std::invalid_argument);
 
 		// Rebuild gate some valid connections could be there
 		gate = BuildTestGate(false, false, false);
@@ -234,7 +236,7 @@ namespace UnitTests
 		parser.Attach(gate, parts);
 		
 		EXPECT_EQ(0, gate->GetGateCount());
-		parser.ParsePartsSection("AND and, AND and2, OR or");
+		parser.ParsePartsSection("AND and, \n\tAND and2, OR or ");
 		EXPECT_EQ(3, gate->GetGateCount());
 		parser.ParsePartsSection("  OR anotherOr  ");
 		EXPECT_EQ(4, gate->GetGateCount());
@@ -259,6 +261,12 @@ namespace UnitTests
 		EXPECT_THROW(parser.ParsePartsSection("  "), std::invalid_argument);
 		EXPECT_THROW(parser.ParsePartsSection(" , "), std::invalid_argument);
 		EXPECT_THROW(parser.ParsePartsSection(" ,,"), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("AND 3and  "), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("A/ND and  "), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("AND"), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("AND|and"), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("AND and&"), std::invalid_argument);
+		EXPECT_THROW(parser.ParsePartsSection("or"), std::invalid_argument);
 		EXPECT_EQ(0, gate->GetGateCount());
 	}
 	
