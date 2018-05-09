@@ -48,7 +48,10 @@ namespace DigiLib {
 				throw std::invalid_argument("input string is null");
 			}
 
-			std::string inStr(in);
+			std::string inStr = trim(in);
+			if (inStr.empty())
+				return;
+
 			size_t firstSeparator = inStr.find(separator);
 
 			if (firstSeparator == -1)
@@ -133,12 +136,15 @@ namespace DigiLib {
 			TextParser::SectionElement inputsSection = ParseSection(in);
 			for (const auto & in : inputsSection)
 			{
-				auto out = ExtractPinDef(in);
+				if (!in.empty())
+				{
+					auto out = ExtractPinDef(in);
 
-				std::string name = std::get<0>(out);
-				size_t size = std::get<1>(out);
+					std::string name = std::get<0>(out);
+					size_t size = std::get<1>(out);
 
-				m_gate->AddInput(name.c_str(), size);
+					m_gate->AddInput(name.c_str(), size);
+				}
 			}
 		}
 
@@ -147,13 +153,16 @@ namespace DigiLib {
 			TextParser::SectionElement outputsSection = ParseSection(in);
 			for (const auto & in : outputsSection)
 			{
-				auto out = ExtractPinDef(in);
+				if (!in.empty())
+				{
+					auto out = ExtractPinDef(in);
 
-				std::string name = std::get<0>(out);
-				size_t size = std::get<1>(out);
+					std::string name = std::get<0>(out);
+					size_t size = std::get<1>(out);
 
-				//TODO:HI_Z
-				m_gate->AddOutput(name.c_str(), size);
+					//TODO:HI_Z
+					m_gate->AddOutput(name.c_str(), size);
+				}
 			}
 		}
 
@@ -172,10 +181,16 @@ namespace DigiLib {
 				std::string substr;
 				std::getline(ss, substr, ';');
 				substr = trim(substr);
-				if (!substr.empty())
+				sections.push_back(ExtractSection(substr));
+			}
+			// Since we need a trailing ;, we expect an empty element at the end
+			if (sections.size() > 0)
+			{
+				if (!sections.rbegin()->Name.empty())
 				{
-					sections.push_back(ExtractSection(substr));
+					throw std::invalid_argument("unterminated section (need trailing ;)");
 				}
+				sections.pop_back();
 			}
 
 			return sections;
@@ -183,6 +198,10 @@ namespace DigiLib {
 
 		TextParser::Section TextParser::ExtractSection(const std::string & in)
 		{
+			if (in.size() == 0)
+			{
+				return TextParser::Section();
+			}
 			size_t index = in.find_first_of(':');
 			if (index == -1)
 			{
@@ -211,6 +230,7 @@ namespace DigiLib {
 
 			TextParser::SectionElement section;
 
+			bool hasEmptyElement = false;
 			std::stringstream ss(in);
 			while (ss.good())
 			{
@@ -219,10 +239,15 @@ namespace DigiLib {
 				substr = trim(substr);
 				if (substr.empty())
 				{
-					throw std::invalid_argument("empty element in statement");
+					hasEmptyElement = true;
 				}
 				section.push_back(substr);
-			}	
+			}
+			
+			if (section.size() > 1 && hasEmptyElement)
+			{
+				throw std::invalid_argument("empty element in section");
+			}
 
 			return section;
 		}

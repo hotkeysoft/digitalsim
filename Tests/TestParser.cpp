@@ -62,8 +62,6 @@ namespace UnitTests
 		parser.Attach(gate);
 
 		EXPECT_THROW(parser.ParseConnection(nullptr), std::invalid_argument);
-		EXPECT_THROW(parser.ParseConnection(""), std::invalid_argument);
-		EXPECT_THROW(parser.ParseConnection(" "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseConnection("in2"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseConnection(" in2-"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseConnection(" in2-> "), std::invalid_argument);
@@ -75,6 +73,9 @@ namespace UnitTests
 		EXPECT_EQ(0, gate->GetConnectedToPin("in2").size());
 		EXPECT_EQ(0, gate->GetConnectedFromPin("in2").size());
 		EXPECT_EQ(0, gate->GetConnectedToPin("in2").size());
+
+		parser.ParseConnection("");
+		parser.ParseConnection(" ");
 
 		//TODO how to indicate 'negative' connections?
 		parser.ParseConnection("in1 -> and1.in1");
@@ -97,8 +98,6 @@ namespace UnitTests
 		parser.Attach(gate);
 
 		EXPECT_THROW(parser.ParseWireSection(nullptr), std::invalid_argument);
-		EXPECT_THROW(parser.ParseWireSection(""), std::invalid_argument);
-		EXPECT_THROW(parser.ParseWireSection(" "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseWireSection(" in1-> and1.in1, "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseWireSection(" , in1-> and1.in1, "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseWireSection(" in1-> and1.in1,, in1-> and1.in2"), std::invalid_argument);
@@ -109,6 +108,8 @@ namespace UnitTests
 		gate = BuildTestGate();
 		parser.Attach(gate);
 
+		parser.ParseWireSection("");
+		parser.ParseWireSection(" ");
 		parser.ParseWireSection("  in1 -> and1.in1 ,\n in1-> and1.in2 ");
 		parser.ParseWireSection(" in2-> \n\t and2.in1 , in2 \n -> \n and2.in2 ");
 		parser.ParseWireSection(" \n\tbusin[1] -> \n\n\t buffer.in[1] , \n\t\t buffer.out ->busout \n");
@@ -126,8 +127,6 @@ namespace UnitTests
 		parser.Attach(gate);
 
 		EXPECT_THROW(parser.ParseInputsSection(nullptr), std::invalid_argument);
-		EXPECT_THROW(parser.ParseInputsSection(""), std::invalid_argument);
-		EXPECT_THROW(parser.ParseInputsSection(" "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseInputsSection(" in1 in2, "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseInputsSection(" , in3 "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseInputsSection(" in4 ,, /in5"), std::invalid_argument);
@@ -140,6 +139,8 @@ namespace UnitTests
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate);
 
+		parser.ParseInputsSection("");
+		parser.ParseInputsSection(" ");
 		parser.ParseInputsSection("in1");
 		EXPECT_EQ(1, gate->GetInputCount());
 		parser.ParseInputsSection("in2, in3");
@@ -171,8 +172,6 @@ namespace UnitTests
 		parser.Attach(gate);
 
 		EXPECT_THROW(parser.ParseOutputsSection(nullptr), std::invalid_argument);
-		EXPECT_THROW(parser.ParseOutputsSection(""), std::invalid_argument);
-		EXPECT_THROW(parser.ParseOutputsSection(" "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseOutputsSection(" in1 in2, "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseOutputsSection(" , in3 "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseOutputsSection(" in4 ,, /in5"), std::invalid_argument);
@@ -185,6 +184,8 @@ namespace UnitTests
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate);
 
+		parser.ParseOutputsSection("");
+		parser.ParseOutputsSection(" ");
 		parser.ParseOutputsSection("in1");
 		EXPECT_EQ(1, gate->GetOutputCount());
 		parser.ParseOutputsSection("in2, in3");
@@ -233,12 +234,13 @@ namespace UnitTests
 		EXPECT_THROW(parser.GetSections(": section1 ; S2: section2 ; S3: section3\n"), std::invalid_argument);
 	}
 
-	TEST(TestParser, PrseGate)
+	TEST(TestParser, ParseGate)
 	{
 		TextParser parser;
 		CompositeGatePtr gate = BuildTestGate(false, false, false);
 		parser.Attach(gate);
 
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: "), std::invalid_argument);
 		parser.ParseGate("Inputs: ; Outputs: ; Wires: ;");
 	}
 }
