@@ -1,0 +1,33 @@
+Inputs: instr[16];
+Outputs: cToM, loadA, loadD, loadM, op1, op2[2], opCode[4], jmpIfZ, constant[15];
+
+// 1. specify the components you want to use here
+Parts: not NAND, jmpAnd AND, dest DEMUX4W,
+  lMor OR, lAand AND, lDand AND;
+
+// 2. wire them up
+Wires: 
+  instr[13]->op1, instr[11:12]->op2, instr[7:10]->opCode, 
+  
+  instr[6]->jmpAnd.in1,
+  not.out->jmpAnd.in2, 
+  jmpAnd.out->jmpIfZ,
+
+  instr[16]->not.in1, instr[16]->not.in2,
+  instr[1:15]->constant,
+  instr[16]->cToM,
+
+  instr[14:15]->dest.sel,
+  1->dest.in,
+  dest.out2->lAand.in1,
+  dest.out3->lMor.in1,
+  dest.out4->lDand.in1,
+
+  instr[16]->lMor.in2,
+  not.out->lAand.in2,
+  not.out->lDand.in2,
+  
+  lMor.out->loadM,
+  lAand.out->loadA,
+  lDand.out->loadD
+;

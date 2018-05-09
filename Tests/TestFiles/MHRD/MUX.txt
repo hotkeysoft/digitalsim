@@ -1,0 +1,23 @@
+Inputs: in1, in2, sel;
+Outputs: out;
+
+// 1. specify the components you want to use here
+Parts: notSel NOT,
+  nand1 NAND,
+  nand2 NAND,
+  nout NAND;
+
+// 2. wire them up
+Wires: 
+  sel->notSel.in,
+  
+  notSel.out->nand1.in1,
+  in1->nand1.in2,
+  
+  sel->nand2.in1,
+  in2->nand2.in2,
+  
+  nand1.out->nout.in1,
+  nand2.out->nout.in2,
+  
+  nout.out->out;

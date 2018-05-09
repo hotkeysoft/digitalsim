@@ -1,0 +1,39 @@
+Inputs: in1[4], in2[4], opCode[4];
+Outputs: out[4], negative, zero;
+# 1. specify the components you want to use here
+Parts: NOT4B notIn1, NOT4B notIn2 , NOT4B notOut ,
+  MUX4B muxIn1 , MUX4B muxIn2 , MUX4B muxOut , MUX4B muxAdd ,
+  ADDER4B add , NAND4B nand , OR4W zor , NAND znot ;
+# 2. wire them up
+Wires: 
+  in1->muxIn1.in1,
+  in1->notIn1.in,
+  notIn1.out->muxIn1.in2,
+  opCode[4]->muxIn1.sel,
+
+  in2->muxIn2.in1,
+  in2->notIn2.in,
+  notIn2.out->muxIn2.in2,
+  opCode[3]->muxIn2.sel,
+  
+  0->add.carryIn,
+  muxIn1.out->add.in1,
+  muxIn2.out->add.in2,
+  
+  muxIn1.out->nand.in1,
+  muxIn2.out->nand.in2,
+  
+  add.out->muxAdd.in1,
+  nand.out->muxAdd.in2,
+  opCode[2]->muxAdd.sel,
+  
+  muxAdd.out->muxOut.in1,
+  muxAdd.out->notOut.in, 
+  notOut.out->muxOut.in2,
+  opCode[1]->muxOut.sel,
+  muxOut.out->out,
+
+  muxOut.out[4]->negative,
+  muxOut.out->zor.in,
+  zor.out->znot.in1, zor.out->znot.in2, znot.out->zero
+;

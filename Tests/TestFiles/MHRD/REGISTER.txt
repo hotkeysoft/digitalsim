@@ -1,0 +1,14 @@
+Inputs: in, load;
+Outputs: out;
+
+// 1. specify the components you want to use here
+Parts: mux MUX, flip DFF;
+
+// 2. wire them up
+Wires: 
+  in->mux.in2,
+  flip.out->mux.in1,
+  load->mux.sel,
+  mux.out->flip.in,
+  flip.out->out
+  ;

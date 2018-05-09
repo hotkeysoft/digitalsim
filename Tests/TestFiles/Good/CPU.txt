@@ -1,0 +1,39 @@
+Inputs: instr[16], data[16], reset;
+Outputs: write, dataAddr[16], instrAddr[16], result[16];
+
+# 1. more devices are needed to implement behavior as described in specification
+Parts:
+  DECODER decoder, REGISTER16B mReg, REGISTER16B aReg, COUNTER16B pc, ALU16B alu,
+  MUX16B mrMux, MUX16B in1Mux, MUX4W16B in2Mux, MUX16B rstMux,
+  
+  jzAnd AND, rstOr OR;
+# 2. wire them up
+Wires: instr->decoder.instr,
+  decoder.loadD->write, decoder.loadM->mReg.load, decoder.loadA->aReg.load,
+  pc.out->instrAddr,
+  decoder.constant->mrMux.in2[1-15],
+  mrMux.out->mReg.in,
+  alu.out->mrMux.in1,
+  alu.out->result,
+  alu.out->aReg.in,
+  decoder.cToM->mrMux.sel,
+  mReg.out->dataAddr,
+  #pad constant
+  decoder.op1->in1Mux.sel,
+  decoder.op2->in2Mux.sel,
+  decoder.constant[1-5]->in1Mux.in2[1-5],
+  decoder.constant[1-5]->in2Mux.in1[1-5],
+  aReg.out->in1Mux.in1,
+  aReg.out->in2Mux.in2,
+  in1Mux.out->alu.in1,
+  in2Mux.out->alu.in2,
+  mReg.out->in2Mux.in3,
+  data->in2Mux.in4,
+  mReg.out->rstMux.in1,
+  reset->rstMux.sel,
+  rstMux.out->pc.in,
+  decoder.jmpIfZ->jzAnd.in1,
+  alu.zero->jzAnd.in2,
+  jzAnd.out->rstOr.in2,
+  reset->rstOr.in1,
+  rstOr.out->pc.load;

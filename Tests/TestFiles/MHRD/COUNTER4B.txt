@@ -1,0 +1,33 @@
+Inputs: in[4], load, reset;
+Outputs: out[4];
+
+// 1. specify the components you want to use here
+Parts: mux MUX4B, rMux MUX4B, add ADDER4B,
+  f1 DFF, f2 DFF, f3 DFF, f4 DFF;
+
+// 2. wire them up
+Wires: 
+  in->mux.in2,
+  mux.out->rMux.in1,
+  reset->rMux.sel,
+  
+  1->add.in2[1],
+
+  f1.out->add.in1[1],
+  f2.out->add.in1[2],
+  f3.out->add.in1[3],  
+  f4.out->add.in1[4],    
+  
+  add.out->mux.in1,
+  load->mux.sel,
+
+  rMux.out[1]->f1.in,
+  rMux.out[2]->f2.in,
+  rMux.out[3]->f3.in,
+  rMux.out[4]->f4.in,
+  
+  f1.out->out[1],
+  f2.out->out[2],
+  f3.out->out[3],  
+  f4.out->out[4]
+  ;

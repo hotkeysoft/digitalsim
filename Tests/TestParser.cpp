@@ -5,6 +5,7 @@
 #include "Core\IOState.h"
 #include "Core\GateBase.h"
 #include "Core\Simulator.h"
+#include "BasicGates\NANDGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\ORGate.h"
 #include "BasicGates\BufferGate.h"
@@ -16,14 +17,19 @@ namespace UnitTests
 	using namespace Core;
 	using namespace Parser;
 
-	PartsBinPtr BuildPartsBin(bool populate = true)
+	PartsBinPtr BuildPartsBin(bool populate = true, bool nandOnly = false)
 	{
 		PartsBinPtr parts = PartsBin::Create();
 		
 		if (populate)
 		{
-			parts->AddPart("AND", BasicGates::ANDGate::Create());
-			parts->AddPart("OR", BasicGates::ORGate::Create());
+			parts->AddPart("NAND", BasicGates::NANDGate::Create());
+
+			if (!nandOnly)
+			{
+				parts->AddPart("AND", BasicGates::ANDGate::Create());
+				parts->AddPart("OR", BasicGates::ORGate::Create());
+			}
 		}
 
 		return parts;
@@ -254,11 +260,13 @@ namespace UnitTests
 		EXPECT_EQ(4, gate->GetGateCount());
 		
 		gate->Reset();
+
+		// no-op
+		parser.ParsePartsSection("");
+		parser.ParsePartsSection("  ");
 		EXPECT_EQ(0, gate->GetGateCount());
 
 		EXPECT_THROW(parser.ParsePartsSection(nullptr), std::invalid_argument);
-		EXPECT_THROW(parser.ParsePartsSection(""), std::invalid_argument);
-		EXPECT_THROW(parser.ParsePartsSection("  "), std::invalid_argument);
 		EXPECT_THROW(parser.ParsePartsSection(" , "), std::invalid_argument);
 		EXPECT_THROW(parser.ParsePartsSection(" ,,"), std::invalid_argument);
 		EXPECT_THROW(parser.ParsePartsSection("AND 3and  "), std::invalid_argument);
@@ -302,66 +310,140 @@ namespace UnitTests
 		parser.Attach(gate, parts);
 	
 		// Missing sections
-		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ;  Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; "), std::invalid_argument);
 
 		// Repeated sections
-		EXPECT_THROW(parser.ParseGate("Parts: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Parts: ;  Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Parts: ;  Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Parts: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Inputs: ; Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Inputs: ;  Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Inputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Inputs: ; "), std::invalid_argument);
 
-		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Inputs: ;  Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Inputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Outputs: ; Inputs: ; Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Outputs: ;  Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Outputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Outputs: ; "), std::invalid_argument);
 
-		EXPECT_THROW(parser.ParseGate("Outputs: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Outputs: ;  Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Outputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ;  Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Parts: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Parts: ; "), std::invalid_argument);
 
-		EXPECT_THROW(parser.ParseGate("Wires: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Wires: ; Outputs: ;  Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Wires: ; Inputs: ; Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Wires: ; Outputs: ;  Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: ; Parts: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Wires: ; "), std::invalid_argument);
 
 		// Invalid order
-		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Wires: ; Parts: ; Inputs: ; Outputs: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Wires: ; Outputs: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Wires: ; Outputs: ; Parts: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Wires: ; Inputs: ; Outputs: ; Parts: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Outputs: ; Inputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Outputs: ; Inputs: ; Wires: ; Parts: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Wires: ; Outputs: ; Parts: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ; Wires: ; "), std::invalid_argument);
 
 		// Too many
-		EXPECT_THROW(parser.ParseGate("Toomany: ; Parts: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Toomany: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Toomany: ; Outputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Toomany: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Toomany: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Toomany: ; Inputs: ; Outputs: ; Parts: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Toomany: ; Outputs: ; Parts: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Toomany: ; Parts: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Toomany: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Toomany: ;"), std::invalid_argument);
 
 		// Mandatory only
-		parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ;");
+		parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ;");
 
 		// Optional
-		parser.ParseGate("Description: ; Parts: ; Inputs: ; Outputs: ; Wires: ;");		
+		parser.ParseGate("Description: ; Inputs: ; Outputs: ; Parts: ; Wires: ;");		
 
 		// Optional out of place
-		EXPECT_THROW(parser.ParseGate("Parts: ; Description: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Description: ; Outputs: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Description: ; Wires: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Description: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Description: ; Outputs: ; Parts: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Description: ; Parts: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Description: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Parts: ; Wires: ; Description: ;"), std::invalid_argument);
 
 		// Optional + missing mandatory
+		EXPECT_THROW(parser.ParseGate("Description: ; Outputs: ; Parts: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Description: ; Inputs: ; Parts: ; Wires: ;"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseGate("Description: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Inputs: ; Wires: ;"), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Inputs: ; Outputs: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Description: ; Inputs: ; Outputs: ; Parts: ;"), std::invalid_argument);
+	}
 
+	TEST(TestParser, Comments)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate(false, false, false);
+		parser.Attach(gate);
+
+		TextParser::Sections sections = parser.GetSections("S1: section1 #; S2: section2 ; S3: section3 \n;");
+		ASSERT_EQ(1, sections.size());
+		EXPECT_STREQ("S1", sections[0].Name.c_str());
+		EXPECT_STREQ("section1", sections[0].Data.c_str());
+
+		sections = parser.GetSections("S1: section1 ; # S2: section2 ;\n S3: section3 ;\n");
+		ASSERT_EQ(2, sections.size());
+		EXPECT_STREQ("S1", sections[0].Name.c_str());
+		EXPECT_STREQ("section1", sections[0].Data.c_str());
+		EXPECT_STREQ("S3", sections[1].Name.c_str());
+		EXPECT_STREQ("section3", sections[1].Data.c_str());
+
+		sections = parser.GetSections("S1: section1 ; # this is a comment \nS2: section2 ;\n S3: section3 ;\n");
+		ASSERT_EQ(3, sections.size());
+		EXPECT_STREQ("S1", sections[0].Name.c_str());
+		EXPECT_STREQ("section1", sections[0].Data.c_str());
+		EXPECT_STREQ("S2", sections[1].Name.c_str());
+		EXPECT_STREQ("section2", sections[1].Data.c_str());
+		EXPECT_STREQ("S3", sections[2].Name.c_str());
+		EXPECT_STREQ("section3", sections[2].Data.c_str());
+
+		sections = parser.GetSections("# begin ;S1: comment ; \n S1: section1 ;# this is a comment \nS2: section2 ;\n S3: section3 ;\n");
+		ASSERT_EQ(3, sections.size());
+		EXPECT_STREQ("S1", sections[0].Name.c_str());
+		EXPECT_STREQ("section1", sections[0].Data.c_str());
+		EXPECT_STREQ("S2", sections[1].Name.c_str());
+		EXPECT_STREQ("section2", sections[1].Data.c_str());
+		EXPECT_STREQ("S3", sections[2].Name.c_str());
+		EXPECT_STREQ("section3", sections[2].Data.c_str());
+	}
+
+	TEST(TestParser, LoadFromFile)
+	{
+		PartsBinPtr parts = BuildPartsBin(true, true);
+		CompositeGatePtr gate;
+		TextParser parser;
+		char buf[1024];
+		_getcwd(buf, 1024);
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\XOR.txt");
+		parts->AddPart("XOR", gate);
+		EXPECT_EQ(2, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT.txt");
+		parts->AddPart("NOT", gate);
+
+		EXPECT_EQ(3, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR.txt");
+		parts->AddPart("OR", gate);
+
+		EXPECT_EQ(4, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR4W.txt");
+		parts->AddPart("OR4W", gate);
+
+		EXPECT_EQ(5, parts->GetPartCount());
+
+		std::cout << Tools::LogicTools::PrintInternalConnections(gate);
 
 	}
 }
