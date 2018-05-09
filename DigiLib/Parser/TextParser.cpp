@@ -94,30 +94,33 @@ namespace DigiLib {
 		{
 			if (m_parts == nullptr)
 			{
-				throw std::invalid_argument("no parts");
+				throw std::invalid_argument("no parts bin assigned");
 			}
 
 			TextParser::SectionElement partsSection = ParseSection(in);
 			for (const auto & part : partsSection)
 			{
-				auto out = ExtractPartDef(part);
-
-				std::string type = std::get<0>(out);
-				std::string name = std::get<1>(out);
-
-				// Check if name matches a part type
-				if (m_parts->Find(name.c_str()))
+				if (!part.empty())
 				{
-					throw std::invalid_argument("there is a part with this name");
-				}
+					auto out = ExtractPartDef(part);
 
-				GatePtr part = m_parts->Find(type.c_str());
-				if (part == nullptr)
-				{
-					throw std::invalid_argument("part not found");
-				}
+					std::string type = std::get<0>(out);
+					std::string name = std::get<1>(out);
 
-				m_gate->AddGate(name.c_str(), part->Clone(name.c_str()));
+					// Check if name matches a part type
+					if (m_parts->Find(name.c_str()))
+					{
+						throw std::invalid_argument("there is a part with this name");
+					}
+
+					GatePtr part = m_parts->Find(type.c_str());
+					if (part == nullptr)
+					{
+						throw std::invalid_argument("part not found");
+					}
+
+					m_gate->AddGate(name.c_str(), part->Clone(name.c_str()));
+				}
 			}
 		}
 

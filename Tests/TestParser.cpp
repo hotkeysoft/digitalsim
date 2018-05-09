@@ -298,9 +298,12 @@ namespace UnitTests
 	{
 		TextParser parser;
 		CompositeGatePtr gate = BuildTestGate(false, false, false);
-		parser.Attach(gate);
+		PartsBinPtr parts = BuildPartsBin();
+		parser.Attach(gate, parts);
 
 		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: "), std::invalid_argument);
 		parser.ParseGate("Inputs: ; Outputs: ; Wires: ;");
+
+		parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ;");
 	}
 }
