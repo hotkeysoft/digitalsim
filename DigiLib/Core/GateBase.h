@@ -90,6 +90,9 @@ namespace DigiLib
 
 			bool ConnectPins(IOPinPtr source, IOPinPtr target, bool inverted = false);
 
+			static bool IsValidGateName(const char* name);
+			static bool IsValidPinName(const char* name);
+
 		protected:
 			virtual IOPinPtr AddInput(const char*  name, size_t width = 1);
 			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
@@ -113,14 +116,12 @@ namespace DigiLib
 			static AllowedConnectionMapType m_insideParentMap;
 			static AllowedConnectionMapType m_parentInsideMap;
 			static void InitAllowedConnectionMaps();
-
-			bool IsValidPinName(const char* name);
+			
 			void ValidatePinName(const char* name);
 			void ValidatePinWidth(size_t width);
 
 			bool CanConnectToTarget(const IOConnection & link);
 
-			virtual bool IsValidGateName(const char* name);
 			virtual void ValidateGateName(const char* name);
 		};
 	}

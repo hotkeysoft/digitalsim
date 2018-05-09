@@ -22,4 +22,10 @@ namespace DigiLib
 		typedef std::shared_ptr<Simulator> SimulatorPtr;
 		typedef Simulator* SimulatorRef;
 	}
+
+	namespace Parser
+	{
+		class PartsBin;
+		typedef std::shared_ptr<PartsBin> PartsBinPtr;
+	}
 }

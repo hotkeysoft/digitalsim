@@ -5,6 +5,7 @@
 #include "Core\CompositeGate.h"
 #include <cctype>
 #include <regex>
+#include "PartsBin.h"
 
 #define PIN_DEF_REGEX "^(\\/?[A-Za-z](?:\\w){0,31})(?:\\[(\\d+)\\])?$"
 
@@ -58,12 +59,12 @@ namespace DigiLib {
 			{
 				throw std::invalid_argument("connection separator not found");
 			}
-			size_t nextSeparator = inStr.find(separator, firstSeparator+1);
+			size_t nextSeparator = inStr.find(separator, firstSeparator + 1);
 			if (nextSeparator != -1)
 			{
 				throw std::invalid_argument("more than one connection separator");
 			}
-			
+
 			std::string pinName1 = trim(inStr.substr(0, firstSeparator));
 			std::string pinName2 = trim(inStr.substr(firstSeparator + separator.size()));
 			if (pinName1.empty())
@@ -243,7 +244,7 @@ namespace DigiLib {
 				}
 				section.push_back(substr);
 			}
-			
+
 			if (section.size() > 1 && hasEmptyElement)
 			{
 				throw std::invalid_argument("empty element in section");
