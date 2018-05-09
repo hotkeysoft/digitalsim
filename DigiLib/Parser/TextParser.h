@@ -1,5 +1,6 @@
 #pragma once
 #include "Core\Common.h"
+#include <list>
 #include <vector>
 #include <sstream>
 
@@ -18,9 +19,11 @@ namespace DigiLib {
 		public:
 			struct Section { std::string Name;  std::string Data; };
 			using Sections = std::vector<Section>;
-			using SectionElement = std::vector<std::string>;
+			using SectionElement = std::list<std::string>;
 			using PinDefType = std::tuple<std::string, size_t>;
 			using PartDefType = std::tuple<std::string, std::string>;
+			using SectionDefType = std::tuple<std::string, bool>;
+			using SectionDef = std::list<SectionDefType>;
 
 			void Attach(Core::CompositeGatePtr gate, PartsBinPtr parts = nullptr)
 			{
@@ -31,6 +34,7 @@ namespace DigiLib {
 			Core::CompositeGatePtr Get() { return m_gate; }
 
 			void ParseGate(const char*);
+			void ParseSection(const DigiLib::Parser::TextParser::Section & section);
 			void ParseConnection(const char *);
 			void ParsePartsSection(const char *);
 			void ParseWireSection(const char *);
@@ -48,6 +52,8 @@ namespace DigiLib {
 		private:
 			Core::CompositeGatePtr m_gate;
 			PartsBinPtr m_parts;
+
+			static SectionDef m_sectionNames;
 		};
 	}
 }

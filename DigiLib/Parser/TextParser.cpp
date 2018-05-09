@@ -21,21 +21,75 @@ namespace DigiLib {
 			return (wsback <= wsfront ? std::string() : std::string(wsfront, wsback));
 		}
 
+		TextParser::SectionDef TextParser::m_sectionNames = {
+			{"Description", false},
+			{"Parts", true},
+			{"Inputs", true},
+			{"Outputs", true},
+			{"Wires", true },
+		};
+
 		void TextParser::ParseGate(const char * in)
 		{
-			auto sections = GetSections(in);
+			const Sections & sections = GetSections(in);
+			Sections::const_iterator currSection = sections.begin();
+
+			for (const auto & sectionDef : m_sectionNames)
+			{
+				// mandatory section
+				if (std::get<1>(sectionDef))
+				{
+					const std::string &expected = std::get<0>(sectionDef);
+					if (currSection == sections.end())
+					{
+						throw std::invalid_argument("missing section: " + expected);
+					}
+					else if (currSection->Name != expected)
+					{
+						throw std::invalid_argument("expected section: " + expected);
+					}
+					else 
+					{ 
+						// Check next one
+						++currSection; 
+					}
+				}
+				else // optional section
+				{
+					const std::string &expected = std::get<0>(sectionDef);
+					if (currSection->Name == expected)
+					{
+						// Check next one
+						++currSection;
+					}
+				}
+			}
+			if (currSection != sections.end())
+			{
+				throw std::invalid_argument("unexpected section: " + currSection->Name);
+			}
+
 			for (const auto & section : sections)
 			{
-				if (section.Name == "Parts")
-					ParsePartsSection(section.Data.c_str());
-				else if (section.Name == "Inputs")
-					ParseInputsSection(section.Data.c_str());
-				else if (section.Name == "Outputs")
-					ParseOutputsSection(section.Data.c_str());
-				else if (section.Name == "Wires")
-					ParseWireSection(section.Data.c_str());
-				else throw std::invalid_argument("unknown section");
+				ParseSection(section);
 			}
+		}
+
+		void TextParser::ParseSection(const DigiLib::Parser::TextParser::Section & section)
+		{
+			if (section.Name == "Description")
+			{
+				//TODO
+			}
+			else if (section.Name == "Parts")
+				ParsePartsSection(section.Data.c_str());
+			else if (section.Name == "Inputs")
+				ParseInputsSection(section.Data.c_str());
+			else if (section.Name == "Outputs")
+				ParseOutputsSection(section.Data.c_str());
+			else if (section.Name == "Wires")
+				ParseWireSection(section.Data.c_str());
+			else throw std::invalid_argument("unknown section: " + section.Name);
 		}
 
 		void TextParser::ParseConnection(const char * in)
@@ -81,9 +135,13 @@ namespace DigiLib {
 
 			IOPinPtr pin1 = m_gate->FindPin(pinName1.c_str());
 			IOPinPtr pin2 = m_gate->FindPin(pinName2.c_str());
-			if (pin1 == nullptr || pin2 == nullptr)
+			if (pin1 == nullptr)
 			{
-				throw std::invalid_argument("pin not found");
+				throw std::invalid_argument("pin not found: " + pinName1);
+			}
+			if (pin2 == nullptr)
+			{
+				throw std::invalid_argument("pin not found: " + pinName2);
 			}
 
 			//TODO how to indicate 'negative' connections?
@@ -110,13 +168,13 @@ namespace DigiLib {
 					// Check if name matches a part type
 					if (m_parts->Find(name.c_str()))
 					{
-						throw std::invalid_argument("there is a part with this name");
+						throw std::invalid_argument("there is a part named: " + name);
 					}
 
 					GatePtr part = m_parts->Find(type.c_str());
 					if (part == nullptr)
 					{
-						throw std::invalid_argument("part not found");
+						throw std::invalid_argument("part not found: " + type);
 					}
 
 					m_gate->AddGate(name.c_str(), part->Clone(name.c_str()));

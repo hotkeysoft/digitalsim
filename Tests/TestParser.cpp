@@ -300,18 +300,68 @@ namespace UnitTests
 		CompositeGatePtr gate = BuildTestGate(false, false, false);
 		PartsBinPtr parts = BuildPartsBin();
 		parser.Attach(gate, parts);
+	
+		// Missing sections
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; "), std::invalid_argument);
 
-		EXPECT_THROW(parser.ParseGate("Inputs: ; Outputs: ; Wires: "), std::invalid_argument);
-		parser.ParseGate("Inputs: ; Outputs: ; Wires: ;");
-		
-		// Invalid order, missing sections
+		// Repeated sections
+		EXPECT_THROW(parser.ParseGate("Parts: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Parts: ;  Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Parts: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Parts: ; "), std::invalid_argument);
+
+		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Inputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Inputs: ; "), std::invalid_argument);
+
+		EXPECT_THROW(parser.ParseGate("Outputs: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Outputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Outputs: ; "), std::invalid_argument);
+
+		EXPECT_THROW(parser.ParseGate("Wires: ; Parts: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ;  Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Wires: ; Outputs: ;  Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Wires: ; "), std::invalid_argument);
+
+		// Invalid order
 		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseGate("Wires: ; Parts: ; Inputs: ; Outputs: ; "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
 		EXPECT_THROW(parser.ParseGate("Inputs: ; Parts: ; Wires: ; Outputs: ; "), std::invalid_argument);
 		EXPECT_THROW(parser.ParseGate("Parts: ; Wires: ; Inputs: ; Outputs: ; "), std::invalid_argument);
-		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Inputs: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Outputs: ; Inputs: ; Wires: ; "), std::invalid_argument);
 
+		// Too many
+		EXPECT_THROW(parser.ParseGate("Toomany: ; Parts: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Toomany: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Toomany: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Toomany: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Toomany: ;"), std::invalid_argument);
+
+		// Mandatory only
 		parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ;");
+
+		// Optional
+		parser.ParseGate("Description: ; Parts: ; Inputs: ; Outputs: ; Wires: ;");		
+
+		// Optional out of place
+		EXPECT_THROW(parser.ParseGate("Parts: ; Description: ; Inputs: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Description: ; Outputs: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Description: ; Wires: ; "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Parts: ; Inputs: ; Outputs: ; Wires: ; Description: ;"), std::invalid_argument);
+
+		// Optional + missing mandatory
+		EXPECT_THROW(parser.ParseGate("Description: ; Inputs: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Outputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Inputs: ; Wires: ;"), std::invalid_argument);
+		EXPECT_THROW(parser.ParseGate("Description: ; Parts: ; Inputs: ; Outputs: ;"), std::invalid_argument);
+
+
 	}
 }
