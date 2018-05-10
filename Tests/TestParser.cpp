@@ -441,15 +441,54 @@ namespace UnitTests
 		EXPECT_STREQ("section3", sections[2].Data.c_str());
 	}
 
+	bool isDir(std::string path)
+	{
+		struct stat info;
+
+		if (stat(path.c_str(), &info) != 0)
+		{
+			return false;
+		}
+		else if (info.st_mode & S_IFDIR)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	std::string GetTestFile(std::string fileName)
+	{
+		// By default, we should be running from the project's directory. 
+		// However, if running from VC test harness, we're in the build directory for some reason...
+		// Fake it by looking in two places in a not very subtle way
+
+		std::string basePath = "./TestFiles";
+		if (isDir(basePath))
+		{
+			return basePath + fileName;
+		}
+
+		char data[1024];
+		_getcwd(data, 1024);
+		basePath = data;
+		basePath += "/../../Tests/TestFiles";
+		if (isDir(basePath))
+		{
+			return basePath + fileName;
+		}
+		throw std::invalid_argument("Can't find test file base directory");
+	}
+
 	TEST(TestParser, LoadFromFile)
 	{
 		PartsBinPtr parts = BuildPartsBin(true, true);
 		CompositeGatePtr gate;
-		TextParser parser;
-		
+		TextParser parser;	
+
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/XOR.txt");
+		parser.LoadFromFile(GetTestFile("/Good/XOR.txt").c_str());
 		parts->AddPart("XOR", gate);
 		EXPECT_EQ(2, parts->GetPartCount());
 
@@ -461,7 +500,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/NOT.txt");
+		parser.LoadFromFile(GetTestFile("/Good/NOT.txt").c_str());
 		parts->AddPart("NOT", gate);
 		EXPECT_EQ(3, parts->GetPartCount());
 
@@ -473,14 +512,14 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/NOT4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/NOT4B.txt").c_str());
 		parts->AddPart("NOT4B", gate);
 		EXPECT_EQ(4, parts->GetPartCount());
 
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/OR.txt");
+		parser.LoadFromFile(GetTestFile("/Good/OR.txt").c_str());
 		parts->AddPart("OR", gate);
 		EXPECT_EQ(5, parts->GetPartCount());
 
@@ -492,7 +531,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/OR4W.txt");
+		parser.LoadFromFile(GetTestFile("/Good/OR4W.txt").c_str());
 		parts->AddPart("OR4W", gate);
 		EXPECT_EQ(6, parts->GetPartCount());
 
@@ -505,7 +544,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/AND.txt");
+		parser.LoadFromFile(GetTestFile("/Good/AND.txt").c_str());
 		parts->AddPart("AND", gate);
 		EXPECT_EQ(7, parts->GetPartCount());
 
@@ -517,7 +556,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/HALFADDER.txt");
+		parser.LoadFromFile(GetTestFile("/Good/HALFADDER.txt").c_str());
 		parts->AddPart("HALFADDER", gate);
 		EXPECT_EQ(8, parts->GetPartCount());
 
@@ -530,7 +569,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/FULLADDER.txt");
+		parser.LoadFromFile(GetTestFile("/Good/FULLADDER.txt").c_str());
 		parts->AddPart("FULLADDER", gate);
 		EXPECT_EQ(9, parts->GetPartCount());
 
@@ -545,13 +584,13 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/ADDER4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/ADDER4B.txt").c_str());
 		parts->AddPart("ADDER4B", gate);
 		EXPECT_EQ(10, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/MUX.txt");
+		parser.LoadFromFile(GetTestFile("/Good/MUX.txt").c_str());
 		parts->AddPart("MUX", gate);
 		EXPECT_EQ(11, parts->GetPartCount());
 
@@ -564,13 +603,13 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/MUX4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/MUX4B.txt").c_str());
 		parts->AddPart("MUX4B", gate);
 		EXPECT_EQ(12, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/DEMUX.txt");
+		parser.LoadFromFile(GetTestFile("/Good/DEMUX.txt").c_str());
 		parts->AddPart("DEMUX", gate);
 		EXPECT_EQ(13, parts->GetPartCount());
 
@@ -583,25 +622,25 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/DEMUX4W.txt");
+		parser.LoadFromFile(GetTestFile("/Good/DEMUX4W.txt").c_str());
 		parts->AddPart("DEMUX4W", gate);
 		EXPECT_EQ(14, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/NAND4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/NAND4B.txt").c_str());
 		parts->AddPart("NAND4B", gate);
 		EXPECT_EQ(15, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/ALU4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/ALU4B.txt").c_str());
 		parts->AddPart("ALU4B", gate);
 		EXPECT_EQ(16, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/DECODER.txt");
+		parser.LoadFromFile(GetTestFile("/Good/DECODER.txt").c_str());
 		parts->AddPart("DECODER", gate);
 		EXPECT_EQ(17, parts->GetPartCount());
 
@@ -611,20 +650,64 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/COUNTER4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/COUNTER4B.txt").c_str());
 		parts->AddPart("COUNTER4B", gate);
 		EXPECT_EQ(19, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/REGISTER.txt");
+		parser.LoadFromFile(GetTestFile("/Good/REGISTER.txt").c_str());
 		parts->AddPart("REGISTER", gate);
 		EXPECT_EQ(20, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("TestFiles/Good/REGISTER4B.txt");
+		parser.LoadFromFile(GetTestFile("/Good/REGISTER4B.txt").c_str());
 		parts->AddPart("REGISTER4B", gate);
 		EXPECT_EQ(21, parts->GetPartCount());
+	}
+
+	GatePtr FindPart(PartsBinPtr parts, const char * name)
+	{
+		std::cout << "Looking for part: " << name << std::endl;
+
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		std::ostringstream os;
+		os << "/Good/" << name << ".txt";
+
+		try
+		{
+			parser.LoadFromFile(GetTestFile(os.str()).c_str());
+			return gate;
+		}
+		catch (std::exception e)
+		{
+			std::cerr << "Error while loading part " << os.str() << std::endl;
+		}
+
+		return nullptr;
+	}
+
+	TEST(TestParser, PartFinder)
+	{
+		PartsBinPtr parts = BuildPartsBin(true, true);
+		parts->SetPartFinder(FindPart);
+
+		parts->AddPart("DFF", BuildDFF());
+
+		CompositeGatePtr gate;
+		TextParser parser;
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile(GetTestFile("/Good/REGISTER4B.txt").c_str());
+		parts->AddPart("REGISTER4B", gate);
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile(GetTestFile("/Good/DECODER.txt").c_str());
+		parts->AddPart("DECODER", gate);
 	}
 }

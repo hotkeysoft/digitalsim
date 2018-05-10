@@ -188,7 +188,7 @@ namespace DigiLib {
 					std::string name = std::get<1>(out);
 
 					// Check if name matches a part type
-					if (m_parts->Find(name.c_str()))
+					if (m_parts->HasGate(name.c_str()))
 					{
 						throw std::invalid_argument("there is a part named: " + name);
 					}

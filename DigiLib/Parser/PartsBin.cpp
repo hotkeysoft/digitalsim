@@ -31,6 +31,16 @@ namespace DigiLib {
 			this->m_gates[name] = gate->Clone(name);
 		}
 
+		bool PartsBin::HasGate(const char * name)
+		{
+			if (name == nullptr)
+			{
+				throw std::invalid_argument("name is null");
+			}
+
+			return m_gates.find(name) != m_gates.end();
+		}
+
 		GatePtr PartsBin::Find(const char * name)
 		{
 			if (name == nullptr)
@@ -42,6 +52,15 @@ namespace DigiLib {
 			if (part != m_gates.end())
 			{
 				return part->second;
+			}
+			else if (m_partFinderFunc)
+			{
+				GatePtr gate = m_partFinderFunc(shared_from_this(), name);
+				if (gate != nullptr)
+				{
+					this->m_gates[name] = gate->Clone(name);
+					return this->m_gates[name];
+				}
 			}
 
 			return nullptr;
