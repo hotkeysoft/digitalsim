@@ -1,0 +1,29 @@
+Inputs: in[16], load, address[2];
+Outputs: out[16];
+
+// 1. specify the components you want to use here
+Parts: lDemux DEMUX4W, outMux MUX4W16B,
+  r1 REGISTER16B, r2 REGISTER16B, r3 REGISTER16B, r4 REGISTER16B;
+
+// 2. wire them up
+Wires: load->lDemux.in,
+  address->lDemux.sel,
+  address->outMux.sel,
+  
+  in->r1.in,
+  in->r2.in,
+  in->r3.in,
+  in->r4.in,
+  
+  lDemux.out1->r1.load,
+  lDemux.out2->r2.load,
+  lDemux.out3->r3.load,
+  lDemux.out4->r4.load,
+  
+  r1.out->outMux.in1,  
+  r2.out->outMux.in2,
+  r3.out->outMux.in3,
+  r4.out->outMux.in4,
+  
+  outMux.out->out
+;

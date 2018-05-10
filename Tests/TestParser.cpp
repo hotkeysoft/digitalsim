@@ -5,6 +5,7 @@
 #include "Core\IOState.h"
 #include "Core\GateBase.h"
 #include "Core\Simulator.h"
+#include "BasicGates\DFlipFlop.h"
 #include "BasicGates\NANDGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\ORGate.h"
@@ -33,6 +34,20 @@ namespace UnitTests
 		}
 
 		return parts;
+	}
+
+	CompositeGatePtr BuildDFF()
+	{
+		CompositeGatePtr gate = CompositeGate::Create("DFF");
+		gate->AddInput("in");
+		gate->AddInput("clk");
+		gate->AddOutput("out");
+		gate->AddGate("dflip", BasicGates::DFlipFlop::Create());
+
+		gate->GetPin("in")->ConnectTo(gate->FindPin("dflip.d"));
+		gate->GetPin("clk")->ConnectTo(gate->FindPin("dflip.clk"));
+		gate->FindPin("dflip.q")->ConnectTo(gate->GetPin("out"));
+		return gate;
 	}
 
 	CompositeGatePtr BuildTestGate(bool addInputs = true, bool addOutputs = true, bool addGates = true)
@@ -592,5 +607,26 @@ namespace UnitTests
 		parts->AddPart("DECODER", gate);
 		EXPECT_EQ(17, parts->GetPartCount());
 
+		// Need DFF for last components
+		parts->AddPart("DFF", BuildDFF());
+		EXPECT_EQ(18, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\COUNTER4B.txt");
+		parts->AddPart("COUNTER4B", gate);
+		EXPECT_EQ(19, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\REGISTER.txt");
+		parts->AddPart("REGISTER", gate);
+		EXPECT_EQ(20, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\REGISTER4B.txt");
+		parts->AddPart("REGISTER4B", gate);
+		EXPECT_EQ(21, parts->GetPartCount());
 	}
 }

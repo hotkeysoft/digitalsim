@@ -11,23 +11,23 @@ Wires:
   mux.out->rMux.in1,
   reset->rMux.sel,
   
-  1->add.in2[1],
+  vcc->add.in2[0],
 
-  f1.out->add.in1[1],
-  f2.out->add.in1[2],
-  f3.out->add.in1[3],  
-  f4.out->add.in1[4],    
+  f1.out->add.in1[0],
+  f2.out->add.in1[1],
+  f3.out->add.in1[2],  
+  f4.out->add.in1[3],    
   
   add.out->mux.in1,
   load->mux.sel,
 
-  rMux.out[1]->f1.in,
-  rMux.out[2]->f2.in,
-  rMux.out[3]->f3.in,
-  rMux.out[4]->f4.in,
+  rMux.out[0]->f1.in,
+  rMux.out[1]->f2.in,
+  rMux.out[2]->f3.in,
+  rMux.out[3]->f4.in,
   
-  f1.out->out[1],
-  f2.out->out[2],
-  f3.out->out[3],  
-  f4.out->out[4]
+  f1.out->out[0],
+  f2.out->out[1],
+  f3.out->out[2],  
+  f4.out->out[3]
   ;

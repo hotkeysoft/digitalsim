@@ -261,8 +261,6 @@ namespace DigiLib
 				IOPinPtr sourcePin = link.GetSource();
 				IOPinPtr targetPin = link.GetTarget();
 
-				std::cout << "Cloning " << sourcePin->GetFullName() << "->" << targetPin->GetFullName() << std::endl;
-
 				clonedSource = sourcePin->Clone(clone.get());
 
 				if (targetPin->GetParent() == sourcePin->GetParent()) 

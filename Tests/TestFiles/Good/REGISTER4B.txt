@@ -2,12 +2,17 @@ Inputs: in[4], load;
 Outputs: out[4];
 
 Parts: MUX4B mux,
-  DFF flip1, DFF flip2, DFF flip3, DFF flip4;
+  DFF flip0, DFF flip1, DFF flip2, DFF flip3;
 
 # 2. wire them up
 Wires: 
   load->mux.sel,
   
+  in[0]->mux.in2[0],
+  flip0.out->mux.in1[0],
+  mux.out[0]->flip0.in,
+  flip0.out->out[0],
+
   in[1]->mux.in2[1],
   flip1.out->mux.in1[1],
   mux.out[1]->flip1.in,
@@ -21,10 +26,5 @@ Wires:
   in[3]->mux.in2[3],
   flip3.out->mux.in1[3],
   mux.out[3]->flip3.in,
-  flip3.out->out[3],
-
-  in[4]->mux.in2[4],
-  flip4.out->mux.in1[4],
-  mux.out[4]->flip4.in,
-  flip4.out->out[4]
+  flip3.out->out[3]
   ;
