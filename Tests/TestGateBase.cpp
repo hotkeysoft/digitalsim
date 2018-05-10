@@ -800,6 +800,9 @@ namespace UnitTests
 		EXPECT_THROW(gate->GetPin("gnd")->ConnectTo(gate->FindPin("vcc")), std::invalid_argument);
 		EXPECT_THROW(gate->GetPin("vcc")->ConnectTo(gate->FindPin("gnd")), std::invalid_argument);
 
+		EXPECT_EQ(1, gate->GetConnectedToPin("vcc").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("gnd").size());
+
 		gate->InitializeState();
 
 		// Test behavior
@@ -821,6 +824,10 @@ namespace UnitTests
 
 		// Clone gate
 		GatePtr clone = gate->Clone("clone");
+
+		EXPECT_EQ(1, clone->GetConnectedToPin("vcc").size());
+		EXPECT_EQ(1, clone->GetConnectedToPin("gnd").size());
+
 		clone->InitializeState();
 		
 		// Test clone behavior

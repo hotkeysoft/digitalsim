@@ -242,41 +242,47 @@ namespace DigiLib
 
 		void CompositeGate::InternalCloneInnerLinks(GatePtr source, GatePtr clone)
 		{
-			CompositeGatePtr compositeClone = std::dynamic_pointer_cast<CompositeGate>(clone);
-
 			for (auto connections : source->GetConnectedToPins())
 			{
-				for (auto link : connections)
+				InternalClonePinLinks(connections, source, clone);
+			}
+			InternalClonePinLinks(source->GetConnectedToPin("vcc"), source, clone);
+			InternalClonePinLinks(source->GetConnectedToPin("gnd"), source, clone);
+		}
+
+		void CompositeGate::InternalClonePinLinks(PinConnectionsType connections, GatePtr source, GatePtr clone)
+		{
+			CompositeGatePtr compositeClone = std::dynamic_pointer_cast<CompositeGate>(clone);
+			for (auto link : connections)
+			{
+				IOPinPtr clonedSource = nullptr;
+				IOPinPtr clonedTarget = nullptr;
+
+				IOPinPtr sourcePin = link.GetSource();
+				IOPinPtr targetPin = link.GetTarget();
+
+				clonedSource = sourcePin->Clone(clone.get());
+
+				if (targetPin->GetParent() == source->GetParent())
 				{
-					IOPinPtr clonedSource = nullptr;
-					IOPinPtr clonedTarget = nullptr;
-					
-					IOPinPtr sourcePin = link.GetSource();
-					IOPinPtr targetPin = link.GetTarget();
-
-					clonedSource = sourcePin->Clone(clone.get());
-
-					if (targetPin->GetParent() == source->GetParent())
-					{
-						// Target on same level as source pin
-						clonedTarget = targetPin->Clone(clone->GetParent());
-					}
-					else if (targetPin->GetParent()->GetParent() == source->GetParent())
-					{
-						// Target is outside component
-						std::string gateName = targetPin->GetParent()->GetName();
-						CompositeGateRef comp = dynamic_cast<CompositeGateRef>(clone->GetParent());
-						clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()).get());
-					}
-					else
-					{
-						// Target is an internal gate below
-						std::string gateName = targetPin->GetParent()->GetName();
-						clonedTarget = targetPin->Clone(compositeClone->GetGate(gateName.c_str()).get());
-					}
-
-					clone->ConnectPins(clonedSource, clonedTarget);
+					// Target on same level as source pin
+					clonedTarget = targetPin->Clone(clone->GetParent());
 				}
+				else if (targetPin->GetParent()->GetParent() == source->GetParent())
+				{
+					// Target is outside component
+					std::string gateName = targetPin->GetParent()->GetName();
+					CompositeGateRef comp = dynamic_cast<CompositeGateRef>(clone->GetParent());
+					clonedTarget = targetPin->Clone(comp->GetGate(gateName.c_str()).get());
+				}
+				else
+				{
+					// Target is an internal gate below
+					std::string gateName = targetPin->GetParent()->GetName();
+					clonedTarget = targetPin->Clone(compositeClone->GetGate(gateName.c_str()).get());
+				}
+
+				clone->ConnectPins(clonedSource, clonedTarget);
 			}
 		}
 

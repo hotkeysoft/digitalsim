@@ -56,6 +56,7 @@ namespace DigiLib
 			static void InternalCloneGates(CompositeGatePtr source, CompositeGatePtr clone);
 			static void InternalCloneLinks(GatePtr source, GatePtr clone);
 			static void InternalCloneInnerLinks(GatePtr source, GatePtr clone);
+			static void InternalClonePinLinks(PinConnectionsType connections, GatePtr source, GatePtr clone);
 
 			void ValidateGateName(const char* name, bool checkDuplicate = true);
 

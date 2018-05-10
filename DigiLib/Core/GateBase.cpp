@@ -204,6 +204,15 @@ namespace DigiLib
 				throw std::invalid_argument("source pin is null");
 			}
 
+			if (m_vccPin->GetName() == pinName)
+			{
+				return m_connectedToVcc;
+			}
+			else if (m_gndPin->GetName() == pinName)
+			{
+				return m_connectedToGnd;
+			}
+
 			IOPinPtr pin = GetPin(pinName);
 			if (pin == nullptr)
 			{
