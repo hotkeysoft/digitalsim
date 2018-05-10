@@ -18,7 +18,7 @@ namespace DigiLib
 		class DllExport IOPin : public std::enable_shared_from_this<IOPin>
 		{
 		public:
-			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z };
+			enum IO_DIRECTION { INPUT, OUTPUT, OUTPUT_HI_Z, POWER };
 
 		public:
 			IOPin(GateRef parentGate, size_t id, const char * name, size_t width, IO_DIRECTION direction);

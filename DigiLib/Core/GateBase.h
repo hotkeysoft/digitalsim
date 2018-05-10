@@ -38,8 +38,8 @@ namespace DigiLib
 			GateBase(GateBase&&) = delete;
 			GateBase& operator=(GateBase&&) = delete;
 
-			virtual void Init() {}
-			virtual void InitializeState() {}
+			virtual void Init();
+			virtual void InitializeState();
 
 			std::string GetName() { return m_name; }
 			std::string GetFullName();
@@ -64,9 +64,6 @@ namespace DigiLib
 			virtual IOPinPtr GetPin(const char* name);
 			virtual IOPinPtr GetPin(const char* name, size_t pin);
 			virtual IOPinPtr GetPin(const char* name, size_t low, size_t hi);
-
-			virtual PinConnectionsType& GetConnectedFromPin(size_t pinID);
-			virtual PinConnectionsType& GetConnectedToPin(size_t pinID);
 
 			virtual PinConnectionsType& GetConnectedFromPin(const char* sourcePin);
 			virtual PinConnectionsType& GetConnectedToPin(const char* sourcePin);
@@ -96,6 +93,7 @@ namespace DigiLib
 		protected:
 			virtual IOPinPtr AddInput(const char*  name, size_t width = 1);
 			virtual IOPinPtr AddOutput(const char*  name, size_t width = 1, IOPin::IO_DIRECTION dir = IOPin::IO_DIRECTION::OUTPUT);
+			void InitVccGndPins();
 
 			std::string m_name;
 			Mode m_mode;
@@ -112,6 +110,12 @@ namespace DigiLib
 
 			IOPinListType m_ioPins;
 
+			IOPinPtr m_vccPin;
+			PinConnectionsType m_connectedToVcc;
+
+			IOPinPtr m_gndPin;
+			PinConnectionsType m_connectedToGnd;
+
 			static AllowedConnectionMapType m_insideInsideMap;
 			static AllowedConnectionMapType m_insideParentMap;
 			static AllowedConnectionMapType m_parentInsideMap;
@@ -119,6 +123,9 @@ namespace DigiLib
 			
 			void ValidatePinName(const char* name);
 			void ValidatePinWidth(size_t width);
+
+			PinConnectionsType& GetConnectedFromPin(size_t pinID);
+			PinConnectionsType& GetConnectedToPin(size_t pinID);
 
 			bool CanConnectToTarget(const IOConnection & link);
 

@@ -64,7 +64,8 @@ namespace DigiLib {
 			std::ostringstream os;
 			for (auto & input : gate->GetInputPins())
 			{
-				for (auto connection : gate->GetConnectedToPin(input.second))
+				IOPinPtr pin = gate->GetPin(input.second);
+				for (auto connection : gate->GetConnectedToPin(pin))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -72,7 +73,8 @@ namespace DigiLib {
 
 			for (auto & output : gate->GetOutputPins())
 			{
-				for (auto connection : gate->GetConnectedToPin(output.second))
+				IOPinPtr pin = gate->GetPin(output.second);
+				for (auto connection : gate->GetConnectedToPin(pin))
 				{
 					os << connection.GetSource()->GetFullName() << " -> " << connection.GetTarget()->GetFullName() << std::endl;
 				}
@@ -188,6 +190,8 @@ namespace DigiLib {
 				for (auto & pinID : outputs)
 				{
 					IOPinPtr pin = gate->GetPin(pinID.second);
+					if (pin->GetName() == "vcc" || pin->GetName() == "gnd")
+						continue;
 					result.push_back(pin->Get().Get());
 				}
 			}

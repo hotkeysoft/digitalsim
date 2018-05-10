@@ -6,5 +6,5 @@ Parts: NAND myNAND;
 
 # 2. wire them up
 Wires: in->myNAND.in1,
-  in->myNAND.in2,
+  vcc->myNAND.in2,
   myNAND.out->out;

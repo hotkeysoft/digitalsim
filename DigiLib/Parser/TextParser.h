@@ -33,6 +33,8 @@ namespace DigiLib {
 
 			Core::CompositeGatePtr Get() { return m_gate; }
 
+			void LoadFromFile(const char*);
+
 			void ParseGate(const char*);
 			void ParseSection(const DigiLib::Parser::TextParser::Section & section);
 			void ParseConnection(const char *);
@@ -48,6 +50,7 @@ namespace DigiLib {
 			static PinDefType ExtractPinDef(const std::string & in);
 			static PartDefType ExtractPartDef(const std::string & in);
 			static Section ExtractSection(const std::string & in);
+			static std::string RemoveComments(const std::string & in);
 
 		private:
 			Core::CompositeGatePtr m_gate;

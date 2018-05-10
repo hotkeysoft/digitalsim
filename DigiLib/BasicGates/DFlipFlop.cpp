@@ -14,6 +14,7 @@ namespace DigiLib {
 
 		void DFlipFlop::Init()
 		{
+			GateBase::Init();
 			AddInput("d");
 			AddInput("clk");
 			AddOutput("q");

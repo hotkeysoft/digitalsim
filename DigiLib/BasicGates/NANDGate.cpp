@@ -13,6 +13,7 @@ namespace DigiLib {
 		}
 		void NANDGate::Init()
 		{
+			GateBase::Init();
 			for (size_t i = 1; i <= m_inputs; ++i)
 			{
 				std::ostringstream ss;

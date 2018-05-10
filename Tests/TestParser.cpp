@@ -112,6 +112,24 @@ namespace UnitTests
 		EXPECT_EQ(1, gate->GetConnectedFromPin("busout").size());
 	}
 
+	TEST(TestParser, ParseConnections2)
+	{
+		TextParser parser;
+		CompositeGatePtr gate = BuildTestGate();
+		parser.Attach(gate);
+
+		parser.ParseConnection(" vcc -> and1.in1");
+		parser.ParseConnection(" gnd -> and1.in2");
+		parser.ParseConnection(" vcc -> busin[5]");
+
+		// Can only connect vcc/gnd to single pin for now
+		parser.ParseConnection(" vcc -> buffer.in[0]");
+		parser.ParseConnection(" gnd -> buffer.in[4]");
+
+		EXPECT_THROW(parser.ParseConnection(" vcc -> buffer.in "), std::invalid_argument);
+		EXPECT_THROW(parser.ParseConnection(" gnd -> buffer.in[2-3] "), std::invalid_argument);
+	}
+
 	TEST(TestParser, WireStatement)
 	{
 		TextParser parser;

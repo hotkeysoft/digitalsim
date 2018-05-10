@@ -14,6 +14,7 @@ namespace DigiLib {
 
 		void SRLatch::Init()
 		{
+			GateBase::Init();
 			AddInput("r");
 			AddInput("s");
 			AddOutput("q");

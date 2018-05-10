@@ -13,6 +13,7 @@ namespace DigiLib {
 
 		void WireGate::Init()
 		{
+			GateBase::Init();
 			m_in = AddInput("in");
 			m_out = AddOutput("out");
 		}

@@ -91,6 +91,7 @@ namespace DigiLib
 
 		void CompositeGate::InitializeState()
 		{
+			GateBase::InitializeState();
 			for (auto gate : m_internalGates)
 			{
 				gate.second->InitializeState();
@@ -201,7 +202,7 @@ namespace DigiLib
 			{
 				IOPinPtr pin = source->m_ioPins[inputs.second];
 
-				clone->AddInput(pin->GetRawName().c_str(), pin->GetWidth());
+				IOPinPtr clonePin = clone->AddInput(pin->GetRawName().c_str(), pin->GetWidth());
 			}
 		}
 

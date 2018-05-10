@@ -15,6 +15,7 @@ namespace DigiLib {
 
 		void JKFlipFlop::Init()
 		{
+			GateBase::Init();
 			AddInput("j");
 			AddInput("k");
 			AddInput("clk");

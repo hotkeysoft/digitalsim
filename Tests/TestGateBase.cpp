@@ -589,7 +589,6 @@ namespace UnitTests
 		EXPECT_THROW(not1->GetConnectedToPin(""), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPin("bad"), std::invalid_argument);
 		EXPECT_THROW(not1->GetConnectedToPin(not2->GetPin("in")), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedToPin(not1->GetConnectedToPins().size()), std::invalid_argument);
 		
 		EXPECT_EQ(0, not1->GetConnectedToPin("in").size());
 		EXPECT_EQ(0, not1->GetConnectedToPin(not1->GetPin("in")).size());
@@ -609,7 +608,6 @@ namespace UnitTests
 		EXPECT_THROW(not2->GetConnectedFromPin(""), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPin("bad"), std::invalid_argument);
 		EXPECT_THROW(not2->GetConnectedFromPin(not1->GetPin("in")), std::invalid_argument);
-		EXPECT_THROW(not1->GetConnectedFromPin(not1->GetConnectedFromPins().size()), std::invalid_argument);
 
 		EXPECT_EQ(1, not2->GetConnectedFromPin("in").size());
 		EXPECT_EQ(1, not2->GetConnectedFromPin(not2->GetPin("in")).size());

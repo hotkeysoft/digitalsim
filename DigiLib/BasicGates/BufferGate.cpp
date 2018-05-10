@@ -12,6 +12,7 @@ namespace DigiLib {
 		
 		void BufferGate::Init()
 		{
+			GateBase::Init();
 			m_in = AddInput("in", m_width);
 			m_en = AddInput("en");
 			m_out = AddOutput("out", m_width, IOPin::OUTPUT_HI_Z);

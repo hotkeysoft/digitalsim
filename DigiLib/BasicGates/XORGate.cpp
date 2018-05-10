@@ -13,6 +13,7 @@ namespace DigiLib {
 
 		void XORGate::Init()
 		{
+			GateBase::Init();
 			m_in1 = AddInput("in1");
 			m_in2 = AddInput("in2");
 			m_out = AddOutput("out");

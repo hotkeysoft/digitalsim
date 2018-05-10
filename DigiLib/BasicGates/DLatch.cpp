@@ -15,6 +15,7 @@ namespace DigiLib {
 
 		void DLatch::Init()
 		{
+			GateBase::Init();
 			AddInput("d");
 			AddInput("c");
 			AddOutput("q");

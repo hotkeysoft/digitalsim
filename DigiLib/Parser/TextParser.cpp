@@ -5,10 +5,12 @@
 #include "Core\CompositeGate.h"
 #include <cctype>
 #include <regex>
+#include <fstream>
 #include "PartsBin.h"
 
 #define PIN_DEF_REGEX "^(\\/?[A-Za-z](?:\\w){0,31})(?:\\[(\\d+)\\])?$"
 #define PART_DEF_REGEX "^([A-Za-z](?:\\w){0,31})\\s+([A-Za-z](?:\\w){0,31})$"
+#define COMMENT_REGEX "#.*"
 
 namespace DigiLib {
 	namespace Parser {
@@ -22,12 +24,31 @@ namespace DigiLib {
 		}
 
 		TextParser::SectionDef TextParser::m_sectionNames = {
-			{"Description", false},
-			{"Parts", true},
-			{"Inputs", true},
-			{"Outputs", true},
-			{"Wires", true },
+			{ "Description", false },
+			{ "Inputs", true },
+			{ "Outputs", true },
+			{ "Parts", true },
+			{ "Wires", true },
 		};
+
+		void TextParser::LoadFromFile(const char * path)
+		{
+			if (path == nullptr)
+			{
+				throw std::invalid_argument("path is null");
+			}
+
+			std::ifstream t(path);
+			if (!t)
+			{
+				throw std::invalid_argument("Unable to open file: " + std::string(path));
+			}
+
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+
+			ParseGate(buffer.str().c_str());
+		}
 
 		void TextParser::ParseGate(const char * in)
 		{
@@ -280,7 +301,7 @@ namespace DigiLib {
 
 			TextParser::Sections sections;
 
-			std::stringstream ss(in);
+			std::stringstream ss(RemoveComments(in));
 			while (ss.good())
 			{
 				std::string substr;
@@ -324,6 +345,13 @@ namespace DigiLib {
 				throw std::invalid_argument("missing section label");
 			}
 			return section;
+		}
+
+		std::string TextParser::RemoveComments(const std::string & in)
+		{
+			static std::regex commentRegex(COMMENT_REGEX);
+
+			return std::regex_replace(in, commentRegex, "");
 		}
 
 		TextParser::SectionElement TextParser::ParseSection(const char * in)

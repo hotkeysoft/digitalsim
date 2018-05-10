@@ -68,6 +68,15 @@ namespace DigiLib
 			return os.str();
 		}
 
+		void GateBase::InitVccGndPins()
+		{
+			m_vccPin = std::make_shared<IOPin>(this, MAX_PINS, "vcc", 1, IOPin::IO_DIRECTION::POWER);
+			m_connectedToVcc.clear();
+			
+			m_gndPin = std::make_shared<IOPin>(this, MAX_PINS, "gnd", 1, IOPin::IO_DIRECTION::POWER);
+			m_connectedToGnd.clear();
+		}
+
 		IOPinPtr GateBase::AddInput(const char* name, size_t width)
 		{
 			ValidatePinName(name);
@@ -111,6 +120,15 @@ namespace DigiLib
 			if (name == nullptr)
 			{
 				throw std::invalid_argument("name is null");
+			}
+
+			if (m_vccPin->GetName() == name)
+			{
+				return m_vccPin;
+			}
+			if (m_gndPin->GetName() == name)
+			{
+				return m_gndPin;
 			}
 
 			auto it = m_inputPinsNames.find(name);
@@ -207,6 +225,15 @@ namespace DigiLib
 				throw std::invalid_argument("pin belongs to another gate");
 			}
 
+			if (pin == m_vccPin)
+			{
+				return m_connectedToVcc;
+			}
+			else if (pin == m_gndPin)
+			{
+				return m_connectedToGnd;
+			}
+
 			return m_connectedToPins[pin->GetID()];
 		}
 
@@ -269,6 +296,7 @@ namespace DigiLib
 			this->m_outputPinsNames.clear();
 			this->m_ioPins.clear();
 			this->m_ioPinCount = 0;
+			this->InitVccGndPins();
 		}
 
 		void GateBase::ResetPins()
@@ -277,6 +305,8 @@ namespace DigiLib
 			{
 				pin->Reset();
 			}
+			GetPin("vcc")->Reset(IOState::HI);
+			GetPin("gnd")->Reset(IOState::LOW);
 		}
 
 		IOPinPtr GateBase::FindPin(const char * name)
@@ -327,7 +357,8 @@ namespace DigiLib
 				throw std::invalid_argument("source or target is null");
 			}
 
-			if (source->GetWidth() != target->GetWidth())
+			// If source is vcc or gnd, ignore sizes
+			if ((source->GetWidth() != target->GetWidth()))
 			{
 				throw std::invalid_argument("bus width mismatch");
 			}
@@ -355,7 +386,18 @@ namespace DigiLib
 
 			if (CanConnectToTarget(connection))
 			{
-				m_connectedToPins[source->GetID()].insert(connection);
+				if (source == m_vccPin)
+				{
+					m_connectedToVcc.insert(connection);
+				}
+				else if (source == m_gndPin)
+				{
+					m_connectedToGnd.insert(connection);
+				}
+				else 
+				{
+					m_connectedToPins[source->GetID()].insert(connection);
+				}
 				target->GetParent()->m_connectedFromPins[target->GetID()].insert(connection);
 				return true;
 			}
@@ -396,14 +438,22 @@ namespace DigiLib
 				m_insideInsideMap[IOPin::INPUT][IOPin::INPUT] = false;
 				m_insideInsideMap[IOPin::INPUT][IOPin::OUTPUT] = false;
 				m_insideInsideMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_insideInsideMap[IOPin::INPUT][IOPin::POWER] = false;
 
 				m_insideInsideMap[IOPin::OUTPUT][IOPin::INPUT] = true;
 				m_insideInsideMap[IOPin::OUTPUT][IOPin::OUTPUT] = false;
 				m_insideInsideMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_insideInsideMap[IOPin::OUTPUT][IOPin::POWER] = false;
 
 				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = true;
 				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
 				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
+				m_insideInsideMap[IOPin::OUTPUT_HI_Z][IOPin::POWER] = false;
+
+				m_insideInsideMap[IOPin::POWER][IOPin::INPUT] = true;
+				m_insideInsideMap[IOPin::POWER][IOPin::OUTPUT] = false;
+				m_insideInsideMap[IOPin::POWER][IOPin::OUTPUT_HI_Z] = false;
+				m_insideInsideMap[IOPin::POWER][IOPin::POWER] = false;
 			}
 
 			if (m_parentInsideMap.empty())
@@ -411,14 +461,23 @@ namespace DigiLib
 				m_parentInsideMap[IOPin::INPUT][IOPin::INPUT] = true;
 				m_parentInsideMap[IOPin::INPUT][IOPin::OUTPUT] = false;
 				m_parentInsideMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_parentInsideMap[IOPin::INPUT][IOPin::POWER] = false;
 
 				m_parentInsideMap[IOPin::OUTPUT][IOPin::INPUT] = false;
 				m_parentInsideMap[IOPin::OUTPUT][IOPin::OUTPUT] = false;
 				m_parentInsideMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_parentInsideMap[IOPin::OUTPUT][IOPin::POWER] = false;
 
 				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
 				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
 				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
+				m_parentInsideMap[IOPin::OUTPUT_HI_Z][IOPin::POWER] = false;
+
+				m_parentInsideMap[IOPin::POWER][IOPin::INPUT] = true;
+				m_parentInsideMap[IOPin::POWER][IOPin::OUTPUT] = false;
+				m_parentInsideMap[IOPin::POWER][IOPin::OUTPUT_HI_Z] = false;
+				m_parentInsideMap[IOPin::POWER][IOPin::POWER] = false;
+
 			}
 
 			if (m_insideParentMap.empty())
@@ -426,14 +485,23 @@ namespace DigiLib
 				m_insideParentMap[IOPin::INPUT][IOPin::INPUT] = false;
 				m_insideParentMap[IOPin::INPUT][IOPin::OUTPUT] = false;
 				m_insideParentMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_insideParentMap[IOPin::INPUT][IOPin::POWER] = false;
 
 				m_insideParentMap[IOPin::OUTPUT][IOPin::INPUT] = false;
 				m_insideParentMap[IOPin::OUTPUT][IOPin::OUTPUT] = true;
 				m_insideParentMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = true;
+				m_insideParentMap[IOPin::OUTPUT][IOPin::POWER] = false;
 
 				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = false;
 				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = true;
 				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = true;
+				m_insideParentMap[IOPin::OUTPUT_HI_Z][IOPin::POWER] = false;
+
+				m_insideParentMap[IOPin::POWER][IOPin::INPUT] = false;
+				m_insideParentMap[IOPin::POWER][IOPin::OUTPUT] = true;
+				m_insideParentMap[IOPin::POWER][IOPin::OUTPUT_HI_Z] = true;
+				m_insideParentMap[IOPin::POWER][IOPin::POWER] = false;
+
 			}
 
 		}
@@ -460,6 +528,11 @@ namespace DigiLib
 			if (!IsValidPinName(name))
 			{
 				throw std::invalid_argument("invalid pin name");
+			}
+			if (m_vccPin->GetName() == name ||
+				m_gndPin->GetName() == name)
+			{
+				throw std::invalid_argument("reserved pin name: " + std::string(name));
 			}
 
 			if (m_inputPinsNames.find(name) != m_inputPinsNames.end() ||
@@ -504,6 +577,15 @@ namespace DigiLib
 			{
 				throw std::invalid_argument("invalid gate name");
 			}
+		}
+		void GateBase::Init()
+		{
+			InitVccGndPins();
+		}
+		void GateBase::InitializeState()
+		{
+			m_vccPin->Set(IOState::HI);
+			m_gndPin->Set(IOState::HI);
 		}
 	}
 }

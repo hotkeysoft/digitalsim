@@ -8,7 +8,8 @@ namespace DigiLib
 	namespace Core
 	{
 		IOPin::IOPin(GateRef parentGate, size_t id, const char* name, size_t width, IO_DIRECTION direction) :
-			m_name(name), m_id(id), m_width(width), m_direction(direction), m_state(IOState::UNDEF, width), m_parentGate(parentGate)
+			m_name(name), m_id(id), m_width(width), m_direction(direction), 
+			m_state(IOState::UNDEF, width), m_parentGate(parentGate)
 		{
 			assert(name != NULL);
 		}
@@ -75,7 +76,7 @@ namespace DigiLib
 
 			const auto mode = m_parentGate->GetMode();
 
-			auto & connectedPins = m_parentGate->GetConnectedToPin(m_id);
+			auto & connectedPins = m_parentGate->GetConnectedToPin(shared_from_this());
 			
 			if (m_direction == IO_DIRECTION::INPUT && connectedPins.size() > 0)
 			{
@@ -119,7 +120,7 @@ namespace DigiLib
 
 		void IOPin::ComputePinState()
 		{
-			auto & connectedFrom = m_parentGate->GetConnectedFromPin(m_id);
+			auto & connectedFrom = m_parentGate->GetConnectedFromPin(shared_from_this());
 			if (connectedFrom.size() > 1)
 			{
 				m_state = IOState(IOState::HI_Z, m_width);
