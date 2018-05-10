@@ -48,6 +48,7 @@ namespace DigiLib {
 			buffer << t.rdbuf();
 
 			ParseGate(buffer.str().c_str());
+			m_gate->InitializeState();
 		}
 
 		void TextParser::ParseGate(const char * in)

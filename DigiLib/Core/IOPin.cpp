@@ -102,7 +102,9 @@ namespace DigiLib
 				m_parentGate->ComputeState();
 			}
 
-			if (m_direction == IO_DIRECTION::OUTPUT || m_direction == IO_DIRECTION::OUTPUT_HI_Z)
+			if (m_direction == IO_DIRECTION::POWER || 
+				m_direction == IO_DIRECTION::OUTPUT || 
+				m_direction == IO_DIRECTION::OUTPUT_HI_Z)
 			{
 				for (auto & connected : connectedPins)
 				{

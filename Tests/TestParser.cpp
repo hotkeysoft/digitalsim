@@ -444,15 +444,25 @@ namespace UnitTests
 		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT.txt");
 		parts->AddPart("NOT", gate);
-
 		EXPECT_EQ(3, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::HI, IOState::LOW });
+			EXPECT_EQ(compare, out);
+		}
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR.txt");
 		parts->AddPart("OR", gate);
-
 		EXPECT_EQ(4, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::HI });
+			EXPECT_EQ(compare, out);
+		}
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
@@ -460,8 +470,5 @@ namespace UnitTests
 		parts->AddPart("OR4W", gate);
 
 		EXPECT_EQ(5, parts->GetPartCount());
-
-		std::cout << Tools::LogicTools::PrintInternalConnections(gate);
-
 	}
 }

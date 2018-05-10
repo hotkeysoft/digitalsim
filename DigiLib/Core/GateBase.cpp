@@ -305,8 +305,8 @@ namespace DigiLib
 			{
 				pin->Reset();
 			}
-			GetPin("vcc")->Reset(IOState::HI);
-			GetPin("gnd")->Reset(IOState::LOW);
+			GetPin("vcc")->Reset(IOState::UNDEF);
+			GetPin("gnd")->Reset(IOState::UNDEF);
 		}
 
 		IOPinPtr GateBase::FindPin(const char * name)
@@ -585,7 +585,7 @@ namespace DigiLib
 		void GateBase::InitializeState()
 		{
 			m_vccPin->Set(IOState::HI);
-			m_gndPin->Set(IOState::HI);
+			m_gndPin->Set(IOState::LOW);
 		}
 	}
 }
