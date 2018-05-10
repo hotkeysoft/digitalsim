@@ -784,4 +784,61 @@ namespace UnitTests
 		EXPECT_EQ(nullptr, gate->FindPin(".d1.d2"));
 		EXPECT_EQ(nullptr, gate->FindPin("d1.[1]"));
 	}
+
+	TEST(TestCore, PowerPin)
+	{
+		CompositeGatePtr gate = CompositeGate::Create("test");
+		gate->AddGate("xor", BasicGates::XORGate::Create());
+		gate->AddGate("or", BasicGates::ORGate::Create());
+
+		gate->GetPin("vcc")->ConnectTo(gate->FindPin("xor.in1"));
+		gate->GetPin("gnd")->ConnectTo(gate->FindPin("or.in1"));
+
+		// Already connected to vcc
+		EXPECT_THROW(gate->GetPin("gnd")->ConnectTo(gate->FindPin("xor.in1")), std::invalid_argument);
+		
+		EXPECT_THROW(gate->GetPin("gnd")->ConnectTo(gate->FindPin("vcc")), std::invalid_argument);
+		EXPECT_THROW(gate->GetPin("vcc")->ConnectTo(gate->FindPin("gnd")), std::invalid_argument);
+
+		gate->InitializeState();
+
+		// Test behavior
+		EXPECT_EQ(IOState::HI, gate->GetPin("vcc")->Get());
+		EXPECT_EQ(IOState::LOW, gate->GetPin("gnd")->Get());
+
+		EXPECT_EQ(IOState::HI, gate->FindPin("xor.in1")->Get());
+		EXPECT_EQ(IOState::LOW, gate->FindPin("or.in1")->Get());
+
+		gate->FindPin("xor.in2")->Set(IOState::LOW);
+		EXPECT_EQ(IOState::HI, gate->FindPin("xor.out")->Get());
+		gate->FindPin("xor.in2")->Set(IOState::HI);
+		EXPECT_EQ(IOState::LOW, gate->FindPin("xor.out")->Get());
+
+		gate->FindPin("or.in2")->Set(IOState::LOW);
+		EXPECT_EQ(IOState::LOW, gate->FindPin("or.out")->Get());
+		gate->FindPin("or.in2")->Set(IOState::HI);
+		EXPECT_EQ(IOState::HI, gate->FindPin("or.out")->Get());
+
+		// Clone gate
+		GatePtr clone = gate->Clone("clone");
+		clone->InitializeState();
+		
+		// Test clone behavior
+		EXPECT_EQ(IOState::HI, clone->GetPin("vcc")->Get());
+		EXPECT_EQ(IOState::LOW, clone->GetPin("gnd")->Get());
+
+		EXPECT_EQ(IOState::HI, clone->FindPin("xor.in1")->Get());
+		EXPECT_EQ(IOState::LOW, clone->FindPin("or.in1")->Get());
+
+		clone->FindPin("xor.in2")->Set(IOState::LOW);
+		EXPECT_EQ(IOState::HI, clone->FindPin("xor.out")->Get());
+		clone->FindPin("xor.in2")->Set(IOState::HI);
+		EXPECT_EQ(IOState::LOW, clone->FindPin("xor.out")->Get());
+
+		clone->FindPin("or.in2")->Set(IOState::LOW);
+		EXPECT_EQ(IOState::LOW, clone->FindPin("or.out")->Get());
+		clone->FindPin("or.in2")->Set(IOState::HI);
+		EXPECT_EQ(IOState::HI, clone->FindPin("or.out")->Get());
+
+	}
 }
