@@ -175,24 +175,24 @@ namespace UnitTests
 		//Logger::WriteMessage("TestConnectTo: Connect to self (out to out)");
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate->GetPin("out")), std::invalid_argument);
 
-		//Logger::WriteMessage("TestConnectTo: Connect to self (in to out)");
-		EXPECT_THROW(gate->GetPin("in")->ConnectTo(gate->GetPin("out")), std::invalid_argument);
+		//Connect to self (in to out) ok
+		gate->GetPin("in")->ConnectTo(gate->GetPin("out"));
 
-		EXPECT_EQ(0, gate->GetConnectedToPin("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(1, gate->GetConnectedToPin("in").size());
+		EXPECT_EQ(1, gate->GetConnectedFromPin("out").size());
 		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
 		EXPECT_EQ(0, gate2->GetConnectedFromPin("in").size());
 
 		gate->GetPin("out")->ConnectTo(gate2->GetPin("in"));
 		EXPECT_EQ(1, gate->GetConnectedToPin("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(1, gate->GetConnectedFromPin("out").size());
 		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
 		EXPECT_EQ(1, gate2->GetConnectedFromPin("in").size());
 
 		// Same link
 		EXPECT_THROW(gate->GetPin("out")->ConnectTo(gate2->GetPin("in")), std::invalid_argument);
 		EXPECT_EQ(1, gate->GetConnectedToPin("out").size());
-		EXPECT_EQ(0, gate->GetConnectedFromPin("out").size());
+		EXPECT_EQ(1, gate->GetConnectedFromPin("out").size());
 		EXPECT_EQ(0, gate2->GetConnectedToPin("in").size());
 		EXPECT_EQ(1, gate2->GetConnectedFromPin("in").size());
 	}
@@ -397,6 +397,61 @@ namespace UnitTests
 		ASSERT_EQ(IOState::HI, not7->GetPin("out")->Get());
 		gate->GetPin("in")->Set(IOState::LOW);
 		ASSERT_EQ(IOState::LOW, not7->GetPin("out")->Get());
+	}
+
+	TEST(TestCore, ComponentInToOut)
+	{
+		CompositeGatePtr gate = CompositeGate::Create("test");
+		gate->AddInput("in");
+		gate->AddOutput("out");
+
+		gate->AddInput("in2");
+		gate->AddOutput("out2");
+
+		gate->AddInput("inbus", 4);
+		gate->AddOutput("outbus", 8);
+		gate->AddOutput("outbus2", 4);
+		ASSERT_EQ(3, gate->GetInputCount());
+		ASSERT_EQ(4, gate->GetOutputCount());
+
+		//Gate in pin -> gate out pin (ok)
+		gate->GetPin("in")->ConnectTo(gate->GetPin("out"));
+
+		//Validate working
+		gate->GetPin("in")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, gate->GetPin("out")->Get());
+		gate->GetPin("in")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, gate->GetPin("out")->Get());
+
+		// Single in pin to output bus pin
+		gate->GetPin("in2")->ConnectTo(gate->GetPin("outbus", 0));
+
+		//Validate working
+		gate->GetPin("in2")->Set(IOState::HI);
+		ASSERT_EQ(IOState::HI, gate->GetPin("outbus", 0)->Get());
+		ASSERT_EQ(IOState({IOState::HI, IOState::UNDEF, IOState::UNDEF, IOState::UNDEF, IOState::UNDEF, IOState::UNDEF, IOState::UNDEF, IOState::UNDEF}), gate->GetPin("outbus")->Get());
+		gate->GetPin("in2")->Set(IOState::LOW);
+		ASSERT_EQ(IOState::LOW, gate->GetPin("outbus", 0)->Get());
+
+		// in bus to output bus (partial)
+		gate->GetPin("inbus")->ConnectTo(gate->GetPin("outbus", 4, 7));
+
+		// Validate working
+		gate->GetPin("inbus")->Set(IOState::FromInt(10, 4));
+		ASSERT_EQ(IOState::FromInt(10, 4), gate->GetPin("outbus", 4, 7)->Get());
+		gate->GetPin("inbus")->Set(IOState::FromInt(5, 4));
+		ASSERT_EQ(IOState::FromInt(5, 4), gate->GetPin("outbus", 4, 7)->Get());
+
+		// in but to out bus (full)
+		gate->GetPin("inbus")->ConnectTo(gate->GetPin("outbus2"));
+
+		// Validate working
+		gate->GetPin("inbus")->Set(IOState::FromInt(9, 4));
+		ASSERT_EQ(IOState::FromInt(9, 4), gate->GetPin("outbus2")->Get());
+		ASSERT_EQ(IOState::FromInt(9, 4), gate->GetPin("outbus", 4, 7)->Get());
+		gate->GetPin("inbus")->Set(IOState::FromInt(14, 4));
+		ASSERT_EQ(IOState::FromInt(14, 4), gate->GetPin("outbus2")->Get());
+		ASSERT_EQ(IOState::FromInt(14, 4), gate->GetPin("outbus", 4, 7)->Get());
 	}
 
 	//TODO: There could be some cases where ConnectTo validations won't work well,

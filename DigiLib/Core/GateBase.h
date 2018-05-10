@@ -116,6 +116,7 @@ namespace DigiLib
 			IOPinPtr m_gndPin;
 			PinConnectionsType m_connectedToGnd;
 
+			static AllowedConnectionMapType m_outsideOutsideMap;
 			static AllowedConnectionMapType m_insideInsideMap;
 			static AllowedConnectionMapType m_insideParentMap;
 			static AllowedConnectionMapType m_parentInsideMap;

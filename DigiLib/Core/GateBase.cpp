@@ -14,6 +14,7 @@ namespace DigiLib
 {
 	namespace Core
 	{
+		AllowedConnectionMapType GateBase::m_outsideOutsideMap;
 		AllowedConnectionMapType GateBase::m_insideInsideMap;
 		AllowedConnectionMapType GateBase::m_insideParentMap;
 		AllowedConnectionMapType GateBase::m_parentInsideMap;
@@ -378,15 +379,17 @@ namespace DigiLib
 			ResetPins();
 			target->GetParent()->ResetPins();
 
-			const bool insideInside = (GetParent() == target->GetParent()->GetParent());
+			const bool outsideOutside = (source->GetParent() == this && target->GetParent() == this);
+			const bool insideInside = !outsideOutside && (GetParent() == target->GetParent()->GetParent());
 			const bool insideToParent = (GetParent() == target->GetParent());
 			const bool parentToInside = (this == target->GetParent()->GetParent());
 
 			InitAllowedConnectionMaps();
-			if ((insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||
+			if ((outsideOutside && !m_outsideOutsideMap[source->GetDirection()][target->GetDirection()]) ||
+				(insideInside && !m_insideInsideMap[source->GetDirection()][target->GetDirection()]) ||
 				(insideToParent && !m_insideParentMap[source->GetDirection()][target->GetDirection()]) ||
 				(parentToInside && !m_parentInsideMap[source->GetDirection()][target->GetDirection()]) ||
-				(!insideInside && !insideToParent && !parentToInside))
+				(!outsideOutside && !insideInside && !insideToParent && !parentToInside))
 			{
 				throw std::invalid_argument("Not allowed by connection rules");
 			}
@@ -442,6 +445,29 @@ namespace DigiLib
 
 		void GateBase::InitAllowedConnectionMaps()
 		{
+			if (m_outsideOutsideMap.empty())
+			{
+				m_outsideOutsideMap[IOPin::INPUT][IOPin::INPUT] = false;
+				m_outsideOutsideMap[IOPin::INPUT][IOPin::OUTPUT] = true;
+				m_outsideOutsideMap[IOPin::INPUT][IOPin::OUTPUT_HI_Z] = true;
+				m_outsideOutsideMap[IOPin::INPUT][IOPin::POWER] = false;
+
+				m_outsideOutsideMap[IOPin::OUTPUT][IOPin::INPUT] = true;
+				m_outsideOutsideMap[IOPin::OUTPUT][IOPin::OUTPUT] = false;
+				m_outsideOutsideMap[IOPin::OUTPUT][IOPin::OUTPUT_HI_Z] = false;
+				m_outsideOutsideMap[IOPin::OUTPUT][IOPin::POWER] = false;
+
+				m_outsideOutsideMap[IOPin::OUTPUT_HI_Z][IOPin::INPUT] = true;
+				m_outsideOutsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT] = false;
+				m_outsideOutsideMap[IOPin::OUTPUT_HI_Z][IOPin::OUTPUT_HI_Z] = false;
+				m_outsideOutsideMap[IOPin::OUTPUT_HI_Z][IOPin::POWER] = false;
+
+				m_outsideOutsideMap[IOPin::POWER][IOPin::INPUT] = true;
+				m_outsideOutsideMap[IOPin::POWER][IOPin::OUTPUT] = false;
+				m_outsideOutsideMap[IOPin::POWER][IOPin::OUTPUT_HI_Z] = false;
+				m_outsideOutsideMap[IOPin::POWER][IOPin::POWER] = false;
+			}
+
 			if (m_insideInsideMap.empty())
 			{
 				m_insideInsideMap[IOPin::INPUT][IOPin::INPUT] = false;

@@ -589,7 +589,7 @@ namespace UnitTests
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DECODER.txt");
-		parts->AddPart("ALU4B", gate);
+		parts->AddPart("DECODER", gate);
 		EXPECT_EQ(17, parts->GetPartCount());
 
 	}
