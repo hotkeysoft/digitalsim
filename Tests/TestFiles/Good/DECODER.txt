@@ -7,27 +7,29 @@ Parts: NAND not, AND jmpAnd , DEMUX4W dest,
 
 # 2. wire them up
 Wires: 
-  instr[13]->op1, instr[11-12]->op2, instr[7-10]->opCode, 
+  instr[12]->op1
+#  instr[10-11]->op2, 
+#  instr[6-9]->opCode,
   
-  instr[6]->jmpAnd.in1,
-  not.out->jmpAnd.in2, 
-  jmpAnd.out->jmpIfZ,
+#  instr[5]->jmpAnd.in1,
+#  not.out->jmpAnd.in2, 
+#  jmpAnd.out->jmpIfZ,
 
-  instr[16]->not.in1, instr[16]->not.in2,
-  instr[1-15]->constant,
-  instr[16]->cToM,
+#  instr[15]->not.in1, instr[15]->not.in2,
+#  instr[0-14]->constant,
+#  instr[15]->cToM,
 
-  instr[14-15]->dest.sel,
-  1->dest.in,
-  dest.out2->lAand.in1,
-  dest.out3->lMor.in1,
-  dest.out4->lDand.in1,
+#  instr[13-14]->dest.sel,
+#  vcc->dest.in,
+#  dest.out2->lAand.in1,
+#  dest.out3->lMor.in1,
+#  dest.out4->lDand.in1,
 
-  instr[16]->lMor.in2,
-  not.out->lAand.in2,
-  not.out->lDand.in2,
+#  instr[15]->lMor.in2,
+#  not.out->lAand.in2,
+#  not.out->lDand.in2,
   
-  lMor.out->loadM,
-  lAand.out->loadA,
-  lDand.out->loadD
+#  lMor.out->loadM,
+#  lAand.out->loadA,
+#  lDand.out->loadD
 ;

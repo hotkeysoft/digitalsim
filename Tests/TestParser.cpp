@@ -440,6 +440,12 @@ namespace UnitTests
 		parts->AddPart("XOR", gate);
 		EXPECT_EQ(2, parts->GetPartCount());
 
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::LOW });
+			EXPECT_EQ(compare, out);
+		}
+
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT.txt");
@@ -454,9 +460,16 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT4B.txt");
+		parts->AddPart("NOT4B", gate);
+		EXPECT_EQ(4, parts->GetPartCount());
+
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR.txt");
 		parts->AddPart("OR", gate);
-		EXPECT_EQ(4, parts->GetPartCount());
+		EXPECT_EQ(5, parts->GetPartCount());
 
 		{
 			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
@@ -468,7 +481,116 @@ namespace UnitTests
 		parser.Attach(gate, parts);
 		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR4W.txt");
 		parts->AddPart("OR4W", gate);
+		EXPECT_EQ(6, parts->GetPartCount());
 
-		EXPECT_EQ(5, parts->GetPartCount());
+		//TODO: GetTruthTable doesn't work with bus
+		//{
+		//	Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+		//	Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::HI, IOState::HI, IOState::HI });
+		//	EXPECT_EQ(compare, out);
+		//}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\AND.txt");
+		parts->AddPart("AND", gate);
+		EXPECT_EQ(7, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI });
+			EXPECT_EQ(compare, out);
+		}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\HALFADDER.txt");
+		parts->AddPart("HALFADDER", gate);
+		EXPECT_EQ(8, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
+				IOState::LOW, IOState::HI, IOState::HI, IOState::LOW });
+			EXPECT_EQ(compare, out);
+		}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\FULLADDER.txt");
+		parts->AddPart("FULLADDER", gate);
+		EXPECT_EQ(9, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
+				IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
+				IOState::LOW, IOState::HI, IOState::HI, IOState::LOW,
+				IOState::HI, IOState::LOW, IOState::HI, IOState::HI, });
+			EXPECT_EQ(compare, out);
+		}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\ADDER4B.txt");
+		parts->AddPart("ADDER4B", gate);
+		EXPECT_EQ(10, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\MUX.txt");
+		parts->AddPart("MUX", gate);
+		EXPECT_EQ(11, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::HI,
+				IOState::HI, IOState::LOW, IOState::HI, IOState::HI });
+			EXPECT_EQ(compare, out);
+		}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\MUX4B.txt");
+		parts->AddPart("MUX4B", gate);
+		EXPECT_EQ(12, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DEMUX.txt");
+		parts->AddPart("DEMUX", gate);
+		EXPECT_EQ(13, parts->GetPartCount());
+
+		{
+			Tools::LogicTools::ResultListType out = Tools::LogicTools::GetTruthTable(gate);
+			Tools::LogicTools::ResultListType compare({ IOState::LOW, IOState::LOW, IOState::LOW, IOState::LOW,
+				IOState::HI, IOState::LOW, IOState::LOW, IOState::HI });
+			EXPECT_EQ(compare, out);
+		}
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DEMUX4W.txt");
+		parts->AddPart("DEMUX4W", gate);
+		EXPECT_EQ(14, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NAND4B.txt");
+		parts->AddPart("NAND4B", gate);
+		EXPECT_EQ(15, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\ALU4B.txt");
+		parts->AddPart("ALU4B", gate);
+		EXPECT_EQ(16, parts->GetPartCount());
+
+		gate = BuildTestGate(false, false, false);
+		parser.Attach(gate, parts);
+		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DECODER.txt");
+		parts->AddPart("ALU4B", gate);
+		EXPECT_EQ(17, parts->GetPartCount());
+
 	}
 }

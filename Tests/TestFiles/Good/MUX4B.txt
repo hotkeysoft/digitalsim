@@ -2,7 +2,7 @@ Inputs: in1[4], in2[4], sel;
 Outputs: out[4];
 
 # 1. specify the components you want to use here
-Parts: notSel NOT,
+Parts: NOT notSel,
   NAND nand11, NAND nand12, NAND nout1,
   NAND nand21, NAND nand22, NAND nout2,
   NAND nand31, NAND nand32, NAND nout3,
@@ -18,20 +18,20 @@ Wires:
   sel->nand12.in1, sel->nand22.in1,
   sel->nand32.in1, sel->nand42.in1,    
 
-  in1[1]->nand11.in2, in2[1]->nand12.in2,  
+  in1[0]->nand11.in2, in2[0]->nand12.in2,  
   nand11.out->nout1.in1, nand12.out->nout1.in2, 
-  nout1.out->out[1],
+  nout1.out->out[0],
 
-  in1[2]->nand21.in2, in2[2]->nand22.in2,  
+  in1[1]->nand21.in2, in2[1]->nand22.in2,  
   nand21.out->nout2.in1, nand22.out->nout2.in2, 
-  nout2.out->out[2],
+  nout2.out->out[1],
 
-  in1[3]->nand31.in2, in2[3]->nand32.in2,  
+  in1[2]->nand31.in2, in2[2]->nand32.in2,  
   nand31.out->nout3.in1, nand32.out->nout3.in2, 
-  nout3.out->out[3],
+  nout3.out->out[2],
   
-  in1[4]->nand41.in2, in2[4]->nand42.in2,  
+  in1[3]->nand41.in2, in2[3]->nand42.in2,  
   nand41.out->nout4.in1, nand42.out->nout4.in2, 
-  nout4.out->out[4];
+  nout4.out->out[3];
 
 
