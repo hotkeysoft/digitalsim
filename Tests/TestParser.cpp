@@ -446,12 +446,10 @@ namespace UnitTests
 		PartsBinPtr parts = BuildPartsBin(true, true);
 		CompositeGatePtr gate;
 		TextParser parser;
-		char buf[1024];
-		_getcwd(buf, 1024);
-
+		
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\XOR.txt");
+		parser.LoadFromFile("TestFiles/Good/XOR.txt");
 		parts->AddPart("XOR", gate);
 		EXPECT_EQ(2, parts->GetPartCount());
 
@@ -463,7 +461,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT.txt");
+		parser.LoadFromFile("TestFiles/Good/NOT.txt");
 		parts->AddPart("NOT", gate);
 		EXPECT_EQ(3, parts->GetPartCount());
 
@@ -475,14 +473,14 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NOT4B.txt");
+		parser.LoadFromFile("TestFiles/Good/NOT4B.txt");
 		parts->AddPart("NOT4B", gate);
 		EXPECT_EQ(4, parts->GetPartCount());
 
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR.txt");
+		parser.LoadFromFile("TestFiles/Good/OR.txt");
 		parts->AddPart("OR", gate);
 		EXPECT_EQ(5, parts->GetPartCount());
 
@@ -494,7 +492,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\OR4W.txt");
+		parser.LoadFromFile("TestFiles/Good/OR4W.txt");
 		parts->AddPart("OR4W", gate);
 		EXPECT_EQ(6, parts->GetPartCount());
 
@@ -507,7 +505,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\AND.txt");
+		parser.LoadFromFile("TestFiles/Good/AND.txt");
 		parts->AddPart("AND", gate);
 		EXPECT_EQ(7, parts->GetPartCount());
 
@@ -519,7 +517,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\HALFADDER.txt");
+		parser.LoadFromFile("TestFiles/Good/HALFADDER.txt");
 		parts->AddPart("HALFADDER", gate);
 		EXPECT_EQ(8, parts->GetPartCount());
 
@@ -532,7 +530,7 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\FULLADDER.txt");
+		parser.LoadFromFile("TestFiles/Good/FULLADDER.txt");
 		parts->AddPart("FULLADDER", gate);
 		EXPECT_EQ(9, parts->GetPartCount());
 
@@ -547,13 +545,13 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\ADDER4B.txt");
+		parser.LoadFromFile("TestFiles/Good/ADDER4B.txt");
 		parts->AddPart("ADDER4B", gate);
 		EXPECT_EQ(10, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\MUX.txt");
+		parser.LoadFromFile("TestFiles/Good/MUX.txt");
 		parts->AddPart("MUX", gate);
 		EXPECT_EQ(11, parts->GetPartCount());
 
@@ -566,13 +564,13 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\MUX4B.txt");
+		parser.LoadFromFile("TestFiles/Good/MUX4B.txt");
 		parts->AddPart("MUX4B", gate);
 		EXPECT_EQ(12, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DEMUX.txt");
+		parser.LoadFromFile("TestFiles/Good/DEMUX.txt");
 		parts->AddPart("DEMUX", gate);
 		EXPECT_EQ(13, parts->GetPartCount());
 
@@ -585,25 +583,25 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DEMUX4W.txt");
+		parser.LoadFromFile("TestFiles/Good/DEMUX4W.txt");
 		parts->AddPart("DEMUX4W", gate);
 		EXPECT_EQ(14, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\NAND4B.txt");
+		parser.LoadFromFile("TestFiles/Good/NAND4B.txt");
 		parts->AddPart("NAND4B", gate);
 		EXPECT_EQ(15, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\ALU4B.txt");
+		parser.LoadFromFile("TestFiles/Good/ALU4B.txt");
 		parts->AddPart("ALU4B", gate);
 		EXPECT_EQ(16, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\DECODER.txt");
+		parser.LoadFromFile("TestFiles/Good/DECODER.txt");
 		parts->AddPart("DECODER", gate);
 		EXPECT_EQ(17, parts->GetPartCount());
 
@@ -613,19 +611,19 @@ namespace UnitTests
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\COUNTER4B.txt");
+		parser.LoadFromFile("TestFiles/Good/COUNTER4B.txt");
 		parts->AddPart("COUNTER4B", gate);
 		EXPECT_EQ(19, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\REGISTER.txt");
+		parser.LoadFromFile("TestFiles/Good/REGISTER.txt");
 		parts->AddPart("REGISTER", gate);
 		EXPECT_EQ(20, parts->GetPartCount());
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);
-		parser.LoadFromFile("D:\\Projects\\trunk\\digitalsim\\Tests\\TestFiles\\Good\\REGISTER4B.txt");
+		parser.LoadFromFile("TestFiles/Good/REGISTER4B.txt");
 		parts->AddPart("REGISTER4B", gate);
 		EXPECT_EQ(21, parts->GetPartCount());
 	}
