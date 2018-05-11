@@ -43,6 +43,8 @@ namespace DigiLib
 			IO_STATE operator [](size_t pin) const;
 			IO_STATE & operator [](size_t pin);
 
+			bool IsUndef() const;
+
 			IO_STATE Get(size_t pin = 0) const;
 			IOState Get(size_t low, size_t hi) const;
 

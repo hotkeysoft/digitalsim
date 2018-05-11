@@ -1,4 +1,4 @@
-Inputs: in[4], load;
+Inputs: in[4], load, clk;
 Outputs: out[4];
 
 Parts: MUX4B mux,
@@ -7,6 +7,11 @@ Parts: MUX4B mux,
 # 2. wire them up
 Wires: 
   load->mux.sel,
+  
+  clk->flip0.clk,
+  clk->flip1.clk,
+  clk->flip2.clk,
+  clk->flip3.clk,
   
   in[0]->mux.in2[0],
   flip0.out->mux.in1[0],

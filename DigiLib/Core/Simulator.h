@@ -34,6 +34,7 @@ namespace DigiLib
 			virtual size_t Run(size_t maxTicks);
 			
 			void Pulse(IOPinPtr pin, size_t begin, size_t end, bool negative = false);
+			void Pulse(IOPinPtr pin, IOState state, size_t begin, size_t end);
 			void Clock(IOPinPtr pin, size_t hiWidth, size_t lowWidth, size_t begin, size_t end, bool negative = false);
 
 			using GateBase::AddInput;

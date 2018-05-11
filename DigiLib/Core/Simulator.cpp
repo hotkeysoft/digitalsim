@@ -104,6 +104,25 @@ namespace DigiLib
 			PostEvent({ negative? IOState::HI : IOState::LOW, pin }, end);
 		}
 
+		void Simulator::Pulse(IOPinPtr pin, IOState state, size_t begin, size_t end)
+		{
+			if (begin < m_currentTick + 1)
+			{
+				throw std::out_of_range("can't post event before current tick");
+			}
+			if (end < begin + 1)
+			{
+				throw std::out_of_range("pulse must be at least one tick wide");
+			}
+			if (state.GetWidth() != pin->GetWidth())
+			{
+				throw std::out_of_range("pin width mismatch");
+			}
+
+			PostEvent({ state, pin } , begin);
+			PostEvent({ IOState(IOState::LOW, pin->GetWidth()), pin }, end);
+		}
+
 		void Simulator::Clock(IOPinPtr pin, size_t hiWidth, size_t lowWidth, size_t begin, size_t end, bool negative)
 		{
 			if (begin < m_currentTick + 1)

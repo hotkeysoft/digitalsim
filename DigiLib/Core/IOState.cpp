@@ -304,5 +304,16 @@ namespace DigiLib
 
 			return m_states[pin];
 		}
+		bool IOState::IsUndef() const
+		{
+			for (size_t i = 0; i < m_width; ++i)
+			{
+				if (m_states[i] == IO_STATE::UNDEF)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

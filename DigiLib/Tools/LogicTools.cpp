@@ -216,7 +216,7 @@ namespace DigiLib {
 			return results;
 		}
 
-		void LogicTools::OutputStates(const IOPinListType & inputs, std::vector<std::ostringstream> &outputs)
+		void LogicTools::OutputStates(const IOPinListType & inputs, std::vector<std::ostringstream> &outputs, bool busAsHex)
 		{
 			size_t output = 0;
 			for (int i = 0; i < inputs.size(); ++i)
@@ -231,6 +231,17 @@ namespace DigiLib {
 				{
 					outputs[output++] << state;
 				}
+				else if (busAsHex)
+				{
+					if (state.IsUndef())
+					{
+						outputs[output++] << "x";
+					}
+					else
+					{
+						outputs[output++] << std::uppercase << std::hex << state.ToInt16();
+					}
+				}
 				else
 				{
 					for (int j = 0; j < state.GetWidth(); ++j)
@@ -241,11 +252,8 @@ namespace DigiLib {
 			}
 		}
 
-		std::string LogicTools::LogicAnalyser(SimulatorPtr sim, const IOPinListType & inputs, size_t maxTicks, size_t modulo)
+		void LogicTools::FindMaxSize(const DigiLib::Core::IOPinListType & inputs, size_t &outCount, size_t &maxlen, bool busAsHex)
 		{
-			size_t maxlen = 0;
-			size_t outCount = 0;
-
 			for (auto & i : inputs)
 			{
 				if (i == nullptr)
@@ -256,8 +264,19 @@ namespace DigiLib {
 				size_t size = i->GetFullName().size();
 				if (i->GetWidth() > 1)
 				{
-					size += 4;
-					outCount += (i->GetWidth());
+					if (busAsHex)
+					{
+						if (i->GetWidth() > 4)
+						{
+							throw std::invalid_argument("busAsHex flag not currently supported for bus > 4 bits");
+						}
+						outCount++;
+					}
+					else
+					{
+						size += 4;
+						outCount += (i->GetWidth());
+					}
 				}
 				else
 				{
@@ -269,9 +288,10 @@ namespace DigiLib {
 					maxlen = size;
 				}
 			}
+		}
 
-			std::vector<std::ostringstream> outputs(outCount);
-
+		void LogicTools::PrintHeader(const DigiLib::Core::IOPinListType & inputs, std::vector<std::ostringstream> &outputs, const size_t maxlen, bool busAsHex)
+		{
 			int output = 0;
 			for (int i = 0; i < inputs.size(); ++i)
 			{
@@ -279,7 +299,7 @@ namespace DigiLib {
 				{
 					output++;
 				}
-				else if (inputs[i]->GetWidth() == 1)
+				else if (inputs[i]->GetWidth() == 1 || busAsHex)
 				{
 					outputs[output++] << std::setw(maxlen) << inputs[i]->GetFullName() << '|';
 				}
@@ -291,13 +311,47 @@ namespace DigiLib {
 					}
 				}
 			}
+		}
 
+		void LogicTools::PrintOutputs(std::vector<std::ostringstream> &outputs, std::ostringstream &os)
+		{
+			for (auto & out : outputs)
+			{
+				os << out.str() << std::endl;
+				out.str("");
+				out.clear();
+			}
+		}
+
+		std::string LogicTools::LogicAnalyser(SimulatorPtr sim, const IOPinListType & inputs, size_t maxTicks, size_t modulo, bool busAsHex)
+		{
+			size_t maxlen = 0;
+			size_t outCount = 0;
+
+			std::ostringstream os;
+
+			FindMaxSize(inputs, outCount, maxlen, busAsHex);
+
+			std::vector<std::ostringstream> outputs(outCount);
+
+			PrintHeader(inputs, outputs, maxlen, busAsHex);
+
+			size_t hPos = 1;
 			size_t tick = 0;
+			size_t block = 2;
 			while (sim->GetEventQueue().size())
 			{
 				if (tick % modulo == 0)
 				{
-					OutputStates(inputs, outputs);
+					OutputStates(inputs, outputs, busAsHex);
+
+					if (hPos % (77-maxlen) == 0)
+					{
+						PrintOutputs(outputs, os);
+						os << std::setw(3) << block++ << "/ " << std::string(72, '-') << std::endl;
+						PrintHeader(inputs, outputs, maxlen, busAsHex);
+					}
+					hPos++;
 				}
 
 				tick = sim->Tick();
@@ -309,13 +363,8 @@ namespace DigiLib {
 			}
 
 			// Output last state
-			OutputStates(inputs, outputs);
-
-			std::ostringstream os;
-			for (auto & out : outputs)
-			{
-				os << out.str() << std::endl;
-			}
+			OutputStates(inputs, outputs, busAsHex);
+			PrintOutputs(outputs, os);
 
 			return os.str();
 		}
