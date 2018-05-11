@@ -484,7 +484,7 @@ namespace UnitTests
 	{
 		PartsBinPtr parts = BuildPartsBin(true, true);
 		CompositeGatePtr gate;
-		TextParser parser;	
+		TextParser parser;
 
 		gate = BuildTestGate(false, false, false);
 		parser.Attach(gate, parts);

@@ -1,4 +1,4 @@
-Inputs: in[4], load, reset;
+Inputs: in[4], load, reset, clk;
 Outputs: out[4];
 
 # 1. specify the components you want to use here
@@ -7,11 +7,25 @@ Parts: MUX4B mux, MUX4B rMux, ADDER4B add,
 
 # 2. wire them up
 Wires: 
+	clk->f1.clk,
+	clk->f2.clk,
+	clk->f3.clk,
+	clk->f4.clk,
+	
   in->mux.in2,
   mux.out->rMux.in1,
   reset->rMux.sel,
   
+  gnd->rMux.in2[0],
+  gnd->rMux.in2[1],
+  gnd->rMux.in2[2],
+  gnd->rMux.in2[3],
+  
   vcc->add.in2[0],
+  gnd->add.in2[1],
+  gnd->add.in2[2],
+  gnd->add.in2[3],
+  gnd->add.carryIn,
 
   f1.out->add.in1[0],
   f2.out->add.in1[1],
