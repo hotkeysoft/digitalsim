@@ -56,13 +56,13 @@ namespace DigiLib
 
 		size_t CompositeGate::GetGateCount(bool recursive) noexcept
 		{
-			size_t count = m_internalGates.size();
+			size_t count = 0;// m_internalGates.size();
 			if (recursive)
 			{
 				// Should we include CompositeGate as one gate or 
 				// count only Basic Gates...
-				// Since links between compositeGate and inner gate have 
-				// a non-zero delay, let's count them.
+				// Links between compositeGate and inner gate have 
+				// a non-zero delay...
 
 				for (auto & gate : m_internalGates)
 				{
