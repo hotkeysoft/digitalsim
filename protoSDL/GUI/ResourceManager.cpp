@@ -40,6 +40,11 @@ namespace GUI
 
 	FontRef ResourceManager::FindFont(const char * id)
 	{
+		if (id == nullptr)
+		{
+			throw std::invalid_argument("id is null");
+		}
+
 		auto it = m_fonts.find(id);
 		if (it == m_fonts.end())
 		{
@@ -71,6 +76,11 @@ namespace GUI
 
 	ImageRef ResourceManager::FindImage(const char * id)
 	{
+		if (id == nullptr)
+		{
+			throw std::invalid_argument("id is null");
+		}
+
 		auto it = m_images.find(id);
 		if (it == m_images.end())
 		{
@@ -80,4 +90,41 @@ namespace GUI
 		return it->second.get();
 	}
 
+	CursorRef ResourceManager::LoadCursor(const char * id, SDL_SystemCursor cursorType)
+	{
+		if (id == nullptr)
+		{
+			throw std::invalid_argument("id");
+		}
+		if (m_images.find(id) != m_images.end())
+		{
+			throw std::invalid_argument("cursor id: " + std::string(id));
+		}
+
+		CursorPtr cursor = CursorPtr(SDL_CreateSystemCursor(cursorType), sdl_deleter());
+		CursorRef ref = cursor.get();
+		if (cursor != nullptr)
+		{
+			m_cursors[id] = std::move(cursor);
+		}
+
+		return ref;
+
+	}
+
+	CursorRef ResourceManager::FindCursor(const char * id)
+	{
+		if (id == nullptr)
+		{
+			throw std::invalid_argument("id is null");
+		}
+
+		auto it = m_cursors.find(id);
+		if (it == m_cursors.end())
+		{
+			return nullptr;
+		}
+
+		return it->second.get();
+	}
 }

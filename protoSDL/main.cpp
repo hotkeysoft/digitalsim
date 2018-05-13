@@ -95,13 +95,14 @@ int main(int argc, char ** argv)
 		mainWnd->SetImage(image);
 		SDL_Rect client = mainWnd->GetClientRect();
 
-		WINMGR().AddWindow("nedit", mainWnd, { client.x, client.y, client.w - 300, client.h - 200 })->SetTitle("Editor");
-		WINMGR().AddWindow("sim", mainWnd, { client.x, client.y + client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
-		WINMGR().AddWindow("parts", mainWnd, { client.x + client.w - 300, client.y, 300, client.h })->SetTitle("Parts Bin");
+		WINMGR().AddWindow("nedit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
+//		WINMGR().AddWindow("nedit", mainWnd, { client.x, client.y, client.w - 300, client.h - 200 })->SetTitle("Editor");
+//		WINMGR().AddWindow("sim", mainWnd, { client.x, client.y + client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
+//		WINMGR().AddWindow("parts", mainWnd, { client.x + client.w - 300, client.y, 300, client.h })->SetTitle("Parts Bin");
 
-		SDL_Cursor* handCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
-		SDL_Cursor* normalCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-		SDL_Cursor* sizeAllCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+		CursorRef handCursor = RES().LoadCursor("hand", SDL_SYSTEM_CURSOR_HAND);
+		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
+		CursorRef sizeAllCursor = RES().LoadCursor("size.all", SDL_SYSTEM_CURSOR_SIZEALL);
 		SDL_SetCursor(normalCursor);
 
 		Render(ren);
@@ -145,6 +146,14 @@ int main(int argc, char ** argv)
 				}
 				else if (e.type == SDL_KEYDOWN) {
 					switch (e.key.keysym.sym) {
+					case SDLK_LEFT:
+						WINMGR().GetActive()->MoveRel(SDL_Point({ -2, 0 })); Render(ren); break;
+					case SDLK_RIGHT:
+						WINMGR().GetActive()->MoveRel(SDL_Point({ 2, 0 })); Render(ren); break;
+					case SDLK_UP:
+						WINMGR().GetActive()->MoveRel(SDL_Point({ 0, -2 })); Render(ren); break;
+					case SDLK_DOWN:
+						WINMGR().GetActive()->MoveRel(SDL_Point({ 0, 2 })); Render(ren); break;
 
 					case SDLK_RETURN:
 						if (SDL_GetModState() & KMOD_ALT)
@@ -157,7 +166,6 @@ int main(int argc, char ** argv)
 					}
 				}
 			}
-			//Render the scene
 		}
 	}
 

@@ -29,7 +29,7 @@ namespace GUI
 		WindowList GetWindowList(GUI::WindowRef parent);
 
 		GUI::WindowPtr HitTest(SDL_Point);
-		GUI::WindowRef GetActive() { return m_activeWindow.get(); }
+		GUI::WindowRef GetActive();
 		void SetActive(GUI::WindowPtr);
 
 	protected:

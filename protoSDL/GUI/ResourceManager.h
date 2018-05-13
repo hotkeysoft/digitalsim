@@ -11,6 +11,7 @@ namespace GUI
 	public:
 		using FontList = std::map<std::string, FontPtr>;
 		using ImageList = std::map<std::string, ImagePtr>;
+		using CursorList = std::map<std::string, CursorPtr>;
 
 		virtual ~ResourceManager() = default;
 		ResourceManager(const ResourceManager&) = delete;
@@ -22,18 +23,24 @@ namespace GUI
 
 		void Init(RendererPtr & renderer);
 
+		// Fonts
 		FontRef LoadFont(const char * id, const char * fileName, size_t size);
 		FontRef FindFont(const char * id);
 
+		// Images
 		ImageRef LoadImage(const char * id, const char * fileName);
 		ImageRef FindImage(const char * id);
 
+		// Cursors
+		CursorRef LoadCursor(const char * id, SDL_SystemCursor);
+		CursorRef FindCursor(const char * id);
 
 	protected:
 		ResourceManager() : m_renderer(nullptr) {}
 		RendererRef m_renderer;
 		FontList m_fonts;
 		ImageList m_images;
+		CursorList m_cursors;
 	};
 
 	constexpr auto RES = &ResourceManager::Get;

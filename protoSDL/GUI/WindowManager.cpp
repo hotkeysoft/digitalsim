@@ -91,10 +91,20 @@ namespace GUI
 		return nullptr;
 	}
 
-	void WindowManager::SetActive(WindowPtr win)
+	GUI::WindowRef WindowManager::GetActive()
 	{
-		m_activeWindow = win;
-		std::cout << "SetActive(): " << win->GetId() << std::endl;
+		return m_activeWindow ? m_activeWindow.get() : Window::GetNullWnd();
 	}
 
+	void WindowManager::SetActive(WindowPtr win)
+	{
+		std::cout << "SetActive(): " << win->GetId() << std::endl;
+		m_activeWindow = win;
+		if (win != nullptr)
+		{
+			const std::string & id = win->GetId();
+			m_windows.remove_if([id](WindowPtr window) { return window->GetId() == id; });
+			m_windows.push_back(win);
+		}
+	}
 }

@@ -29,12 +29,13 @@ namespace GUI
 		void SetTitle(const char* title);
 		void SetImage(ImageRef image);
 
+		static WindowRef GetNullWnd() { return &m_nullWnd; }
+
 		std::string GetId() const { return m_id; }
 		WindowManager::WindowList GetChildWindows();
 
-		SDL_Rect GetClientRect() const;
-		SDL_Rect GetTitleBarRect() const;
-		SDL_Rect GetWindowRect() const { return m_rect; };
+		SDL_Rect GetClientRect(bool relative = true) const;
+		SDL_Rect GetWindowRect(bool relative = true) const;
 
 		HitZone HitTest(SDL_Point);
 
@@ -46,9 +47,15 @@ namespace GUI
 		bool HasParent() const { return m_parent != nullptr; }
 		WindowRef GetParent() const { return m_parent; }
 
+		void SetIsFixed(bool fixed) { m_isFixed = fixed; };
+		bool GetIsFixed() const { return m_isFixed;  }
+		void MoveRel(SDL_Point rel);
+
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect);
+		Window();
 
+		SDL_Rect GetTitleBarRect() const;
 		void SetDrawColor(const GUI::Color & col);
 		void Draw3dFrame(SDL_Rect pos, bool raised);
 		void DrawReliefBox(SDL_Rect pos, const GUI::Color & col, bool raised);
@@ -59,7 +66,9 @@ namespace GUI
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 		std::string m_title;
+		bool m_isFixed;
 		SDL_Rect m_rect;
+		SDL_Rect m_titleStrRect;
 
 		static uint8_t constexpr m_borderWidth = 6;
 		static uint8_t constexpr m_buttonSize = 24;
@@ -71,8 +80,9 @@ namespace GUI
 		static ImagePtr m_titleBackground;
 		TexturePtr m_activeTitle;
 		TexturePtr m_inactiveTitle;
-		SDL_Rect m_titleStrRect;
 		ImageRef m_image;
+
+		static Window m_nullWnd;
 
 		bool m_visible;
 

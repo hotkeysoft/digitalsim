@@ -3,6 +3,7 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include <memory>
+#include <iostream>
 
 namespace GUI
 {
@@ -23,11 +24,11 @@ namespace GUI
 
 	struct sdl_deleter
 	{
-		void operator()(MainWindowRef p) const { SDL_DestroyWindow(p); }
-		void operator()(RendererRef p) const { SDL_DestroyRenderer(p); }
-		void operator()(TextureRef p) const { SDL_DestroyTexture(p); }
-		void operator()(FontRef p) const { TTF_CloseFont(p); }
-		void operator()(CursorRef p) const { SDL_FreeCursor(p); }
+		void operator()(MainWindowRef p) const { SDL_DestroyWindow(p); std::cout << "DestroyWindow" << std::endl; }
+		void operator()(RendererRef p) const { SDL_DestroyRenderer(p); std::cout << "DestroyRenderer" << std::endl; }
+		void operator()(TextureRef p) const { SDL_DestroyTexture(p); std::cout << "DestroyTexture" << std::endl; }
+		void operator()(FontRef p) const { TTF_CloseFont(p); std::cout << "CloseFont" << std::endl; }
+		void operator()(CursorRef p) const { SDL_FreeCursor(p); std::cout << "FreeCursor" << std::endl; }
 	};
 
 	using MainWindowPtr = std::unique_ptr<SDL_Window, sdl_deleter>;

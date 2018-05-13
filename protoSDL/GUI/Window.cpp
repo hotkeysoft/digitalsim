@@ -7,8 +7,12 @@ namespace GUI
 {
 	ImagePtr Window::m_titleBackground = nullptr;
 
+	Window Window::m_nullWnd;
+
+	Window::Window() : m_id("null"), m_renderer(nullptr), m_parent(nullptr), m_image(nullptr), m_font(nullptr), m_visible(false) {}
+
 	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect) : m_renderer(renderer),
-		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true)	
+		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true), m_isFixed(false)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -107,11 +111,19 @@ namespace GUI
 		return WINMGR().GetWindowList(this);
 	}
 
-	SDL_Rect Window::GetClientRect() const
+	SDL_Rect Window::GetClientRect(bool relative) const
 	{
-		SDL_Rect rect = m_rect;
-		rect.x += m_borderWidth + 1;
-		rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
+		SDL_Rect rect = GetWindowRect();
+		if (relative)
+		{
+			rect.x = 0;
+			rect.y = 0;
+		}
+		else
+		{
+			rect.x += m_borderWidth + 1;
+			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
+		}
 		rect.w -= (2 * (m_borderWidth + 1));
 		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
 		
@@ -120,11 +132,24 @@ namespace GUI
 
 	SDL_Rect Window::GetTitleBarRect() const
 	{
-		SDL_Rect rect = m_rect;
+		SDL_Rect rect = GetWindowRect(false);
 		rect.x += (m_buttonSize + 2) + m_borderWidth + 1;
 		rect.y += m_borderWidth + 1;
 		rect.w -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
 		rect.h = m_buttonSize + 2;
+		return rect;
+	}
+
+	SDL_Rect Window::GetWindowRect(bool relative) const
+	{
+		SDL_Rect rect = m_rect;
+		if (!relative && m_parent != nullptr)
+		{
+			SDL_Rect parentClient = m_parent->GetClientRect(false);
+			rect.x += parentClient.x;
+			rect.y += parentClient.y;
+		}
+		
 		return rect;
 	}
 
@@ -162,8 +187,14 @@ namespace GUI
 
 		if (title)
 		{
+			SDL_Rect target = GetTitleBarRect();
+			target.x += m_titleStrRect.x;
+			target.y += m_titleStrRect.y;
+			target.w = m_titleStrRect.w;
+			target.h = m_titleStrRect.h;
+
 			SDL_Rect source = { 0, 0, m_titleStrRect.w, m_titleStrRect.h };
-			SDL_RenderCopy(m_renderer, title.get(), &source, &m_titleStrRect);
+			SDL_RenderCopy(m_renderer, title.get(), &source, &target);
 		}
 	}
 
@@ -177,7 +208,7 @@ namespace GUI
 		{
 			return HIT_CLIENT;
 		}
-		else if (SDL_PointInRect(&pt, &m_rect))
+		else if (SDL_PointInRect(&pt, &GetWindowRect(false)))
 		{
 			return HIT_BORDER_ANY;
 		}
@@ -187,11 +218,12 @@ namespace GUI
 
 	void Window::Draw()
 	{
+		SDL_Rect rect = GetWindowRect(false);
 		bool active = (WINMGR().GetActive() == this);
-		DrawReliefBox(m_rect, Color::C_LIGHT_GREY, false);
+		DrawReliefBox(rect, Color::C_LIGHT_GREY, false);
 		DrawTitleBar(active);
 		DrawTitle(active);
-		DrawButton(m_rect, Color::C_LIGHT_GREY, true);
+		DrawButton(rect, Color::C_LIGHT_GREY, true);
 
 		for (const auto & window : GetChildWindows())
 		{
@@ -223,10 +255,13 @@ namespace GUI
 
 		int fontW, fontH;
 		SDL_QueryTexture(m_activeTitle.get(), NULL, NULL, &fontW, &fontH);
-		m_titleStrRect = GetTitleBarRect();
-		m_titleStrRect.x += m_borderWidth;
-		m_titleStrRect.w -= (2 * m_borderWidth);
-		m_titleStrRect.y += m_borderWidth/2;
+		SDL_Rect titleBar = GetTitleBarRect();
+		m_titleStrRect.x = m_borderWidth;
+		m_titleStrRect.y = m_borderWidth / 2;
+
+		m_titleStrRect.w = titleBar.w;
+		m_titleStrRect.h = titleBar.h;
+
 		if (fontW < m_titleStrRect.w)
 		{
 			m_titleStrRect.w = fontW;
@@ -235,6 +270,13 @@ namespace GUI
 		{
 			m_titleStrRect.h = fontH;
 		}
+	}
+
+	void Window::MoveRel(SDL_Point rel)
+	{
+		std::cout << "Window(" << m_id << ").MoveRel(" << rel.x << "," << rel.y << ")" << std::endl;
+		m_rect.x += rel.x;
+		m_rect.y += rel.y;
 	}
 
 	struct Window::shared_enabler : public Window
