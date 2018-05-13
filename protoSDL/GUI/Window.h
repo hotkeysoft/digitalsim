@@ -47,8 +47,8 @@ namespace GUI
 		bool HasParent() const { return m_parent != nullptr; }
 		WindowRef GetParent() const { return m_parent; }
 
-		void SetIsFixed(bool fixed) { m_isFixed = fixed; };
-		bool GetIsFixed() const { return m_isFixed;  }
+		void SetFixed(bool fixed) { m_isFixed = fixed; };
+		bool IsFixed() const { return m_isFixed;  }
 		void MoveRel(SDL_Point rel);
 
 	protected:

@@ -113,7 +113,7 @@ namespace GUI
 
 	SDL_Rect Window::GetClientRect(bool relative) const
 	{
-		SDL_Rect rect = GetWindowRect();
+		SDL_Rect rect = GetWindowRect(relative);
 		if (relative)
 		{
 			rect.x = 0;
@@ -218,6 +218,12 @@ namespace GUI
 
 	void Window::Draw()
 	{
+		if (m_parent != nullptr)
+		{
+			SDL_Rect parentRect = m_parent->GetClientRect(false);
+			SDL_RenderSetClipRect(m_renderer, &parentRect);
+		}
+
 		SDL_Rect rect = GetWindowRect(false);
 		bool active = (WINMGR().GetActive() == this);
 		DrawReliefBox(rect, Color::C_LIGHT_GREY, false);
@@ -225,10 +231,12 @@ namespace GUI
 		DrawTitle(active);
 		DrawButton(rect, Color::C_LIGHT_GREY, true);
 
-		for (const auto & window : GetChildWindows())
-		{
-			window->Draw();
-		}
+		SDL_RenderSetClipRect(m_renderer, nullptr);
+
+		//for (const auto & window : GetChilWindows())
+		//{
+		//	window->Draw();
+		//}
 	}
 	
 	void DeleteTexture(SDL_Texture* surface)
@@ -274,9 +282,11 @@ namespace GUI
 
 	void Window::MoveRel(SDL_Point rel)
 	{
-		std::cout << "Window(" << m_id << ").MoveRel(" << rel.x << "," << rel.y << ")" << std::endl;
-		m_rect.x += rel.x;
-		m_rect.y += rel.y;
+		if (!m_isFixed)
+		{
+			m_rect.x += rel.x;
+			m_rect.y += rel.y;
+		}
 	}
 
 	struct Window::shared_enabler : public Window

@@ -93,12 +93,22 @@ int main(int argc, char ** argv)
 		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 });
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
+		mainWnd->SetFixed(true);
 		SDL_Rect client = mainWnd->GetClientRect();
 
-		WINMGR().AddWindow("nedit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
-//		WINMGR().AddWindow("nedit", mainWnd, { client.x, client.y, client.w - 300, client.h - 200 })->SetTitle("Editor");
-//		WINMGR().AddWindow("sim", mainWnd, { client.x, client.y + client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
-//		WINMGR().AddWindow("parts", mainWnd, { client.x + client.w - 300, client.y, 300, client.h })->SetTitle("Parts Bin");
+		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
+
+		WindowPtr editWnd = WINMGR().FindWindow("edit");
+		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetTitle("edit.1");
+		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 })->SetTitle("edit.2");
+
+		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
+		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1");
+
+		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
+		WindowPtr simWnd = WINMGR().FindWindow("sim");
+
+		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetTitle("Parts Bin");
 
 		CursorRef handCursor = RES().LoadCursor("hand", SDL_SYSTEM_CURSOR_HAND);
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
@@ -106,6 +116,10 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		Render(ren);
+
+		bool mouseCaptured = false;
+		WindowPtr captureTarget = nullptr;
+		SDL_Point lastPos;
 
 		SDL_Event e;
 		bool quit = false;
@@ -117,18 +131,28 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEMOTION)
 				{
 					SDL_Point pt = { e.button.x, e.button.y };
-					WindowPtr hit = WINMGR().HitTest(pt);
-					if (hit)
+					if (mouseCaptured && captureTarget)
 					{
-						switch (hit->HitTest(pt))
-						{
-						case GUI::Window::HIT_TITLEBAR:
-							SDL_SetCursor(sizeAllCursor);
-							break;
-						default:
-							SDL_SetCursor(normalCursor);
-						}
+						
+						captureTarget->MoveRel({ pt.x - lastPos.x, pt.y - lastPos.y });
+						lastPos = pt;
 						Render(ren);
+					}
+					else
+					{
+						WindowPtr hit = WINMGR().HitTest(pt);
+						if (hit)
+						{
+							switch (hit->HitTest(pt))
+							{
+							case GUI::Window::HIT_TITLEBAR:
+								SDL_SetCursor(sizeAllCursor);
+								break;
+							default:
+								SDL_SetCursor(normalCursor);
+							}
+							Render(ren);
+						}
 					}
 
 				}
@@ -141,7 +165,17 @@ int main(int argc, char ** argv)
 						{
 							WINMGR().SetActive(hit);
 							Render(ren);
+							mouseCaptured = true;
+							captureTarget = hit;
+							lastPos = pt;
 						}
+					}
+				}
+				else if (e.type == SDL_MOUSEBUTTONUP) {
+					if (mouseCaptured)
+					{
+						mouseCaptured = false;
+						captureTarget = nullptr;
 					}
 				}
 				else if (e.type == SDL_KEYDOWN) {
