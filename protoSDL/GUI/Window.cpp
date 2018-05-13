@@ -216,12 +216,25 @@ namespace GUI
 		return HIT_NOTHING;
 	}
 
+	SDL_Rect GetClipRect(WindowRef win)
+	{
+		SDL_Rect rect = win->GetClientRect(false);
+
+		while (win)
+		{
+			SDL_IntersectRect(&rect, &win->GetClientRect(false), &rect);
+			win = win->GetParent();
+		}
+
+		return rect;
+	}
+
 	void Window::Draw()
 	{
 		if (m_parent != nullptr)
 		{
-			SDL_Rect parentRect = m_parent->GetClientRect(false);
-			SDL_RenderSetClipRect(m_renderer, &parentRect);
+			SDL_Rect clip = GetClipRect(m_parent);
+			SDL_RenderSetClipRect(m_renderer, &clip);
 		}
 
 		SDL_Rect rect = GetWindowRect(false);
@@ -232,11 +245,6 @@ namespace GUI
 		DrawButton(rect, Color::C_LIGHT_GREY, true);
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);
-
-		//for (const auto & window : GetChilWindows())
-		//{
-		//	window->Draw();
-		//}
 	}
 	
 	void DeleteTexture(SDL_Texture* surface)
@@ -286,6 +294,16 @@ namespace GUI
 		{
 			m_rect.x += rel.x;
 			m_rect.y += rel.y;
+
+			if (m_rect.x < 0)
+			{
+				m_rect.x = 0;
+			}
+
+			if (m_rect.y < 0)
+			{
+				m_rect.y = 0;
+			}
 		}
 	}
 

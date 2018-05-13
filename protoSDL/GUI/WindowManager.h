@@ -36,6 +36,7 @@ namespace GUI
 
 	protected:
 		void RaiseSingleWindow(WindowRef);
+		void RaiseChildren(WindowRef);
 
 		WindowManager() : m_renderer(nullptr) {}
 		RendererRef m_renderer;

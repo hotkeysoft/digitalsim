@@ -132,24 +132,25 @@ namespace GUI
 		}
 	}
 
+	void WindowManager::RaiseChildren(WindowRef win)
+	{
+		RaiseSingleWindow(win);
+		for (auto & child : win->GetChildWindows())
+		{
+			RaiseChildren(child.get());
+		}
+
+	}
+
 	void WindowManager::MoveToFront(WindowPtr win)
 	{
 		if (win == nullptr)
 			return;
 
-		// Move parent to front
-//		RaiseSingleWindow(win->GetParent());
-
-		// Move self
-		RaiseSingleWindow(win.get());
-
-
-		// Move children
-		for (auto & child : win->GetChildWindows())
+		if (win->HasParent())
 		{
-			MoveToFront(child);
+			RaiseChildren(win->GetParent());
 		}
-
-
+		RaiseChildren(win.get());
 	}
 }
