@@ -190,18 +190,12 @@ namespace GUI
 		{
 			SDL_Rect target = GetTitleBarRect();
 
-			int w = target.w - (2 * m_borderWidth);
-			int h = target.h;
-
-			w = std::min(m_titleStrRect.w, w);
-			h = std::min(m_titleStrRect.h, h);
-
 			target.x += m_borderWidth;
 			target.y += m_borderWidth / 2;
-			target.w = w;
-			target.h = h;
+			target.w = std::min(m_titleStrRect.w, target.w - (2 * m_borderWidth));
+			target.h = std::min(m_titleStrRect.h, target.h);
 
-			SDL_Rect source = { 0, 0, w, h };
+			SDL_Rect source = { 0, 0, target.w, target.h };
 			SDL_RenderCopy(m_renderer, title.get(), &source, &target);
 		}
 	}
