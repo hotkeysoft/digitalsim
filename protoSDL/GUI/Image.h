@@ -13,7 +13,7 @@ namespace GUI
 		Image(Image&&) = delete;
 		Image& operator=(Image&&) = delete;
 
-		static ImagePtr Create(SDL::RendererRef & renderer);
+		static ImagePtr Create(RendererRef & renderer);
 
 		operator bool() const { return IsSet(); }
 
@@ -23,10 +23,10 @@ namespace GUI
 		bool IsSet() const { return m_texture != nullptr; }
 
 	protected:
-		Image(SDL::RendererRef & renderer);
+		Image(RendererRef & renderer);
 
-		SDL::RendererRef m_renderer;
-		SDL::TexturePtr m_texture;
+		RendererRef m_renderer;
+		TexturePtr m_texture;
 
 		int m_width;
 		int m_height;

@@ -7,7 +7,7 @@ namespace GUI
 {
 	ImagePtr Window::m_titleBackground = nullptr;
 
-	Window::Window(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect) : m_renderer(renderer),
+	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect) : m_renderer(renderer),
 		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true)	
 	{
 		if (m_renderer == nullptr)
@@ -21,7 +21,7 @@ namespace GUI
 		m_id = id;
 	}
 
-	WindowPtr Window::Create(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect)
+	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect)
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect);
 		return std::static_pointer_cast<Window>(ptr);
@@ -150,7 +150,7 @@ namespace GUI
 
 	void Window::DrawTitle(bool active)
 	{
-		SDL::TexturePtr title;
+		TexturePtr title;
 		if (active && m_activeTitle)
 		{
 			title = m_activeTitle;
@@ -204,9 +204,9 @@ namespace GUI
 		SDL_DestroyTexture(surface);
 	}
 
-	SDL::TexturePtr Window::SurfaceToTexture(SDL_Surface* surf)
+	TexturePtr Window::SurfaceToTexture(SDL_Surface* surf)
 	{
-		SDL::TexturePtr texture = SDL::TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), DeleteTexture);
+		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), DeleteTexture);
 
 		SDL_FreeSurface(surf);
 

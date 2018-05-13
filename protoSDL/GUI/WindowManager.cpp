@@ -14,7 +14,7 @@ namespace GUI
 		return manager;
 	}
 
-	void WindowManager::Init(SDL::RendererPtr & renderer)
+	void WindowManager::Init(RendererPtr & renderer)
 	{
 		m_renderer = renderer.get();
 	}
@@ -35,14 +35,14 @@ namespace GUI
 		return AddWindow(id, nullptr, pos);
 	}
 
-	WindowPtr WindowManager::AddWindow(const char* id, GUI::WindowPtr parent, SDL_Rect pos)
+	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos)
 	{
 		if (FindWindow(id) != nullptr)
 		{
 			throw std::invalid_argument("windows already exists:" + (std::string)id);
 		}
 
-		WindowPtr newWindow = Window::Create(id, m_renderer, parent.get(), GUI::ResourceManager::Get().FindFont("default"), pos);
+		WindowPtr newWindow = Window::Create(id, m_renderer, parent.get(), RES().FindFont("default"), pos);
 		m_windows.push_front(newWindow);
 
 		return newWindow;
@@ -66,7 +66,7 @@ namespace GUI
 		return nullptr;
 	}
 
-	WindowManager::WindowList WindowManager::GetWindowList(GUI::WindowRef parent)
+	WindowManager::WindowList WindowManager::GetWindowList(WindowRef parent)
 	{
 		WindowList childWindows;
 		std::copy_if(m_windows.begin(), m_windows.end(), std::back_inserter(childWindows),
@@ -74,7 +74,7 @@ namespace GUI
 		return childWindows;
 	}
 
-	GUI::WindowPtr WindowManager::HitTest(SDL_Point pt)
+	WindowPtr WindowManager::HitTest(SDL_Point pt)
 	{
 		for (auto & window : m_windows)
 		{
@@ -91,7 +91,7 @@ namespace GUI
 		return nullptr;
 	}
 
-	void WindowManager::SetActive(GUI::WindowPtr win)
+	void WindowManager::SetActive(WindowPtr win)
 	{
 		m_activeWindow = win;
 		std::cout << "SetActive(): " << win->GetId() << std::endl;

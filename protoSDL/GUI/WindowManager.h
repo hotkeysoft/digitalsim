@@ -20,7 +20,7 @@ namespace GUI
 
 		static WindowManager & Get();
 
-		void Init(SDL::RendererPtr & renderer);
+		void Init(RendererPtr & renderer);
 
 		void Draw();
 		GUI::WindowPtr AddWindow(const char* id, SDL_Rect pos);
@@ -34,7 +34,7 @@ namespace GUI
 
 	protected:
 		WindowManager() : m_renderer(nullptr) {}
-		SDL::RendererRef m_renderer;
+		RendererRef m_renderer;
 
 		WindowList m_windows;
 		GUI::WindowPtr m_activeWindow;

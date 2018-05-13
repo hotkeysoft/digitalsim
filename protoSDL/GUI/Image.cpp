@@ -4,7 +4,7 @@
 
 namespace GUI
 {
-	Image::Image(SDL::RendererRef & renderer) : m_renderer(renderer)
+	Image::Image(RendererRef & renderer) : m_renderer(renderer)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -12,7 +12,7 @@ namespace GUI
 		}
 	}
 
-	ImagePtr Image::Create(SDL::RendererRef & renderer)
+	ImagePtr Image::Create(RendererRef & renderer)
 	{
 		auto ptr = std::make_shared<shared_enabler>(renderer);
 		return std::static_pointer_cast<Image>(ptr);
@@ -20,7 +20,7 @@ namespace GUI
 
 	bool Image::LoadFromFile(const char* fileName)
 	{
-		m_texture = SDL::TexturePtr(IMG_LoadTexture(m_renderer, fileName), SDL::sdl_deleter());
+		m_texture = TexturePtr(IMG_LoadTexture(m_renderer, fileName), sdl_deleter());
 		if (m_texture)
 		{
 			SDL_QueryTexture(m_texture.get(), NULL, NULL, &m_width, &m_height);

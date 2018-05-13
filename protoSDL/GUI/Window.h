@@ -25,7 +25,7 @@ namespace GUI
 		Window(Window&&) = delete;
 		Window& operator=(Window&&) = delete;
 
-		static WindowPtr Create(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect);
+		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect);
 		void SetTitle(const char* title);
 		void SetImage(ImageRef image);
 
@@ -47,7 +47,7 @@ namespace GUI
 		WindowRef GetParent() const { return m_parent; }
 
 	protected:
-		Window(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect);
+		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect);
 
 		void SetDrawColor(const GUI::Color & col);
 		void Draw3dFrame(SDL_Rect pos, bool raised);
@@ -56,7 +56,7 @@ namespace GUI
 		void DrawTitleBar(bool active);
 		void DrawTitle(bool active);
 		void RenderTitle();
-		SDL::TexturePtr SurfaceToTexture(SDL_Surface* surf);
+		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 		std::string m_title;
 		SDL_Rect m_rect;
@@ -66,11 +66,11 @@ namespace GUI
 
 		std::string m_id;
 		GUI::WindowRef m_parent;
-		SDL::RendererRef m_renderer;
-		SDL::FontRef m_font;
+		RendererRef m_renderer;
+		FontRef m_font;
 		static ImagePtr m_titleBackground;
-		SDL::TexturePtr m_activeTitle;
-		SDL::TexturePtr m_inactiveTitle;
+		TexturePtr m_activeTitle;
+		TexturePtr m_inactiveTitle;
 		SDL_Rect m_titleStrRect;
 		ImageRef m_image;
 

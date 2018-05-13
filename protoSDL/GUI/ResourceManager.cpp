@@ -12,12 +12,12 @@ namespace GUI
 		return manager;
 	}
 
-	void ResourceManager::Init(SDL::RendererPtr & renderer)
+	void ResourceManager::Init(RendererPtr & renderer)
 	{
 		m_renderer = renderer.get();
 	}
 
-	SDL::FontRef ResourceManager::LoadFont(const char * id, const char * fileName, size_t size)
+	FontRef ResourceManager::LoadFont(const char * id, const char * fileName, size_t size)
 	{		
 		if (id == nullptr || fileName == nullptr)
 		{
@@ -28,8 +28,8 @@ namespace GUI
 			throw std::invalid_argument("font id already loaded: " + std::string(id));
 		}
 
-		SDL::FontPtr font = SDL::FontPtr(TTF_OpenFont(fileName, (int)size), SDL::sdl_deleter());
-		SDL::FontRef ref = font.get();
+		FontPtr font = FontPtr(TTF_OpenFont(fileName, (int)size), sdl_deleter());
+		FontRef ref = font.get();
 		if (font != nullptr)
 		{
 			m_fonts[id] = std::move(font);
@@ -38,7 +38,7 @@ namespace GUI
 		return ref;
 	}
 
-	SDL::FontRef ResourceManager::FindFont(const char * id)
+	FontRef ResourceManager::FindFont(const char * id)
 	{
 		auto it = m_fonts.find(id);
 		if (it == m_fonts.end())
@@ -49,7 +49,7 @@ namespace GUI
 		return it->second.get();
 	}
 
-	GUI::ImageRef ResourceManager::LoadImage(const char * id, const char * fileName)
+	ImageRef ResourceManager::LoadImage(const char * id, const char * fileName)
 	{
 		if (id == nullptr || fileName == nullptr)
 		{
@@ -60,7 +60,7 @@ namespace GUI
 			throw std::invalid_argument("image id already loaded: " + std::string(id));
 		}
 
-		GUI::ImagePtr image = GUI::Image::Create(m_renderer);
+		ImagePtr image = Image::Create(m_renderer);
 		if (image != nullptr && image->LoadFromFile(fileName))
 		{			
 			m_images[id] = image;
@@ -69,7 +69,7 @@ namespace GUI
 		return image.get();
 	}
 
-	GUI::ImageRef ResourceManager::FindImage(const char * id)
+	ImageRef ResourceManager::FindImage(const char * id)
 	{
 		auto it = m_images.find(id);
 		if (it == m_images.end())

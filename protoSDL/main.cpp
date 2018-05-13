@@ -12,29 +12,24 @@
 
 using namespace GUI;
 
-void ToggleFullscreen(SDL::MainWindowPtr & window) {
+void ToggleFullscreen(MainWindowPtr & window) {
 	Uint32 FullscreenFlag = SDL_WINDOW_FULLSCREEN;
 	bool IsFullscreen = SDL_GetWindowFlags(window.get()) & FullscreenFlag;
 	SDL_SetWindowFullscreen(window.get(), IsFullscreen ? 0 : FullscreenFlag);
 	SDL_ShowCursor(1);
 }
 
-void DeleteTexture(::SDL_Texture* surface)
+MainWindowPtr CreateWindow(char const *title, int x, int y, int w, int h, Uint32 flags)
 {
-	SDL_DestroyTexture(surface);
+	return MainWindowPtr(SDL_CreateWindow(title, x, y, w, h, flags), sdl_deleter());
 }
 
-SDL::MainWindowPtr CreateWindow(char const *title, int x, int y, int w, int h, Uint32 flags)
+RendererPtr CreateRenderer(MainWindowPtr & window, int index, Uint32 flags)
 {
-	return SDL::MainWindowPtr(SDL_CreateWindow(title, x, y, w, h, flags), SDL::sdl_deleter());
+	return RendererPtr(SDL_CreateRenderer(window.get(), index, flags), sdl_deleter());
 }
 
-SDL::RendererPtr CreateRenderer(SDL::MainWindowPtr & window, int index, Uint32 flags)
-{
-	return SDL::RendererPtr(SDL_CreateRenderer(window.get(), index, flags), SDL::sdl_deleter());
-}
-
-void Render(SDL::RendererPtr & ren)
+void Render(RendererPtr & ren)
 {	
 	SDL_SetRenderDrawColor(ren.get(), 64, 64, 64, 255);
 	
@@ -45,7 +40,7 @@ void Render(SDL::RendererPtr & ren)
 	SDL_RenderPresent(ren.get());
 }
 
-SDL_Texture* SurfaceToTexture(SDL::RendererPtr & ren, SDL_Surface* surf)
+SDL_Texture* SurfaceToTexture(RendererPtr & ren, SDL_Surface* surf)
 {
 	SDL_Texture* text;
 
@@ -76,9 +71,9 @@ int main(int argc, char ** argv)
 	//	NULL);
 
 	{
-		SDL::MainWindowPtr win = CreateWindow("Hello SDL World!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
+		MainWindowPtr win = CreateWindow("Hello SDL World!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
 
-		SDL::RendererPtr ren = CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		RendererPtr ren = CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		if (ren == nullptr)
 		{
 			SDL_DestroyWindow(win.get());
@@ -91,7 +86,7 @@ int main(int argc, char ** argv)
 		WINMGR().Init(ren);
 
 		TTF_Init();
-		SDL::FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
+		FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 
