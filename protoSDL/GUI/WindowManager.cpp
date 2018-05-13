@@ -30,19 +30,19 @@ namespace GUI
 		}
 	}
 
-	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos)
+	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos, WindowCreationFlags flags)
 	{
-		return AddWindow(id, nullptr, pos);
+		return AddWindow(id, nullptr, pos, flags);
 	}
 
-	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos)
+	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos, WindowCreationFlags flags)
 	{
 		if (FindWindow(id) != nullptr)
 		{
 			throw std::invalid_argument("windows already exists:" + (std::string)id);
 		}
 
-		WindowPtr newWindow = Window::Create(id, m_renderer, parent.get(), RES().FindFont("default"), pos);
+		WindowPtr newWindow = Window::Create(id, m_renderer, parent.get(), RES().FindFont("default"), pos, flags);
 		m_windows.push_back(newWindow);
 
 		return newWindow;
@@ -76,30 +76,19 @@ namespace GUI
 
 	WindowPtr WindowManager::HitTest(SDL_Point pt)
 	{
-		// print window stack
-		for (auto & win : m_windows)
-		{
-			std::cout << win->GetId() << " ";
-		}
-		std::cout << std::endl;
-
-		std::cout << "HitTest: ";
 		for (auto it = m_windows.rbegin(); it != m_windows.rend(); ++it)
 		{
 			auto & window = *it;
-			std::cout << window->GetId() << " ";
 			if (window->IsVisible())
 			{
 				SDL_Rect rect = window->GetWindowRect(false);
 				if (SDL_PointInRect(&pt, &rect))
 				{
-					std::cout << "HIT" << std::endl;
 					return window;
 				}
 			}
 		}
 
-		std::cout << "NO HIT" << std::endl;
 		return nullptr;
 	}
 
@@ -110,16 +99,8 @@ namespace GUI
 
 	void WindowManager::SetActive(WindowPtr win)
 	{
-		std::cout << "SetActive(): " << win->GetId() << std::endl;
 		m_activeWindow = win;
 		MoveToFront(win);
-
-		// print window stack
-		for (auto & win : m_windows)
-		{
-			std::cout << win->GetId() << " ";
-		}
-		std::cout << std::endl;
 	}
 	void WindowManager::RaiseSingleWindow(WindowRef win)
 	{

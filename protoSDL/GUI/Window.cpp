@@ -2,6 +2,7 @@
 #include "SDL_rect.h"
 #include "Window.h"
 #include "Image.h"
+#include <algorithm>
 
 namespace GUI
 {
@@ -11,8 +12,8 @@ namespace GUI
 
 	Window::Window() : m_id("null"), m_renderer(nullptr), m_parent(nullptr), m_image(nullptr), m_font(nullptr), m_visible(false) {}
 
-	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect) : m_renderer(renderer),
-		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true), m_isFixed(false)
+	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags) : m_renderer(renderer),
+		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true), m_flags(flags)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -25,9 +26,9 @@ namespace GUI
 		m_id = id;
 	}
 
-	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect)
+	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect, flags);
 		return std::static_pointer_cast<Window>(ptr);
 	}
 
@@ -188,32 +189,57 @@ namespace GUI
 		if (title)
 		{
 			SDL_Rect target = GetTitleBarRect();
-			target.x += m_titleStrRect.x;
-			target.y += m_titleStrRect.y;
-			target.w = m_titleStrRect.w;
-			target.h = m_titleStrRect.h;
 
-			SDL_Rect source = { 0, 0, m_titleStrRect.w, m_titleStrRect.h };
+			int w = target.w - (2 * m_borderWidth);
+			int h = target.h;
+
+			w = std::min(m_titleStrRect.w, w);
+			h = std::min(m_titleStrRect.h, h);
+
+			target.x += m_borderWidth;
+			target.y += m_borderWidth / 2;
+			target.w = w;
+			target.h = h;
+
+			SDL_Rect source = { 0, 0, w, h };
 			SDL_RenderCopy(m_renderer, title.get(), &source, &target);
 		}
 	}
 
-	Window::HitZone Window::HitTest(SDL_Point pt)
+	HitZone Window::HitTest(SDL_Point pt)
 	{
 		if (SDL_PointInRect(&pt, &GetTitleBarRect()))
 		{
 			return HIT_TITLEBAR;
 		}
-		else if (SDL_PointInRect(&pt, &GetClientRect()))
+		else if (SDL_PointInRect(&pt, &GetClientRect(false)))
 		{
 			return HIT_CLIENT;
 		}
-		else if (SDL_PointInRect(&pt, &GetWindowRect(false)))
+
+		SDL_Rect wndRect = GetWindowRect(false);
+		if (!SDL_PointInRect(&pt, &wndRect))
 		{
-			return HIT_BORDER_ANY;
+			return HIT_NOTHING;
 		}
 
-		return HIT_NOTHING;
+		bool left = pt.x < wndRect.x + 2*m_borderWidth;
+		bool top = pt.y < wndRect.y + 2*m_borderWidth;
+		bool right = pt.x > wndRect.x + wndRect.w - 2*m_borderWidth;
+		bool bottom = pt.y > wndRect.y + wndRect.h - 2*m_borderWidth;
+		if (top)
+		{
+			if (left) return HIT_CORNER_TOPLEFT;
+			else if (right) return HIT_CORNER_TOPRIGHT;
+			else return HIT_BORDER_TOP;
+		}
+		else if (bottom)
+		{
+			if (left) return HIT_CORNER_BOTTOMLEFT;
+			else if (right) return HIT_CORNER_BOTTOMRIGHT;
+			else return HIT_BORDER_BOTTOM;
+		}
+		else return left? HIT_BORDER_LEFT : HIT_BORDER_RIGHT;
 	}
 
 	SDL_Rect GetClipRect(WindowRef win)
@@ -269,43 +295,58 @@ namespace GUI
 		SDL_Surface* inactive = TTF_RenderText_Blended(m_font, m_title.c_str(), GUI::Color::C_DARK_GREY);
 		m_inactiveTitle = SurfaceToTexture(inactive);
 
-		int fontW, fontH;
-		SDL_QueryTexture(m_activeTitle.get(), NULL, NULL, &fontW, &fontH);
-		SDL_Rect titleBar = GetTitleBarRect();
-		m_titleStrRect.x = m_borderWidth;
-		m_titleStrRect.y = m_borderWidth / 2;
-
-		m_titleStrRect.w = titleBar.w;
-		m_titleStrRect.h = titleBar.h;
-
-		if (fontW < m_titleStrRect.w)
-		{
-			m_titleStrRect.w = fontW;
-		}
-		if (fontH < m_titleStrRect.h)
-		{
-			m_titleStrRect.h = fontH;
-		}
+		SDL_QueryTexture(m_activeTitle.get(), NULL, NULL, &m_titleStrRect.w, &m_titleStrRect.h);
+		m_titleStrRect.x = 0;
+		m_titleStrRect.y = 0;
 	}
 
-	void Window::MoveRel(SDL_Point rel)
+	bool Window::MoveRel(SDL_Point rel)
 	{
-		if (!m_isFixed)
+		bool clip = false;
+		if (m_flags & WIN_CANMOVE)
 		{
 			m_rect.x += rel.x;
 			m_rect.y += rel.y;
 
 			if (m_rect.x < 0)
 			{
+				clip = true;
 				m_rect.x = 0;
 			}
 
 			if (m_rect.y < 0)
 			{
+				clip = true;
 				m_rect.y = 0;
 			}
-		}
+		}		
+
+		return !clip;
 	}
+
+	bool Window::ResizeRel(SDL_Point rel)
+	{
+		bool clip = false;
+		if (m_flags & WIN_CANRESIZE)
+		{
+			m_rect.w += rel.x;
+			m_rect.h += rel.y;
+
+			if (m_rect.w < 100)
+			{
+				clip = true;
+				m_rect.w = 100;
+			}
+
+			if (m_rect.h < 100)
+			{
+				clip = true;
+				m_rect.h = 100;
+			}
+		}
+		return clip;
+	}
+
 
 	struct Window::shared_enabler : public Window
 	{

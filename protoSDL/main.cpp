@@ -35,7 +35,7 @@ void Render(RendererPtr & ren)
 	
 	SDL_RenderClear(ren.get());
 
-	GUI::WINMGR().Draw();
+	WINMGR().Draw();
 
 	SDL_RenderPresent(ren.get());
 }
@@ -90,10 +90,9 @@ int main(int argc, char ** argv)
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 
-		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 });
+		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WIN_SYSMENU);
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
-		mainWnd->SetFixed(true);
 		SDL_Rect client = mainWnd->GetClientRect();
 
 		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
@@ -103,22 +102,28 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 })->SetTitle("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
-		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1");
+		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1  With a long name");
 
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 
 		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetTitle("Parts Bin");
 
-		CursorRef handCursor = RES().LoadCursor("hand", SDL_SYSTEM_CURSOR_HAND);
+		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
+		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
+		CursorRef sizeWECursor = RES().LoadCursor("size.WE", SDL_SYSTEM_CURSOR_SIZEWE);
+		CursorRef sizeNSCursor = RES().LoadCursor("size.NS", SDL_SYSTEM_CURSOR_SIZENS);
+
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
-		CursorRef sizeAllCursor = RES().LoadCursor("size.all", SDL_SYSTEM_CURSOR_SIZEALL);
 		SDL_SetCursor(normalCursor);
+
+
 
 		Render(ren);
 
 		bool mouseCaptured = false;
 		WindowPtr captureTarget = nullptr;
+		HitZone captureZone = HIT_NOTHING;
 		SDL_Point lastPos;
 
 		SDL_Event e;
@@ -133,8 +138,55 @@ int main(int argc, char ** argv)
 					SDL_Point pt = { e.button.x, e.button.y };
 					if (mouseCaptured && captureTarget)
 					{
-						
-						captureTarget->MoveRel({ pt.x - lastPos.x, pt.y - lastPos.y });
+						SDL_Point rel = { pt.x - lastPos.x, pt.y - lastPos.y };
+						switch (captureZone)
+						{
+						case HIT_TITLEBAR:
+							captureTarget->MoveRel(rel);
+							break;
+						case HIT_BORDER_LEFT:
+							if (captureTarget->MoveRel(SDL_Point({ rel.x, 0 })))
+							{
+								captureTarget->ResizeRel(SDL_Point({ -rel.x, 0 }));
+							}
+							break;
+						case HIT_BORDER_RIGHT:
+							captureTarget->ResizeRel({ rel.x, 0 });
+							break;
+						case HIT_BORDER_TOP:
+							if (captureTarget->MoveRel(SDL_Point({ 0, rel.y })))
+							{
+								captureTarget->ResizeRel({ 0, -rel.y });
+							}
+							break;
+						case HIT_BORDER_BOTTOM:
+							captureTarget->ResizeRel({ 0, rel.y });
+							break;
+						case HIT_CORNER_TOPLEFT:
+							if (captureTarget->MoveRel(rel))
+							{
+								captureTarget->ResizeRel({ -rel.x, -rel.y });
+							}
+							break;
+						case HIT_CORNER_TOPRIGHT:
+							if (captureTarget->MoveRel(SDL_Point({ 0, rel.y })))
+							{
+								captureTarget->ResizeRel({ rel.x, -rel.y });
+							}
+							break;
+						case HIT_CORNER_BOTTOMLEFT:
+							if (captureTarget->MoveRel(SDL_Point({ rel.x, 0 })))
+							{
+								captureTarget->ResizeRel({ -rel.x, rel.y });
+							}
+							break;
+						case HIT_CORNER_BOTTOMRIGHT:
+							if (captureTarget->MoveRel(SDL_Point({ 0, 0 })))
+							{
+								captureTarget->ResizeRel({ rel.x, rel.y });
+							}
+							break;
+						}
 						lastPos = pt;
 						Render(ren);
 					}
@@ -145,10 +197,27 @@ int main(int argc, char ** argv)
 						{
 							switch (hit->HitTest(pt))
 							{
-							case GUI::Window::HIT_TITLEBAR:
-								SDL_SetCursor(sizeAllCursor);
+							case HIT_BORDER_TOP:
+							case HIT_BORDER_BOTTOM:
+								SDL_SetCursor(sizeNSCursor);
+								break;
+							case HIT_BORDER_LEFT:
+							case HIT_BORDER_RIGHT:
+								SDL_SetCursor(sizeWECursor);
+								break;
+							case HIT_CORNER_TOPLEFT:
+							case HIT_CORNER_BOTTOMRIGHT:
+								SDL_SetCursor(sizeNWSECursor);
+								break;
+							case HIT_CORNER_TOPRIGHT:
+							case HIT_CORNER_BOTTOMLEFT:
+								SDL_SetCursor(sizeNESWCursor);
 								break;
 							default:
+								SDL_SetCursor(normalCursor);
+							}
+							if (!(hit->GetFlags() & WIN_CANRESIZE))
+							{
 								SDL_SetCursor(normalCursor);
 							}
 							Render(ren);
@@ -160,15 +229,25 @@ int main(int argc, char ** argv)
 					if (e.button.button == SDL_BUTTON_LEFT)
 					{
 						SDL_Point pt = { e.button.x, e.button.y };
-						GUI::WindowPtr hit = WINMGR().HitTest(pt);
+						WindowPtr hit = WINMGR().HitTest(pt);
 						if (hit)
 						{
 							WINMGR().SetActive(hit);
-							Render(ren);
-							mouseCaptured = true;
-							captureTarget = hit;
-							lastPos = pt;
+							captureZone = hit->HitTest(pt);
+							if (captureZone == HIT_TITLEBAR)
+							{
+								mouseCaptured = true;
+								captureTarget = hit;
+								lastPos = pt;
+							}
+							else if (captureZone & HIT_BORDER_ANY | HIT_CORNER_ANY)
+							{
+								mouseCaptured = true;
+								captureTarget = hit;
+								lastPos = pt;
+							}
 						}
+						Render(ren);
 					}
 				}
 				else if (e.type == SDL_MOUSEBUTTONUP) {
@@ -200,6 +279,7 @@ int main(int argc, char ** argv)
 					}
 				}
 			}
+			SDL_Delay(2);
 		}
 	}
 

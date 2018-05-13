@@ -9,15 +9,6 @@ namespace GUI
 	class Window
 	{
 	public:
-		enum HitZone {
-			HIT_NOTHING = 0,
-			HIT_TITLEBAR = 1,
-			HIT_CLIENT = 2,
-			HIT_BORDER_CORNER = 4,
-			HIT_BORDER_H = 8,
-			HIT_BORDER_V = 16,
-			HIT_BORDER_ANY = HIT_BORDER_CORNER | HIT_BORDER_H | HIT_BORDER_V
-		};
 
 		virtual ~Window() = default;
 		Window(const Window&) = delete;
@@ -25,7 +16,7 @@ namespace GUI
 		Window(Window&&) = delete;
 		Window& operator=(Window&&) = delete;
 
-		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect);
+		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags);
 		void SetTitle(const char* title);
 		void SetImage(ImageRef image);
 
@@ -47,12 +38,12 @@ namespace GUI
 		bool HasParent() const { return m_parent != nullptr; }
 		WindowRef GetParent() const { return m_parent; }
 
-		void SetFixed(bool fixed) { m_isFixed = fixed; };
-		bool IsFixed() const { return m_isFixed;  }
-		void MoveRel(SDL_Point rel);
+		WindowCreationFlags GetFlags() { return m_flags; }
+		bool MoveRel(SDL_Point rel);
+		bool ResizeRel(SDL_Point rel);
 
 	protected:
-		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect);
+		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags);
 		Window();
 
 		SDL_Rect GetTitleBarRect() const;
@@ -66,7 +57,7 @@ namespace GUI
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 		std::string m_title;
-		bool m_isFixed;
+		WindowCreationFlags m_flags;
 		SDL_Rect m_rect;
 		SDL_Rect m_titleStrRect;
 
@@ -82,7 +73,7 @@ namespace GUI
 		TexturePtr m_inactiveTitle;
 		ImageRef m_image;
 
-		static Window m_nullWnd;
+		static Window m_nullWnd;		
 
 		bool m_visible;
 
