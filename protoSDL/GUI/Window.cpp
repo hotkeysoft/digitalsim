@@ -7,17 +7,23 @@ namespace GUI
 {
 	ImagePtr Window::m_titleBackground = nullptr;
 
-	Window::Window(SDL::RendererRef renderer, SDL::FontRef font, SDL_Rect rect) : m_renderer(renderer), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true)
+	Window::Window(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect) : m_renderer(renderer),
+		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true)	
 	{
 		if (m_renderer == nullptr)
 		{
 			throw std::invalid_argument("no renderer");
 		}
+		if (id == nullptr)
+		{
+			throw std::invalid_argument("id is null");
+		}
+		m_id = id;
 	}
 
-	WindowPtr Window::Create(SDL::RendererRef renderer, SDL::FontRef font, SDL_Rect rect)
+	WindowPtr Window::Create(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect)
 	{
-		auto ptr = std::make_shared<shared_enabler>(renderer, font, rect);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect);
 		return std::static_pointer_cast<Window>(ptr);
 	}
 
@@ -94,6 +100,11 @@ namespace GUI
 		{
 			m_image->Draw(SDL_Point({pos.x+1, pos.y+1}));
 		}
+	}
+
+	WindowManager::WindowList Window::GetChildWindows()
+	{
+		return WINMGR().GetWindowList(this);
 	}
 
 	SDL_Rect Window::GetClientRect() const
@@ -174,12 +185,18 @@ namespace GUI
 		return HIT_NOTHING;
 	}
 
-	void Window::Draw(bool active)
+	void Window::Draw()
 	{
+		bool active = (WINMGR().GetActive() == this);
 		DrawReliefBox(m_rect, Color::C_LIGHT_GREY, false);
 		DrawTitleBar(active);
 		DrawTitle(active);
 		DrawButton(m_rect, Color::C_LIGHT_GREY, true);
+
+		for (const auto & window : GetChildWindows())
+		{
+			window->Draw();
+		}
 	}
 	
 	void DeleteTexture(SDL_Texture* surface)

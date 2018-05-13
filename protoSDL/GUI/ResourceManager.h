@@ -19,18 +19,21 @@ namespace GUI
 		ResourceManager& operator=(ResourceManager&&) = delete;
 
 		static ResourceManager & Get();
-		static void Init(SDL::RendererPtr & renderer);
 
-		static SDL::FontRef LoadFont(const char * id, const char * fileName, size_t size);
-		static SDL::FontRef FindFont(const char * id);
+		void Init(SDL::RendererPtr & renderer);
 
-		static GUI::ImageRef LoadImage(const char * id, const char * fileName);
-		static GUI::ImageRef FindImage(const char * id);
+		SDL::FontRef LoadFont(const char * id, const char * fileName, size_t size);
+		SDL::FontRef FindFont(const char * id);
+
+		GUI::ImageRef LoadImage(const char * id, const char * fileName);
+		GUI::ImageRef FindImage(const char * id);
 
 	protected:
-		ResourceManager() = default;
-		static SDL::RendererRef m_renderer;
-		static FontList m_fonts;
-		static ImageList m_images;
+		ResourceManager() : m_renderer(nullptr) {}
+		SDL::RendererRef m_renderer;
+		FontList m_fonts;
+		ImageList m_images;
 	};
+
+	constexpr auto RES = &ResourceManager::Get;
 }

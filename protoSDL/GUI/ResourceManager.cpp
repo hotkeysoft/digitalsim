@@ -6,10 +6,6 @@
 
 namespace GUI
 {
-	SDL::RendererRef ResourceManager::m_renderer = nullptr;
-	ResourceManager::FontList ResourceManager::m_fonts;
-	ResourceManager::ImageList ResourceManager::m_images;
-
 	ResourceManager & ResourceManager::Get()
 	{
 		static ResourceManager manager;

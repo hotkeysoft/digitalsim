@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "Color.h"
+#include "WindowManager.h"
 #include <string>
 
 namespace GUI
@@ -24,9 +25,12 @@ namespace GUI
 		Window(Window&&) = delete;
 		Window& operator=(Window&&) = delete;
 
-		static WindowPtr Create(SDL::RendererRef renderer, SDL::FontRef font, SDL_Rect rect);
+		static WindowPtr Create(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect);
 		void SetTitle(const char* title);
 		void SetImage(ImageRef image);
+
+		std::string GetId() const { return m_id; }
+		WindowManager::WindowList GetChildWindows();
 
 		SDL_Rect GetClientRect() const;
 		SDL_Rect GetTitleBarRect() const;
@@ -34,13 +38,16 @@ namespace GUI
 
 		HitZone HitTest(SDL_Point);
 
-		void Draw(bool active = false);
+		void Draw();
 
 		void SetVisible(bool visible = true) { m_visible = visible; }
 		bool IsVisible() const { return m_visible;  }
 
+		bool HasParent() const { return m_parent != nullptr; }
+		WindowRef GetParent() const { return m_parent; }
+
 	protected:
-		Window(SDL::RendererRef renderer, SDL::FontRef font, SDL_Rect rect);
+		Window(const char* id, SDL::RendererRef renderer, WindowRef parent, SDL::FontRef font, SDL_Rect rect);
 
 		void SetDrawColor(const GUI::Color & col);
 		void Draw3dFrame(SDL_Rect pos, bool raised);
@@ -57,6 +64,8 @@ namespace GUI
 		static uint8_t constexpr m_borderWidth = 6;
 		static uint8_t constexpr m_buttonSize = 24;
 
+		std::string m_id;
+		GUI::WindowRef m_parent;
 		SDL::RendererRef m_renderer;
 		SDL::FontRef m_font;
 		static ImagePtr m_titleBackground;

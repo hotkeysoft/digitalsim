@@ -10,6 +10,8 @@
 #include <memory>
 #include <cassert>
 
+using namespace GUI;
+
 void ToggleFullscreen(SDL::MainWindowPtr & window) {
 	Uint32 FullscreenFlag = SDL_WINDOW_FULLSCREEN;
 	bool IsFullscreen = SDL_GetWindowFlags(window.get()) & FullscreenFlag;
@@ -32,15 +34,13 @@ SDL::RendererPtr CreateRenderer(SDL::MainWindowPtr & window, int index, Uint32 f
 	return SDL::RendererPtr(SDL_CreateRenderer(window.get(), index, flags), SDL::sdl_deleter());
 }
 
-GUI::WindowPtr window;
-
 void Render(SDL::RendererPtr & ren)
 {	
 	SDL_SetRenderDrawColor(ren.get(), 64, 64, 64, 255);
 	
 	SDL_RenderClear(ren.get());
 
-	GUI::WindowManager::Get().Draw();
+	GUI::WINMGR().Draw();
 
 	SDL_RenderPresent(ren.get());
 }
@@ -87,22 +87,22 @@ int main(int argc, char ** argv)
 			return 1;
 		}
 
-		GUI::ResourceManager::Get().Init(ren);
-		GUI::WindowManager::Get().Init(ren);
+		RES().Init(ren);
+		WINMGR().Init(ren);
 
 		TTF_Init();
-		SDL::FontRef font = GUI::ResourceManager::Get().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
-		GUI::ResourceManager::Get().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
-		GUI::ImageRef image = GUI::ResourceManager::Get().LoadImage("iconChip", "./Resources/iconChip.png");
+		SDL::FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
+		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
+		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 
-		GUI::WindowPtr mainWnd = GUI::WindowManager::Get().AddWindow("main", { 0, 0, 1280, 720 });
+		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 });
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
 		SDL_Rect client = mainWnd->GetClientRect();
 
-		GUI::WindowManager::Get().AddWindow("nedit", { client.x, client.y, client.w - 300, client.h - 200 })->SetTitle("Editor");
-		GUI::WindowManager::Get().AddWindow("sim", { client.x, client.y + client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
-		GUI::WindowManager::Get().AddWindow("parts", { client.x + client.w - 300, client.y, 300, client.h })->SetTitle("Parts Bin");
+		WINMGR().AddWindow("nedit", mainWnd, { client.x, client.y, client.w - 300, client.h - 200 })->SetTitle("Editor");
+		WINMGR().AddWindow("sim", mainWnd, { client.x, client.y + client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
+		WINMGR().AddWindow("parts", mainWnd, { client.x + client.w - 300, client.y, 300, client.h })->SetTitle("Parts Bin");
 
 		SDL_Cursor* handCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
 		SDL_Cursor* normalCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
@@ -121,7 +121,7 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEMOTION)
 				{
 					SDL_Point pt = { e.button.x, e.button.y };
-					GUI::WindowPtr hit = GUI::WindowManager::HitTest(pt);
+					WindowPtr hit = WINMGR().HitTest(pt);
 					if (hit)
 					{
 						switch (hit->HitTest(pt))
@@ -140,10 +140,10 @@ int main(int argc, char ** argv)
 					if (e.button.button == SDL_BUTTON_LEFT)
 					{
 						SDL_Point pt = { e.button.x, e.button.y };
-						GUI::WindowPtr hit = GUI::WindowManager::HitTest(pt);
+						GUI::WindowPtr hit = WINMGR().HitTest(pt);
 						if (hit)
 						{
-							GUI::WindowManager::SetActive(hit);
+							WINMGR().SetActive(hit);
 							Render(ren);
 						}
 					}

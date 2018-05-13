@@ -2,14 +2,15 @@
 #include "Common.h"
 #include "Color.h"
 #include <string>
-#include <map>
+#include <list>
+#include <functional>
 
 namespace GUI
 {
 	class WindowManager
 	{
 	public:
-		using WindowList = std::map<std::string, GUI::WindowPtr>;
+		using WindowList = std::list<GUI::WindowPtr>;
 
 		virtual ~WindowManager() = default;
 		WindowManager(const WindowManager&) = delete;
@@ -18,20 +19,27 @@ namespace GUI
 		WindowManager& operator=(WindowManager&&) = delete;
 
 		static WindowManager & Get();
-		static void Init(SDL::RendererPtr & renderer);
 
-		static void Draw();
-		static GUI::WindowPtr AddWindow(const char* id, SDL_Rect pos);
-		static GUI::WindowPtr FindWindow(const char* id);
+		void Init(SDL::RendererPtr & renderer);
 
-		static GUI::WindowPtr HitTest(SDL_Point);
-		static void SetActive(GUI::WindowPtr);
+		void Draw();
+		GUI::WindowPtr AddWindow(const char* id, SDL_Rect pos);
+		GUI::WindowPtr AddWindow(const char* id, GUI::WindowPtr parent, SDL_Rect pos);
+		GUI::WindowPtr FindWindow(const char* id);
+		WindowList GetWindowList(GUI::WindowRef parent);
+
+		GUI::WindowPtr HitTest(SDL_Point);
+		GUI::WindowRef GetActive() { return m_activeWindow.get(); }
+		void SetActive(GUI::WindowPtr);
 
 	protected:
-		WindowManager() = default;
-		static SDL::RendererRef m_renderer;
+		WindowManager() : m_renderer(nullptr) {}
+		SDL::RendererRef m_renderer;
 
-		static WindowList m_windows;
-		static GUI::WindowPtr m_activeWindow;
+		WindowList m_windows;
+		GUI::WindowPtr m_activeWindow;
 	};
+
+	constexpr auto WINMGR = &WindowManager::Get;
+
 }

@@ -3,13 +3,11 @@
 #include "ResourceManager.h"
 #include "WindowManager.h"
 #include "Window.h"
+#include <algorithm>
+#include <iostream>
 
 namespace GUI
 {
-	SDL::RendererRef WindowManager::m_renderer = nullptr;
-	WindowManager::WindowList WindowManager::m_windows;
-	GUI::WindowPtr WindowManager::m_activeWindow = nullptr;
-
 	WindowManager & WindowManager::Get()
 	{
 		static WindowManager manager;
@@ -23,25 +21,29 @@ namespace GUI
 
 	void WindowManager::Draw()
 	{
-		for (auto & it : m_windows)
+		for (auto & window : m_windows)
 		{
-			WindowPtr &window = it.second;
-			if (window->IsVisible())
+			if (window->IsVisible() && !window->HasParent())
 			{
-				window->Draw(window == m_activeWindow);
+				window->Draw();
 			}
 		}
 	}
 
 	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos)
 	{
+		return AddWindow(id, nullptr, pos);
+	}
+
+	WindowPtr WindowManager::AddWindow(const char* id, GUI::WindowPtr parent, SDL_Rect pos)
+	{
 		if (FindWindow(id) != nullptr)
 		{
 			throw std::invalid_argument("windows already exists:" + (std::string)id);
 		}
 
-		WindowPtr newWindow = Window::Create(m_renderer, GUI::ResourceManager::Get().FindFont("default"), pos);
-		m_windows[id] = newWindow;
+		WindowPtr newWindow = Window::Create(id, m_renderer, parent.get(), GUI::ResourceManager::Get().FindFont("default"), pos);
+		m_windows.push_front(newWindow);
 
 		return newWindow;
 	}
@@ -53,20 +55,29 @@ namespace GUI
 			throw std::invalid_argument("id can't be null");
 		}
 
-		auto it = m_windows.find(id);
-		if (it != m_windows.end())
+		for (auto & it : m_windows)
 		{
-			return it->second;
+			if (id == it->GetId())
+			{
+				return it;
+			}
 		}
 
 		return nullptr;
 	}
 
+	WindowManager::WindowList WindowManager::GetWindowList(GUI::WindowRef parent)
+	{
+		WindowList childWindows;
+		std::copy_if(m_windows.begin(), m_windows.end(), std::back_inserter(childWindows),
+			[parent](WindowPtr window) { return window->GetParent() == parent; });
+		return childWindows;
+	}
+
 	GUI::WindowPtr WindowManager::HitTest(SDL_Point pt)
 	{
-		for (auto & it : m_windows)
+		for (auto & window : m_windows)
 		{
-			WindowPtr &window = it.second;
 			if (window->IsVisible())
 			{
 				SDL_Rect rect = window->GetWindowRect();
@@ -83,6 +94,7 @@ namespace GUI
 	void WindowManager::SetActive(GUI::WindowPtr win)
 	{
 		m_activeWindow = win;
+		std::cout << "SetActive(): " << win->GetId() << std::endl;
 	}
 
 }
