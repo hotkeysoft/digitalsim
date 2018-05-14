@@ -24,6 +24,12 @@ namespace GUI
 		{
 			throw std::invalid_argument("id is null");
 		}
+
+		if (m_flags & WindowFlags::WIN_MINMAX && m_parent == nullptr)
+		{
+			throw std::invalid_argument("WIN_MINMAX flag needs parent window");
+		}
+
 		m_id = id;
 	}
 
@@ -110,9 +116,10 @@ namespace GUI
 
 	void Window::DrawMinMaxButtons(SDL_Rect pos, const GUI::Color & col)
 	{
-		DrawButton(GetMinimizeButtonRect(pos), col, RES().FindImage("win.minimize"), !(m_pushedState & HIT_MINBUTTON));
+		const char * resStr = (m_showState & WindowState::WS_MINIMIZED) ? "win.restore" : "win.minimize";
+		DrawButton(GetMinimizeButtonRect(pos), col, RES().FindImage(resStr), !(m_pushedState & HIT_MINBUTTON));
 
-		const char * resStr = (m_showState & WindowState::WS_MAXIMIZED) ? "win.restore" : "win.maximize";
+		resStr = (m_showState & WindowState::WS_MAXIMIZED) ? "win.restore" : "win.maximize";
 
 		DrawButton(GetMaximizeButtonRect(pos), col, RES().FindImage(resStr), !(m_pushedState & HIT_MAXBUTTON));
 	}
@@ -188,9 +195,18 @@ namespace GUI
 	SDL_Rect Window::GetWindowRect(bool relative) const
 	{
 		SDL_Rect rect = m_rect;
-		if (m_showState & WindowState::WS_MAXIMIZED && m_parent != nullptr)
+		if (m_showState & WindowState::WS_MAXIMIZED)
 		{
 			rect = m_parent->GetClientRect(true);
+		}
+		else if (m_showState & WindowState::WS_MINIMIZED)
+		{
+			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth);
+			rect = m_parent->GetClientRect(true);
+			rect.w = 200;			
+			rect.x = m_parent->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
+			rect.y = (rect.h - minimizedHeight);
+			rect.h = minimizedHeight;
 		}
 
 		if (!relative && m_parent != nullptr)
@@ -292,7 +308,7 @@ namespace GUI
 		}
 
 		// Resize handles
-		if (m_showState & WindowState::WS_MAXIMIZED ||
+		if (m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED) ||
 			!(m_flags & WindowFlags::WIN_CANRESIZE))
 		{
 			return HIT_NOTHING;
@@ -459,9 +475,18 @@ namespace GUI
 
 	void Window::Minimize()
 	{
-		m_showState = WindowState(m_showState | WindowState::WS_MINIMIZED);
-		m_showState = WindowState(m_showState & ~WindowState::WS_MAXIMIZED);
+		if (m_showState & WindowState::WS_MINIMIZED)
+		{
+			Restore();
+			m_parent->SetMinimizedChild(this, false);
+		}
+		else
+		{
+			m_showState = WindowState(m_showState | WindowState::WS_MINIMIZED);
+			m_showState = WindowState(m_showState & ~WindowState::WS_MAXIMIZED);
 
+			m_parent->SetMinimizedChild(this, true);
+		}
 	}
 
 	void Window::Maximize()
@@ -480,6 +505,44 @@ namespace GUI
 	void Window::Restore()
 	{
 		m_showState = WindowState(m_showState & ~(WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED));
+	}
+
+	int Window::GetMinimizedChildIndex(WindowRef child) const
+	{
+		auto find = std::find_if(m_minimizedChildren.begin(), m_minimizedChildren.end(), [child](WindowRef min) { return min == child; });
+		if (find != m_minimizedChildren.end())
+		{
+			return (int)(find - m_minimizedChildren.begin());
+		}
+
+		return -1;
+	}
+
+	void Window::SetMinimizedChild(WindowRef child, bool add)
+	{
+		if (add)
+		{
+			if (GetMinimizedChildIndex(child) != -1)
+				return;
+
+			auto firstHole = std::find_if(m_minimizedChildren.begin(), m_minimizedChildren.end(), [](WindowRef min) { return min == nullptr; });
+			if (firstHole == m_minimizedChildren.end())
+			{
+				m_minimizedChildren.push_back(child);
+			}
+			else
+			{
+				*firstHole = child;
+			}
+		}
+		else
+		{
+			auto find = std::find_if(m_minimizedChildren.begin(), m_minimizedChildren.end(), [child](WindowRef min) { return min == child; });
+			if (find != m_minimizedChildren.end())
+			{
+				*find = nullptr;
+			}
+		}
 	}
 
 	struct Window::shared_enabler : public Window

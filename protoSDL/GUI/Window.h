@@ -3,12 +3,14 @@
 #include "Color.h"
 #include "WindowManager.h"
 #include <string>
+#include <vector>
 
 namespace GUI
 {
 	class Window
 	{
 	public:
+		using MinWindowList = std::vector<WindowRef>;
 
 		virtual ~Window() = default;
 		Window(const Window&) = delete;
@@ -57,6 +59,9 @@ namespace GUI
 		SDL_Rect GetMinimizeButtonRect(SDL_Rect base) const;
 		SDL_Rect GetMaximizeButtonRect(SDL_Rect base) const;
 
+		void SetMinimizedChild(WindowRef child, bool add);
+		int GetMinimizedChildIndex(WindowRef child) const;
+
 		void SetDrawColor(const GUI::Color & col);
 		void Draw3dFrame(SDL_Rect pos, bool raised);
 		void DrawReliefBox(SDL_Rect pos, const GUI::Color & col, bool raised);
@@ -87,8 +92,10 @@ namespace GUI
 		TexturePtr m_activeTitle;
 		TexturePtr m_inactiveTitle;
 		ImageRef m_image;
+		MinWindowList m_minimizedChildren;
 
 		static Window m_nullWnd;		
+
 
 		struct shared_enabler;
 	};

@@ -106,6 +106,11 @@ int main(int argc, char ** argv)
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1  With a long name");
+		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 100, 0, 100, 100 })->SetTitle("edit.1.2  With a long name");
+		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 200, 0, 100, 100 })->SetTitle("edit.1.3  With a long name");
+		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 100, 100 })->SetTitle("edit.1.4  With a long name");
+		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 100, 100, 100, 100 })->SetTitle("edit.1.5  With a long name");
+		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 200, 100, 100, 100 })->SetTitle("edit.1.6  With a long name");
 
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
