@@ -2,6 +2,7 @@
 #include "SDL_rect.h"
 #include "Window.h"
 #include "Image.h"
+#include "ResourceManager.h"
 #include <algorithm>
 
 namespace GUI
@@ -10,10 +11,10 @@ namespace GUI
 
 	Window Window::m_nullWnd;
 
-	Window::Window() : m_id("null"), m_renderer(nullptr), m_parent(nullptr), m_image(nullptr), m_font(nullptr), m_visible(false) {}
+	Window::Window() : m_id("null"), m_renderer(nullptr), m_parent(nullptr), m_image(nullptr), m_font(nullptr), m_showState(), m_pushedState(HIT_NOTHING) {}
 
-	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags) : m_renderer(renderer),
-		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_visible(true), m_flags(flags)
+	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowFlags flags) : m_renderer(renderer),
+		m_parent(parent), m_image(nullptr), m_font(font), m_rect(rect), m_showState(WindowState::WS_VISIBLE), m_flags(flags), m_pushedState(HIT_NOTHING)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -26,7 +27,7 @@ namespace GUI
 		m_id = id;
 	}
 
-	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowCreationFlags flags)
+	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowFlags flags)
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect, flags);
 		return std::static_pointer_cast<Window>(ptr);
@@ -87,13 +88,8 @@ namespace GUI
 		}
 	}
 
-	void Window::DrawButton(SDL_Rect pos, const GUI::Color & col, bool raised)
+	void Window::DrawButton(SDL_Rect pos, const GUI::Color & col, ImageRef image, bool raised)
 	{
-		pos.x += m_borderWidth + 1;
-		pos.y += m_borderWidth + 1;
-		pos.w = m_buttonSize + 2;
-		pos.h = m_buttonSize + 2;
-
 		SetDrawColor(col);
 
 		// Render rect
@@ -101,10 +97,24 @@ namespace GUI
 
 		Draw3dFrame(pos, raised);
 
-		if (m_image && m_image->IsSet())
+		if (image && image->IsSet())
 		{
-			m_image->Draw(SDL_Point({pos.x+1, pos.y+1}));
+			image->Draw(SDL_Point({ pos.x + 1, pos.y + 1 }));
 		}
+	}
+
+	void Window::DrawSystemMenuButton(SDL_Rect pos, const GUI::Color & col)
+	{
+		DrawButton(GetSystemMenuButtonRect(pos), col, m_image, !(m_pushedState & HIT_SYSMENU));
+	}
+
+	void Window::DrawMinMaxButtons(SDL_Rect pos, const GUI::Color & col)
+	{
+		DrawButton(GetMinimizeButtonRect(pos), col, RES().FindImage("win.minimize"), !(m_pushedState & HIT_MINBUTTON));
+
+		const char * resStr = (m_showState & WindowState::WS_MAXIMIZED) ? "win.restore" : "win.maximize";
+
+		DrawButton(GetMaximizeButtonRect(pos), col, RES().FindImage(resStr), !(m_pushedState & HIT_MAXBUTTON));
 	}
 
 	WindowManager::WindowList Window::GetChildWindows()
@@ -131,19 +141,58 @@ namespace GUI
 		return rect;
 	}
 
-	SDL_Rect Window::GetTitleBarRect() const
+	SDL_Rect Window::GetTitleBarRect(SDL_Rect rect) const
 	{
-		SDL_Rect rect = GetWindowRect(false);
-		rect.x += (m_buttonSize + 2) + m_borderWidth + 1;
+		int sysButtonW = (m_flags & WindowFlags::WIN_SYSMENU) ? m_buttonSize + 2 : 0;
+		int minMaxButtonW = (m_flags & WindowFlags::WIN_MINMAX) ? (m_buttonSize + 2) * 2 : 0;		
+
+		rect.x += sysButtonW + m_borderWidth + 1;
 		rect.y += m_borderWidth + 1;
-		rect.w -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
+		rect.w -= (2 * (m_borderWidth + 1)) + sysButtonW + minMaxButtonW;
 		rect.h = m_buttonSize + 2;
+		return rect;
+	}
+
+	SDL_Rect Window::GetSystemMenuButtonRect(SDL_Rect rect) const
+	{
+		rect.x += m_borderWidth + 1;
+		rect.y += m_borderWidth + 1;
+		rect.w = m_buttonSize + 2;
+		rect.h = m_buttonSize + 2;
+
+		return rect;
+	}
+
+	SDL_Rect Window::GetMinimizeButtonRect(SDL_Rect rect) const
+	{
+		rect.x += rect.w - (m_borderWidth + (m_buttonSize + 2) * 2 + 1);
+		rect.y += m_borderWidth + 1;
+
+		rect.w = m_buttonSize + 2;
+		rect.h = m_buttonSize + 2;
+
+		return rect;
+	}
+
+	SDL_Rect Window::GetMaximizeButtonRect(SDL_Rect rect) const
+	{
+		rect.x += rect.w - (m_borderWidth + (m_buttonSize + 2) + 1);
+		rect.y += m_borderWidth + 1;
+
+		rect.w = m_buttonSize + 2;
+		rect.h = m_buttonSize + 2;
+
 		return rect;
 	}
 
 	SDL_Rect Window::GetWindowRect(bool relative) const
 	{
 		SDL_Rect rect = m_rect;
+		if (m_showState & WindowState::WS_MAXIMIZED && m_parent != nullptr)
+		{
+			rect = m_parent->GetClientRect(true);
+		}
+
 		if (!relative && m_parent != nullptr)
 		{
 			SDL_Rect parentClient = m_parent->GetClientRect(false);
@@ -154,9 +203,9 @@ namespace GUI
 		return rect;
 	}
 
-	void Window::DrawTitleBar(bool active)
+	void Window::DrawTitleBar(SDL_Rect rect, bool active)
 	{	
-		auto rect = GetTitleBarRect();
+		auto titleBar = GetTitleBarRect(rect);
 		if (active)
 		{
 			if (m_titleBackground == nullptr)
@@ -164,17 +213,17 @@ namespace GUI
 				m_titleBackground = Image::Create(m_renderer);
 				m_titleBackground->LoadFromFile("Resources/TitlebarActive.png");				
 			}
-			m_titleBackground->Draw(rect);
+			m_titleBackground->Draw(titleBar);
 		}
 		else
 		{
 			SetDrawColor(Color::C_LIGHT_GREY);
-			SDL_RenderFillRect(m_renderer, &rect);
-			Draw3dFrame(rect, true);
+			SDL_RenderFillRect(m_renderer, &titleBar);
+			Draw3dFrame(titleBar, true);
 		}
 	}
 
-	void Window::DrawTitle(bool active)
+	void Window::DrawTitle(SDL_Rect rect, bool active)
 	{
 		TexturePtr title;
 		if (active && m_activeTitle)
@@ -188,7 +237,7 @@ namespace GUI
 
 		if (title)
 		{
-			SDL_Rect target = GetTitleBarRect();
+			SDL_Rect target = GetTitleBarRect(rect);
 
 			target.x += m_borderWidth;
 			target.y += m_borderWidth / 2;
@@ -202,7 +251,9 @@ namespace GUI
 
 	HitZone Window::HitTest(SDL_Point pt)
 	{
-		if (SDL_PointInRect(&pt, &GetTitleBarRect()))
+		SDL_Rect wndRect = GetWindowRect(false);
+
+		if (SDL_PointInRect(&pt, &GetTitleBarRect(wndRect)))
 		{
 			return HIT_TITLEBAR;
 		}
@@ -211,10 +262,22 @@ namespace GUI
 			return HIT_CLIENT;
 		}
 
-		SDL_Rect wndRect = GetWindowRect(false);
 		if (!SDL_PointInRect(&pt, &wndRect))
 		{
 			return HIT_NOTHING;
+		}
+
+		if (SDL_PointInRect(&pt, &GetSystemMenuButtonRect(wndRect)))
+		{
+			return HIT_SYSMENU;
+		}
+		if (SDL_PointInRect(&pt, &GetMinimizeButtonRect(wndRect)))
+		{
+			return HIT_MINBUTTON;
+		}
+		if (SDL_PointInRect(&pt, &GetMaximizeButtonRect(wndRect)))
+		{
+			return HIT_MAXBUTTON;
 		}
 
 		bool left = pt.x < wndRect.x + 2*m_borderWidth;
@@ -251,6 +314,9 @@ namespace GUI
 
 	void Window::Draw()
 	{
+		if (!(m_showState & WindowState::WS_VISIBLE))
+			return;
+
 		if (m_parent != nullptr)
 		{
 			SDL_Rect clip = GetClipRect(m_parent);
@@ -260,9 +326,17 @@ namespace GUI
 		SDL_Rect rect = GetWindowRect(false);
 		bool active = (WINMGR().GetActive() == this);
 		DrawReliefBox(rect, Color::C_LIGHT_GREY, false);
-		DrawTitleBar(active);
-		DrawTitle(active);
-		DrawButton(rect, Color::C_LIGHT_GREY, true);
+		DrawTitleBar(rect, active);
+		DrawTitle(rect, active);
+
+		if (m_flags & WindowFlags::WIN_SYSMENU)
+		{
+			DrawSystemMenuButton(rect, Color::C_LIGHT_GREY);
+		}
+		if (m_flags & WindowFlags::WIN_MINMAX)
+		{
+			DrawMinMaxButtons(rect, Color::C_LIGHT_GREY);
+		}
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);
 	}
@@ -294,10 +368,33 @@ namespace GUI
 		m_titleStrRect.y = 0;
 	}
 
+	void Window::ToggleButtonState(HitZone button, bool pushed)
+	{
+		if (pushed)
+		{
+			m_pushedState = HitZone(m_pushedState | button);
+		}
+		else
+		{
+			m_pushedState = HitZone(m_pushedState & ~button);
+		}
+	}
+
+	void Window::ButtonPushed(HitZone button)
+	{
+		switch (button)
+		{
+		case HIT_MAXBUTTON: Maximize(); break;
+		case HIT_MINBUTTON: Minimize(); break;
+		case HIT_SYSMENU: break;
+		}
+	}
+
 	bool Window::MoveRel(SDL_Point rel)
 	{
 		bool clip = false;
-		if (m_flags & WIN_CANMOVE)
+		if ((m_flags & WindowFlags::WIN_CANMOVE) &&
+			!(m_showState & WindowState::WS_MAXIMIZED))
 		{
 			m_rect.x += rel.x;
 			m_rect.y += rel.y;
@@ -321,7 +418,8 @@ namespace GUI
 	bool Window::ResizeRel(SDL_Point rel)
 	{
 		bool clip = false;
-		if (m_flags & WIN_CANRESIZE)
+		if (m_flags & WindowFlags::WIN_CANRESIZE &&
+			!(m_showState & WindowState::WS_MAXIMIZED))
 		{
 			m_rect.w += rel.x;
 			m_rect.h += rel.y;
@@ -341,6 +439,30 @@ namespace GUI
 		return clip;
 	}
 
+	void Window::Minimize()
+	{
+		m_showState = WindowState(m_showState | WindowState::WS_MINIMIZED);
+		m_showState = WindowState(m_showState & ~WindowState::WS_MAXIMIZED);
+
+	}
+
+	void Window::Maximize()
+	{
+		if (m_showState & WindowState::WS_MAXIMIZED)
+		{
+			Restore();
+		}
+		else
+		{
+			m_showState = WindowState(m_showState | WindowState::WS_MAXIMIZED);
+			m_showState = WindowState(m_showState & ~WindowState::WS_MINIMIZED);
+		}
+	}
+
+	void Window::Restore()
+	{
+		m_showState = WindowState(m_showState & ~(WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED));
+	}
 
 	struct Window::shared_enabler : public Window
 	{

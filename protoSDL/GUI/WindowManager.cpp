@@ -23,19 +23,16 @@ namespace GUI
 	{
 		for (auto & window : m_windows)
 		{
-			if (window->IsVisible())
-			{
-				window->Draw();
-			}
+			window->Draw();
 		}
 	}
 
-	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos, WindowCreationFlags flags)
+	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos, WindowFlags flags)
 	{
 		return AddWindow(id, nullptr, pos, flags);
 	}
 
-	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos, WindowCreationFlags flags)
+	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos, WindowFlags flags)
 	{
 		if (FindWindow(id) != nullptr)
 		{
@@ -79,7 +76,7 @@ namespace GUI
 		for (auto it = m_windows.rbegin(); it != m_windows.rend(); ++it)
 		{
 			auto & window = *it;
-			if (window->IsVisible())
+			if (window->GetShowState() & WindowState::WS_VISIBLE)
 			{
 				SDL_Rect rect = window->GetWindowRect(false);
 				if (SDL_PointInRect(&pt, &rect))

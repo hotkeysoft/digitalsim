@@ -89,8 +89,11 @@ int main(int argc, char ** argv)
 		FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
+		RES().LoadImage("win.maximize", "./Resources/iconMaximize.png");
+		RES().LoadImage("win.minimize", "./Resources/iconMinimize.png");
+		RES().LoadImage("win.restore", "./Resources/iconRestore.png");
 
-		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WIN_SYSMENU);
+		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU);
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
 		SDL_Rect client = mainWnd->GetClientRect();
@@ -99,7 +102,7 @@ int main(int argc, char ** argv)
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetTitle("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 })->SetTitle("edit.2");
+		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 }, WindowFlags::WIN_CANRESIZE| WindowFlags::WIN_CANMOVE)->SetTitle("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1  With a long name");
@@ -186,6 +189,11 @@ int main(int argc, char ** argv)
 								captureTarget->ResizeRel({ rel.x, rel.y });
 							}
 							break;
+						case HIT_SYSMENU:
+						case HIT_MAXBUTTON:
+						case HIT_MINBUTTON:
+							captureTarget->ToggleButtonState(captureZone, captureTarget->HitTest(pt) == captureZone);
+							break;
 						}
 						lastPos = pt;
 						Render(ren);
@@ -216,7 +224,7 @@ int main(int argc, char ** argv)
 							default:
 								SDL_SetCursor(normalCursor);
 							}
-							if (!(hit->GetFlags() & WIN_CANRESIZE))
+							if (!(hit->GetFlags() & WindowFlags::WIN_CANRESIZE))
 							{
 								SDL_SetCursor(normalCursor);
 							}
@@ -234,7 +242,16 @@ int main(int argc, char ** argv)
 						{
 							WINMGR().SetActive(hit);
 							captureZone = hit->HitTest(pt);
-							if (captureZone == HIT_TITLEBAR)
+							if (captureZone == HIT_SYSMENU || 
+								captureZone == HIT_MINBUTTON ||
+								captureZone == HIT_MAXBUTTON)
+							{
+								hit->ToggleButtonState(captureZone, true);
+								mouseCaptured = true;
+								captureTarget = hit;
+								lastPos = pt;
+							}
+							else if (captureZone == HIT_TITLEBAR)
 							{
 								mouseCaptured = true;
 								captureTarget = hit;
@@ -253,8 +270,23 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEBUTTONUP) {
 					if (mouseCaptured)
 					{
+						SDL_Point pt = { e.button.x, e.button.y };
+						switch (captureZone)
+						{
+						case HIT_SYSMENU:
+						case HIT_MAXBUTTON:
+						case HIT_MINBUTTON:
+							captureTarget->ToggleButtonState(captureZone, false);
+							if (captureTarget->HitTest(pt) == captureZone)
+							{
+								captureTarget->ButtonPushed(captureZone);
+							}
+							break;
+						}
+
 						mouseCaptured = false;
 						captureTarget = nullptr;
+						Render(ren);
 					}
 				}
 				else if (e.type == SDL_KEYDOWN) {

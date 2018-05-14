@@ -7,7 +7,7 @@
 
 namespace GUI
 {
-	enum HitZone {
+	enum HitZone : uint16_t {
 		HIT_NOTHING = 0,
 		HIT_TITLEBAR = 1,
 		HIT_CLIENT = 2,
@@ -24,9 +24,15 @@ namespace GUI
 
 		HIT_BORDER_ANY = HIT_BORDER_LEFT | HIT_BORDER_RIGHT | HIT_BORDER_TOP | HIT_BORDER_BOTTOM,
 		HIT_CORNER_ANY = HIT_CORNER_TOPLEFT | HIT_CORNER_TOPRIGHT | HIT_CORNER_BOTTOMLEFT | HIT_CORNER_BOTTOMRIGHT,
+
+		HIT_SYSMENU = 1024,
+		HIT_MINBUTTON = 2048,
+		HIT_MAXBUTTON = 4096,
+
+		HIT_BUTTON_ANY = HIT_SYSMENU | HIT_MINBUTTON | HIT_MAXBUTTON
 	};
 
-	enum WindowCreationFlags {
+	enum class WindowFlags {
 		WIN_SYSMENU = 1,
 		WIN_MINMAX = 2,
 		WIN_CANMOVE = 4,
@@ -34,6 +40,22 @@ namespace GUI
 
 		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE
 	};
+
+	enum WindowState : uint16_t {
+		WS_VISIBLE = 1,
+		WS_MAXIMIZED = 2,
+		WS_MINIMIZED = 4,
+	};
+
+	constexpr enum WindowFlags operator |(const enum WindowFlags selfValue, const enum WindowFlags inValue)
+	{
+		return (enum WindowFlags)(uint32_t(selfValue) | uint32_t(inValue));
+	}
+
+	constexpr bool operator &(const enum WindowFlags selfValue, const enum WindowFlags inValue)
+	{
+		return (uint32_t(selfValue) & uint32_t(inValue));
+	}
 
 	class Image;
 	using ImagePtr = std::shared_ptr<Image>;
