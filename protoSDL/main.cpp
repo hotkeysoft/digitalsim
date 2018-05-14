@@ -224,10 +224,6 @@ int main(int argc, char ** argv)
 							default:
 								SDL_SetCursor(normalCursor);
 							}
-							if (!(hit->GetFlags() & WindowFlags::WIN_CANRESIZE))
-							{
-								SDL_SetCursor(normalCursor);
-							}
 							Render(ren);
 						}
 					}

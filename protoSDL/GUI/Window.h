@@ -67,6 +67,7 @@ namespace GUI
 		void DrawTitle(SDL_Rect rect, bool active);
 		void RenderTitle();
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
+		SDL_Rect GetClipRect(WindowRef win);
 
 		std::string m_title;
 		WindowFlags m_flags;

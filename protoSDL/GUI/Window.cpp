@@ -251,7 +251,22 @@ namespace GUI
 
 	HitZone Window::HitTest(SDL_Point pt)
 	{
+		if (!(m_showState & WindowState::WS_VISIBLE))
+		{
+			return HIT_NOTHING;
+		}
+
 		SDL_Rect wndRect = GetWindowRect(false);
+		SDL_Rect intersect = wndRect;
+		if (m_parent != nullptr)
+		{
+			SDL_IntersectRect(&GetClipRect(m_parent), &wndRect, &intersect);
+		}
+
+		if (!SDL_PointInRect(&pt, &intersect))
+		{
+			return HIT_NOTHING;
+		}
 
 		if (SDL_PointInRect(&pt, &GetTitleBarRect(wndRect)))
 		{
@@ -262,11 +277,7 @@ namespace GUI
 			return HIT_CLIENT;
 		}
 
-		if (!SDL_PointInRect(&pt, &wndRect))
-		{
-			return HIT_NOTHING;
-		}
-
+		// Title bar buttons
 		if (SDL_PointInRect(&pt, &GetSystemMenuButtonRect(wndRect)))
 		{
 			return HIT_SYSMENU;
@@ -278,6 +289,13 @@ namespace GUI
 		if (SDL_PointInRect(&pt, &GetMaximizeButtonRect(wndRect)))
 		{
 			return HIT_MAXBUTTON;
+		}
+
+		// Resize handles
+		if (m_showState & WindowState::WS_MAXIMIZED ||
+			!(m_flags & WindowFlags::WIN_CANRESIZE))
+		{
+			return HIT_NOTHING;
 		}
 
 		bool left = pt.x < wndRect.x + 2*m_borderWidth;
@@ -299,7 +317,7 @@ namespace GUI
 		else return left? HIT_BORDER_LEFT : HIT_BORDER_RIGHT;
 	}
 
-	SDL_Rect GetClipRect(WindowRef win)
+	SDL_Rect Window::GetClipRect(WindowRef win)
 	{
 		SDL_Rect rect = win->GetClientRect(false);
 

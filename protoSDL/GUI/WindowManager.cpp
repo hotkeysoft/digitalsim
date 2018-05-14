@@ -76,13 +76,9 @@ namespace GUI
 		for (auto it = m_windows.rbegin(); it != m_windows.rend(); ++it)
 		{
 			auto & window = *it;
-			if (window->GetShowState() & WindowState::WS_VISIBLE)
+			if (window->HitTest(pt) != HIT_NOTHING)
 			{
-				SDL_Rect rect = window->GetWindowRect(false);
-				if (SDL_PointInRect(&pt, &rect))
-				{
-					return window;
-				}
+				return window;
 			}
 		}
 
