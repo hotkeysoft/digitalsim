@@ -85,15 +85,20 @@ int main(int argc, char ** argv)
 		RES().Init(ren);
 		WINMGR().Init(ren);
 
-		TTF_Init();
 		FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 		RES().LoadImage("win.maximize", "./Resources/iconMaximize.png");
 		RES().LoadImage("win.minimize", "./Resources/iconMinimize.png");
 		RES().LoadImage("win.restore", "./Resources/iconRestore.png");
+		RES().LoadImage("win.scroll.left", "./Resources/iconLeftArrow.png");
+		RES().LoadImage("win.scroll.right", "./Resources/iconRightArrow.png");
+		RES().LoadImage("win.scroll.up", "./Resources/iconUpArrow.png");
+		RES().LoadImage("win.scroll.down", "./Resources/iconDownArrow.png");
 
-		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU);
+		RES().LoadImage("iconSim", "./Resources/iconSim.png");
+
+		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE);
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
 		SDL_Rect client = mainWnd->GetClientRect();
@@ -105,15 +110,16 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 }, WindowFlags::WIN_CANRESIZE| WindowFlags::WIN_CANMOVE)->SetTitle("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
-		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 100, 100 })->SetTitle("edit.1.1  With a long name");
-		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 100, 0, 100, 100 })->SetTitle("edit.1.2  With a long name");
-		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 200, 0, 100, 100 })->SetTitle("edit.1.3  With a long name");
-		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 100, 100 })->SetTitle("edit.1.4  With a long name");
-		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 100, 100, 100, 100 })->SetTitle("edit.1.5  With a long name");
-		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 200, 100, 100, 100 })->SetTitle("edit.1.6  With a long name");
+		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 })->SetTitle("edit.1.1  With a long name");
+		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 200, 0, 200, 100 })->SetTitle("edit.1.2  With a long name");
+		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 400, 0, 200, 100 })->SetTitle("edit.1.3  With a long name");
+		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetTitle("edit.1.4  With a long name");
+		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 200, 100, 200, 100 })->SetTitle("edit.1.5  With a long name");
+		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetTitle("edit.1.6  With a long name");
 
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
+		simWnd->SetImage(RES().FindImage("iconSim"));
 
 		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetTitle("Parts Bin");
 
@@ -124,8 +130,6 @@ int main(int argc, char ** argv)
 
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
 		SDL_SetCursor(normalCursor);
-
-
 
 		Render(ren);
 
@@ -293,13 +297,13 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_KEYDOWN) {
 					switch (e.key.keysym.sym) {
 					case SDLK_LEFT:
-						WINMGR().GetActive()->MoveRel(SDL_Point({ -2, 0 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(SDL_Point({ -2, 0 })); Render(ren); break;
 					case SDLK_RIGHT:
-						WINMGR().GetActive()->MoveRel(SDL_Point({ 2, 0 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(SDL_Point({ 2, 0 })); Render(ren); break;
 					case SDLK_UP:
-						WINMGR().GetActive()->MoveRel(SDL_Point({ 0, -2 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(SDL_Point({ 0, -2 })); Render(ren); break;
 					case SDLK_DOWN:
-						WINMGR().GetActive()->MoveRel(SDL_Point({ 0, 2 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(SDL_Point({ 0, 2 })); Render(ren); break;
 
 					case SDLK_RETURN:
 						if (SDL_GetModState() & KMOD_ALT)

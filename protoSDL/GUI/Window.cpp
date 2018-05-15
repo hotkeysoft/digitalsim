@@ -124,6 +124,104 @@ namespace GUI
 		DrawButton(GetMaximizeButtonRect(pos), col, RES().FindImage(resStr), !(m_pushedState & HIT_MAXBUTTON));
 	}
 
+	Window::ScrollState Window::GetScrollBarState() const
+	{
+		ScrollState ret;
+
+		if (m_parent != nullptr && !(m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED)))
+		{
+			SDL_Rect thisRect = GetWindowRect(true, false);
+			SDL_Rect parentRect = m_parent->GetClientRect();
+			ret.showH = ((thisRect.x + thisRect.w) > parentRect.w);
+			ret.showV = ((thisRect.y + thisRect.h) > parentRect.h);
+			ret.hMax = ((thisRect.x + thisRect.w) - parentRect.w);
+			ret.vMax = ((thisRect.y + thisRect.h) - parentRect.h);
+		}
+		return ret;
+	}
+
+	void Window::DrawHScrollBar(SDL_Rect pos)
+	{		
+		DrawButton(pos, Color::C_MED_GREY, nullptr, false);
+		DrawButton(SDL_Rect({ pos.x, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.left"), true);
+		DrawButton(SDL_Rect({ pos.x + pos.w - m_scrollBarSize, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.right"), true);
+
+		int scrollAreaWidth = pos.w - (2 * m_scrollBarSize);
+		double fractionWidth = (1-((double)m_scrollState.hMax/ (double)pos.w)) * (double)scrollAreaWidth;
+
+		DrawButton(SDL_Rect({ pos.x + m_scrollBarSize, pos.y, std::max((int)fractionWidth, (int)m_borderWidth), m_scrollBarSize }), Color::C_LIGHT_GREY, nullptr, true);
+	}
+	void Window::DrawVScrollBar(SDL_Rect pos)
+	{
+		DrawButton(pos, Color::C_MED_GREY, nullptr, false);
+		DrawButton(SDL_Rect({ pos.x, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.up"), true);
+		DrawButton(SDL_Rect({ pos.x, pos.y + pos.h - m_scrollBarSize, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.down"), true);
+
+		int scrollAreaHeight = pos.h - (2 * m_scrollBarSize);
+		double fractionHeight = (1 - ((double)m_scrollState.vMax / (double)pos.h)) * (double)scrollAreaHeight;
+
+		DrawButton(SDL_Rect({ pos.x, pos.y + m_scrollBarSize, m_scrollBarSize, std::max((int)fractionHeight, (int)m_borderWidth) }), Color::C_LIGHT_GREY, nullptr, true);
+	}
+
+	void Window::DrawScrollBars(SDL_Rect pos)
+	{
+		m_scrollState.showH = m_scrollState.hScroll ? true : false;
+		m_scrollState.showV = m_scrollState.vScroll ? true : false;
+		m_scrollState.hMax = 0;
+		m_scrollState.vMax = 0;
+
+		for (auto & child : GetChildWindows())
+		{
+			ScrollState childScroll = child->GetScrollBarState();
+			if (childScroll.showH)
+			{
+				m_scrollState.showH = true;
+				m_scrollState.hMax = std::max(m_scrollState.hMax, childScroll.hMax);
+			}
+			if (childScroll.showV)
+			{
+				m_scrollState.showV = true;
+				m_scrollState.vMax = std::max(m_scrollState.vMax, childScroll.vMax);
+			}
+		}
+		
+		if (m_scrollState.showH)
+		{
+			SDL_Rect hPos = pos;
+			hPos.x += m_borderWidth + 1;
+			hPos.w -= (2*m_borderWidth) + 2 + (m_scrollState.showV ? m_scrollBarSize : 0);
+
+			hPos.y += hPos.h - (m_scrollBarSize + m_borderWidth + 1);
+			hPos.h = m_scrollBarSize;
+
+			DrawHScrollBar(hPos);
+		}
+
+		if (m_scrollState.showV)
+		{
+			SDL_Rect hPos = pos;
+			hPos.x += hPos.w - (m_scrollBarSize + m_borderWidth + 1);
+			hPos.w = m_scrollBarSize;
+
+			hPos.y += m_borderWidth + m_buttonSize + 2 + 1;
+			hPos.h -= (2 * m_borderWidth) + m_buttonSize + 2 + 2 + (m_scrollState.showH ? m_scrollBarSize : 0);
+
+			DrawVScrollBar(hPos);
+		}
+
+		if (m_scrollState.showH && m_scrollState.showV)
+		{
+			SDL_Rect hPos = pos;
+			hPos.x += hPos.w - (m_scrollBarSize + m_borderWidth + 1);
+			hPos.y += hPos.h - (m_scrollBarSize + m_borderWidth + 1);
+			hPos.w = m_scrollBarSize;
+			hPos.h = m_scrollBarSize;
+
+			Draw3dFrame(hPos, true);
+		}
+
+	}
+
 	WindowManager::WindowList Window::GetChildWindows()
 	{
 		return WINMGR().GetWindowList(this);
@@ -142,8 +240,8 @@ namespace GUI
 			rect.x += m_borderWidth + 1;
 			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
 		}
-		rect.w -= (2 * (m_borderWidth + 1));
-		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
+		rect.w -= (2 * (m_borderWidth + 1)) + (m_scrollState.showV ? m_scrollBarSize : 0);
+		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2) + (m_scrollState.showH ? m_scrollBarSize : 0);
 		
 		return rect;
 	}
@@ -192,7 +290,7 @@ namespace GUI
 		return rect;
 	}
 
-	SDL_Rect Window::GetWindowRect(bool relative) const
+	SDL_Rect Window::GetWindowRect(bool relative, bool scrolled) const
 	{
 		SDL_Rect rect = m_rect;
 		if (m_showState & WindowState::WS_MAXIMIZED)
@@ -201,7 +299,7 @@ namespace GUI
 		}
 		else if (m_showState & WindowState::WS_MINIMIZED)
 		{
-			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth);
+			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth) + 2;
 			rect = m_parent->GetClientRect(true);
 			rect.w = 200;			
 			rect.x = m_parent->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
@@ -209,13 +307,23 @@ namespace GUI
 			rect.h = minimizedHeight;
 		}
 
-		if (!relative && m_parent != nullptr)
+		if (m_parent != nullptr)
 		{
-			SDL_Rect parentClient = m_parent->GetClientRect(false);
-			rect.x += parentClient.x;
-			rect.y += parentClient.y;
+			if (!relative)
+			{
+				SDL_Rect parentClient = m_parent->GetClientRect(false);
+				rect.x += parentClient.x;
+				rect.y += parentClient.y;
+			}
+
+			if (scrolled)
+			{
+				SDL_Point scrollOffset = m_parent->GetScroll();
+				rect.x -= scrollOffset.x;
+				rect.y -= scrollOffset.y;
+			}
 		}
-		
+	
 		return rect;
 	}
 
@@ -358,7 +466,8 @@ namespace GUI
 		}
 
 		SDL_Rect rect = GetWindowRect(false);
-		bool active = (WINMGR().GetActive() == this);
+
+		bool active = (WINMGR().GetActive() == this || (m_flags & WindowFlags::WIN_ACTIVE));
 		DrawReliefBox(rect, Color::C_LIGHT_GREY, false);
 		DrawTitleBar(rect, active);
 		DrawTitle(rect, active);
@@ -370,6 +479,11 @@ namespace GUI
 		if (m_flags & WindowFlags::WIN_MINMAX)
 		{
 			DrawMinMaxButtons(rect, Color::C_LIGHT_GREY);
+		}
+
+		if (!(m_showState & WS_MINIMIZED))
+		{
+			DrawScrollBars(rect);
 		}
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);
@@ -470,6 +584,7 @@ namespace GUI
 				m_rect.h = 100;
 			}
 		}
+
 		return clip;
 	}
 
@@ -497,6 +612,7 @@ namespace GUI
 		}
 		else
 		{
+			ScrollTo(SDL_Point({ 0,0 }));
 			m_showState = WindowState(m_showState | WindowState::WS_MAXIMIZED);
 			m_showState = WindowState(m_showState & ~WindowState::WS_MINIMIZED);
 		}
@@ -543,6 +659,27 @@ namespace GUI
 				*find = nullptr;
 			}
 		}
+	}
+
+	void Window::ScrollRel(SDL_Point pt)
+	{ 
+		if (m_scrollState.showH)
+		{
+			m_scrollState.hScroll += pt.x;
+			m_scrollState.hScroll = clip(m_scrollState.hScroll, 0, m_scrollState.hMax);
+		}
+
+		if (m_scrollState.showV)
+		{
+			m_scrollState.vScroll += pt.y;
+			m_scrollState.vScroll = clip(m_scrollState.vScroll, 0, m_scrollState.vMax);
+		}
+	}
+
+	void Window::ScrollTo(SDL_Point pt)
+	{
+		m_scrollState.hScroll = clip(pt.x, 0, m_scrollState.hMax);
+		m_scrollState.vScroll = clip(pt.y, 0, m_scrollState.vMax);
 	}
 
 	struct Window::shared_enabler : public Window

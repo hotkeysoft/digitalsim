@@ -32,11 +32,13 @@ namespace GUI
 		HIT_BUTTON_ANY = HIT_SYSMENU | HIT_MINBUTTON | HIT_MAXBUTTON
 	};
 
+	// Creation flags.  These attribute don't change during the lifetime of the window
 	enum class WindowFlags {
-		WIN_SYSMENU = 1,
-		WIN_MINMAX = 2,
-		WIN_CANMOVE = 4,
-		WIN_CANRESIZE = 8,
+		WIN_SYSMENU = 1, // Top left button in titlebar (left side)
+		WIN_MINMAX = 2, // Minimize / Maximize buttons in titlebar (right side)
+		WIN_CANMOVE = 4, // Window can be moved
+		WIN_CANRESIZE = 8, // Window can me resized
+		WIN_ACTIVE = 16, // Always look active, usually for main window
 
 		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE
 	};
@@ -86,5 +88,10 @@ namespace GUI
 	using FontPtr = std::unique_ptr<TTF_Font, sdl_deleter>;
 	using CursorPtr = std::unique_ptr<SDL_Cursor, sdl_deleter>;
 	using TexturePtr = std::shared_ptr<::SDL_Texture>;
+
+	template <typename T>
+	T clip(const T& n, const T& lower, const T& upper) {
+		return std::max(lower, std::min(n, upper));
+	}
 }
 

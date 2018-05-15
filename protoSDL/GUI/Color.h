@@ -11,7 +11,8 @@ namespace GUI
 
 		static const Color C_WHITE;
 		static const Color C_BLACK;
-		static const Color C_LIGHT_GREY;
+		static const Color C_LIGHT_GREY; 
+		static const Color C_MED_GREY;
 		static const Color C_DARK_GREY;
 	};
 }

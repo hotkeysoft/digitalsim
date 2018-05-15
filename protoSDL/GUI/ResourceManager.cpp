@@ -70,6 +70,10 @@ namespace GUI
 		{			
 			m_images[id] = image;
 		}
+		else
+		{
+			std::cerr << "Image not loaded" << fileName << std::endl;
+		}
 		
 		return image.get();
 	}
