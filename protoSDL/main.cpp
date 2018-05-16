@@ -203,6 +203,12 @@ int main(int argc, char ** argv)
 						case HIT_MINBUTTON:
 							captureTarget->ToggleButtonState(captureZone, captureTarget->HitTest(pt) == captureZone);
 							break;
+						case HIT_HSCROLL_SLIDER:
+							captureTarget->ClickHScrollBar(pt);
+							break;
+						case HIT_VSCROLL_SLIDER:
+							captureTarget->ClickVScrollBar(pt);
+							break;
 						}
 						lastPos = pt;
 						Render(ren);
@@ -249,12 +255,26 @@ int main(int argc, char ** argv)
 							captureZone = hit->HitTest(pt);
 							if (captureZone == HIT_SYSMENU || 
 								captureZone == HIT_MINBUTTON ||
-								captureZone == HIT_MAXBUTTON)
+								captureZone == HIT_MAXBUTTON ||
+								captureZone == HIT_HSCROLL_LEFT ||
+								captureZone == HIT_HSCROLL_RIGHT || 
+								captureZone == HIT_VSCROLL_UP ||
+								captureZone == HIT_VSCROLL_DOWN ||
+								captureZone == HIT_HSCROLL_SLIDER ||
+								captureZone == HIT_VSCROLL_SLIDER)
 							{
 								hit->ToggleButtonState(captureZone, true);
 								mouseCaptured = true;
 								captureTarget = hit;
 								lastPos = pt;
+							}
+							else if (captureZone == HIT_HSCROLL_AREA)
+							{
+								hit->ClickHScrollBar(pt);
+							}
+							else if (captureZone == HIT_VSCROLL_AREA)
+							{
+								hit->ClickVScrollBar(pt);
 							}
 							else if (captureZone == HIT_TITLEBAR)
 							{
@@ -281,6 +301,12 @@ int main(int argc, char ** argv)
 						case HIT_SYSMENU:
 						case HIT_MAXBUTTON:
 						case HIT_MINBUTTON:
+						case HIT_HSCROLL_LEFT:
+						case HIT_HSCROLL_RIGHT:
+						case HIT_VSCROLL_UP:
+						case HIT_VSCROLL_DOWN:
+						case HIT_HSCROLL_SLIDER:
+						case HIT_VSCROLL_SLIDER:
 							captureTarget->ToggleButtonState(captureZone, false);
 							if (captureTarget->HitTest(pt) == captureZone)
 							{

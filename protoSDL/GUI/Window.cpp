@@ -144,31 +144,58 @@ namespace GUI
 	void Window::DrawHScrollBar(Rect pos)
 	{		
 		DrawButton(pos, Color::C_MED_GREY, nullptr, false);
-		DrawButton(Rect({ pos.x, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.left"), true);
-		DrawButton(Rect({ pos.x + pos.w - m_scrollBarSize, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.right"), true);
 
 		int scrollAreaWidth = pos.w - (2 * m_scrollBarSize);
-		double fractionWidth = (1 - ((double)m_scrollState.hMax / (double)pos.w)) * (double)scrollAreaWidth + 1;
-		double currPos = (((double)m_scrollState.hScroll / (double)pos.w)) * (double)scrollAreaWidth;
-		if (currPos + fractionWidth > scrollAreaWidth)
+		m_scrollState.leftButton = { pos.x, pos.y, m_scrollBarSize, m_scrollBarSize };
+		m_scrollState.rightButton = { pos.x + pos.w - m_scrollBarSize, pos.y, m_scrollBarSize, m_scrollBarSize };
+		m_scrollState.hScrollArea = { pos.x + m_scrollBarSize, pos.y, scrollAreaWidth, m_scrollBarSize };
+
+		DrawButton(m_scrollState.leftButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.left"), !(m_pushedState & HIT_HSCROLL_LEFT));
+		DrawButton(m_scrollState.rightButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.right"), !(m_pushedState & HIT_HSCROLL_RIGHT));
+
+		double sliderHeight = (1.0 - ((double)m_scrollState.hMax / (double)pos.w)) * (double)scrollAreaWidth + 1;
+		if (sliderHeight < (m_borderWidth * 2))
 		{
-			currPos = scrollAreaWidth - fractionWidth + 1;
+			sliderHeight = m_borderWidth * 2;
 		}
 
-		DrawButton(Rect({ pos.x + m_scrollBarSize + (int)currPos, pos.y, std::max((int)fractionWidth, (int)m_borderWidth), m_scrollBarSize }), Color::C_LIGHT_GREY, nullptr, true);
+		int currPos = m_scrollState.hScroll * scrollAreaWidth / pos.w;
+		if (currPos + sliderHeight > scrollAreaWidth)
+		{
+			currPos = scrollAreaWidth - (int)sliderHeight + 1;
+		}
+
+		m_scrollState.hSlider = { pos.x + m_scrollBarSize + currPos, pos.y, (int)sliderHeight, m_scrollBarSize };
+
+		DrawButton(m_scrollState.hSlider, Color::C_LIGHT_GREY, nullptr, !(m_pushedState & HIT_HSCROLL_SLIDER));
 	}
 	void Window::DrawVScrollBar(Rect pos)
 	{
 		DrawButton(pos, Color::C_MED_GREY, nullptr, false);
-		DrawButton(Rect({ pos.x, pos.y, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.up"), true);
-		DrawButton(Rect({ pos.x, pos.y + pos.h - m_scrollBarSize, m_scrollBarSize, m_scrollBarSize }), Color::C_LIGHT_GREY, RES().FindImage("win.scroll.down"), true);
 
 		int scrollAreaHeight = pos.h - (2 * m_scrollBarSize);
-		double fractionHeight = (1 - ((double)m_scrollState.vMax / (double)pos.h)) * (double)scrollAreaHeight + 1;
-		double currPos = (((double)m_scrollState.vScroll / (double)pos.h)) * (double)scrollAreaHeight;
+		m_scrollState.upButton = { pos.x, pos.y, m_scrollBarSize, m_scrollBarSize };
+		m_scrollState.downButton = { pos.x, pos.y + pos.h - m_scrollBarSize, m_scrollBarSize, m_scrollBarSize };
+		m_scrollState.vScrollArea = { pos.x, pos.y + m_scrollBarSize, m_scrollBarSize, scrollAreaHeight };
 
+		DrawButton(m_scrollState.upButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.up"), !(m_pushedState & HIT_VSCROLL_UP));
+		DrawButton(m_scrollState.downButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.down"), !(m_pushedState & HIT_VSCROLL_DOWN));
+		
+		double sliderHeight = (1.0 - ((double)m_scrollState.vMax / (double)pos.h)) * (double)scrollAreaHeight + 1;
+		if (sliderHeight < (m_borderWidth * 2))
+		{
+			sliderHeight = m_borderWidth * 2;
+		}
 
-		DrawButton(Rect({ pos.x, pos.y + m_scrollBarSize + (int)currPos, m_scrollBarSize, std::max((int)fractionHeight, (int)m_borderWidth) }), Color::C_LIGHT_GREY, nullptr, true);
+		int currPos = m_scrollState.vScroll * scrollAreaHeight / pos.h;
+		if (currPos + sliderHeight > scrollAreaHeight)
+		{
+			currPos = scrollAreaHeight - (int)sliderHeight + 1;
+		}
+
+		m_scrollState.vSlider = { pos.x, pos.y + m_scrollBarSize + currPos, m_scrollBarSize, (int)sliderHeight };
+
+		DrawButton(m_scrollState.vSlider, Color::C_LIGHT_GREY, nullptr, !(m_pushedState & HIT_VSCROLL_SLIDER));
 	}
 
 	void Window::DrawScrollBars(Rect pos)
@@ -429,6 +456,45 @@ namespace GUI
 			return HIT_MAXBUTTON;
 		}
 
+		if (m_scrollState.showH)
+		{
+			if (m_scrollState.leftButton.PointInRect(&pt))
+			{
+				return HIT_HSCROLL_LEFT;
+			}
+			if (m_scrollState.rightButton.PointInRect(&pt))
+			{
+				return HIT_HSCROLL_RIGHT;
+			}
+			if (m_scrollState.hSlider.PointInRect(&pt))
+			{
+				return HIT_HSCROLL_SLIDER;
+			}
+			if (m_scrollState.hScrollArea.PointInRect(&pt))
+			{
+				return HIT_HSCROLL_AREA;
+			}
+		}
+		if (m_scrollState.showV)
+		{
+			if (m_scrollState.upButton.PointInRect(&pt))
+			{
+				return HIT_VSCROLL_UP;
+			}
+			if (m_scrollState.downButton.PointInRect(&pt))
+			{
+				return HIT_VSCROLL_DOWN;
+			}
+			if (m_scrollState.vSlider.PointInRect(&pt))
+			{
+				return HIT_VSCROLL_SLIDER;
+			}
+			if (m_scrollState.vScrollArea.PointInRect(&pt))
+			{
+				return HIT_VSCROLL_AREA;
+			}
+		}
+
 		// Resize handles
 		if (m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED) ||
 			!(m_flags & WindowFlags::WIN_CANRESIZE))
@@ -544,11 +610,17 @@ namespace GUI
 
 	void Window::ButtonPushed(HitZone button)
 	{
+		int hScroll = m_scrollState.hMax / 10;
+		int vScroll = m_scrollState.vMax / 10;
 		switch (button)
 		{
 		case HIT_MAXBUTTON: Maximize(); break;
 		case HIT_MINBUTTON: Minimize(); break;
 		case HIT_SYSMENU: break;
+		case HIT_HSCROLL_LEFT: ScrollRel({ -hScroll, 0 }); break;
+		case HIT_HSCROLL_RIGHT: ScrollRel({ hScroll, 0 }); break;
+		case HIT_VSCROLL_UP: ScrollRel({ 0, -vScroll }); break;
+		case HIT_VSCROLL_DOWN: ScrollRel({ 0, vScroll }); break;
 		}
 	}
 
@@ -700,6 +772,18 @@ namespace GUI
 
 		m_scrollState.hScroll = clip(pt.x, 0, m_scrollState.hMax);
 		m_scrollState.vScroll = clip(pt.y, 0, m_scrollState.vMax);
+	}
+
+	void Window::ClickHScrollBar(SDL_Point pt)
+	{
+		int rel = (pt.x - m_scrollState.hScrollArea.x) * m_scrollState.hMax / m_scrollState.hScrollArea.w;
+		m_scrollState.hScroll = clip(rel, 0, m_scrollState.hMax);
+	}
+
+	void Window::ClickVScrollBar(SDL_Point pt)
+	{
+		int rel = (pt.y - m_scrollState.vScrollArea.y) * m_scrollState.vMax / m_scrollState.vScrollArea.h;
+		m_scrollState.vScroll = clip(rel, 0, m_scrollState.vMax);
 	}
 
 	struct Window::shared_enabler : public Window

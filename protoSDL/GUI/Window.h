@@ -19,6 +19,11 @@ namespace GUI
 			bool showH, showV;
 			int hScroll, vScroll;
 			int hMax, vMax;
+
+			Rect leftButton, rightButton;
+			Rect upButton, downButton;
+			Rect hSlider, vSlider;
+			Rect hScrollArea, vScrollArea;
 		};
 
 		virtual ~Window() = default;
@@ -56,6 +61,8 @@ namespace GUI
 		bool ResizeRel(SDL_Point rel);
 		void ScrollRel(SDL_Point pt);
 		void ScrollTo(SDL_Point pt);
+		void ClickHScrollBar(SDL_Point pt);
+		void ClickVScrollBar(SDL_Point pt);
 
 		void Maximize();
 		void Minimize();
