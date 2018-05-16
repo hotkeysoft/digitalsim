@@ -12,6 +12,9 @@ namespace GUI
 		Rect() : SDL_Rect({ 0, 0, 0, 0 }) {}
 		Rect(int x, int y, int w, int h) : SDL_Rect({ x, y, w, h }) {};
 
+		bool IsEmpty() const;
+		bool IsEqual(const RectRef other) const;
+
 		bool PointInRect(const PointRef pt) { return SDL_PointInRect(pt, this); }
 		Rect IntersectRect(const RectRef);
 

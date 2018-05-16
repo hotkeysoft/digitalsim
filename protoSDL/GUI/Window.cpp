@@ -106,7 +106,7 @@ namespace GUI
 
 		if (image && image->IsSet())
 		{
-			image->Draw(Point({ pos.x + 1, pos.y + 1 }));
+			image->Draw(&Point(pos.x + 1, pos.y + 1));
 		}
 	}
 
@@ -379,7 +379,7 @@ namespace GUI
 				m_titleBackground = Image::Create(m_renderer);
 				m_titleBackground->LoadFromFile("Resources/TitlebarActive.png");				
 			}
-			m_titleBackground->Draw(titleBar);
+			m_titleBackground->Draw(&titleBar);
 		}
 		else
 		{

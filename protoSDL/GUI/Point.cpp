@@ -4,6 +4,13 @@
 
 namespace GUI
 {
+	bool Point::IsEqual(const PointRef other) const
+	{
+		return (other != nullptr) &&
+			(this->x == other->x) &&
+			(this->y == other->y);
+	}
+
 	std::string Point::ToString() const
 	{
 		std::ostringstream os;

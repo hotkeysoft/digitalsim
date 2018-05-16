@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "SDL_rect.h"
 #include <string>
 #include <ostream>
 
@@ -10,6 +11,8 @@ namespace GUI
 	public:
 		Point() : SDL_Point({ 0, 0 }) {}
 		Point(int x, int y) : SDL_Point({ x, y }) {};
+
+		bool IsEqual(const PointRef other) const;
 
 		std::string ToString() const;
 	};

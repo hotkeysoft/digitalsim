@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "Rect.h"
+#include "Point.h"
 #include <string>
 
 namespace GUI
@@ -19,8 +20,8 @@ namespace GUI
 		operator bool() const { return IsSet(); }
 
 		bool LoadFromFile(const char* fileName);
-		void Draw(SDL_Point pos);
-		void Draw(Rect pos);
+		void Draw(const PointRef pos);
+		void Draw(const RectRef pos);
 		bool IsSet() const { return m_texture != nullptr; }
 
 	protected:
