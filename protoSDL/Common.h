@@ -78,6 +78,9 @@ namespace GUI
 	class Rect;
 	using RectRef = Rect * ;
 
+	class Point;
+	using PointRef = Point * ;
+
 	class Image;
 	using ImagePtr = std::shared_ptr<Image>;
 	using ImageRef = Image * ;

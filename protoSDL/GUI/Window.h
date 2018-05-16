@@ -15,9 +15,9 @@ namespace GUI
 		
 		struct ScrollState 
 		{ 
-			ScrollState() : showH(false), showV(false), hScroll(0), vScroll(0), hMax(0), vMax(0) {}
+			ScrollState() : showH(false), showV(false), hMax(0), vMax(0) {}
 			bool showH, showV;
-			int hScroll, vScroll;
+			Point scrollPos;
 			int hMax, vMax;
 
 			Rect leftButton, rightButton;
@@ -44,7 +44,7 @@ namespace GUI
 		Rect GetClientRect(bool relative = true) const;
 		Rect GetWindowRect(bool relative = true, bool scrolled = true) const;
 
-		HitZone HitTest(SDL_Point);
+		HitZone HitTest(PointRef);
 
 		void Draw();
 
@@ -57,18 +57,18 @@ namespace GUI
 		void ToggleButtonState(HitZone button, bool pushed);
 		void ButtonPushed(HitZone button);
 
-		bool MoveRel(SDL_Point rel);
-		bool ResizeRel(SDL_Point rel);
-		void ScrollRel(SDL_Point pt);
-		void ScrollTo(SDL_Point pt);
-		void ClickHScrollBar(SDL_Point pt);
-		void ClickVScrollBar(SDL_Point pt);
+		bool MoveRel(PointRef rel);
+		bool ResizeRel(PointRef rel);
+		void ScrollRel(PointRef pt);
+		void ScrollTo(PointRef pt);
+		void ClickHScrollBar(PointRef pt);
+		void ClickVScrollBar(PointRef pt);
 
 		void Maximize();
 		void Minimize();
 		void Restore();
 
-		SDL_Point GetScroll() const { return SDL_Point({m_scrollState.hScroll, m_scrollState.vScroll}); }
+		PointRef GetScroll() { return &m_scrollState.scrollPos; }
 
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);

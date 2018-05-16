@@ -39,6 +39,9 @@
     <ClCompile Include="GUI\Rect.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\Point.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI\Window.h">
@@ -60,6 +63,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Rect.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Point.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>

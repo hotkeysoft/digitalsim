@@ -136,7 +136,7 @@ int main(int argc, char ** argv)
 		bool mouseCaptured = false;
 		WindowPtr captureTarget = nullptr;
 		HitZone captureZone = HIT_NOTHING;
-		SDL_Point lastPos;
+		Point lastPos;
 
 		SDL_Event e;
 		bool quit = false;
@@ -147,67 +147,67 @@ int main(int argc, char ** argv)
 				}
 				else if (e.type == SDL_MOUSEMOTION)
 				{
-					SDL_Point pt = { e.button.x, e.button.y };
+					Point pt = { e.button.x, e.button.y };
 					if (mouseCaptured && captureTarget)
 					{
-						SDL_Point rel = { pt.x - lastPos.x, pt.y - lastPos.y };
+						Point rel = { pt.x - lastPos.x, pt.y - lastPos.y };
 						switch (captureZone)
 						{
 						case HIT_TITLEBAR:
-							captureTarget->MoveRel(rel);
+							captureTarget->MoveRel(&rel);
 							break;
 						case HIT_BORDER_LEFT:
-							if (captureTarget->MoveRel(SDL_Point({ rel.x, 0 })))
+							if (captureTarget->MoveRel(&Point(rel.x, 0)))
 							{
-								captureTarget->ResizeRel(SDL_Point({ -rel.x, 0 }));
+								captureTarget->ResizeRel(&Point(-rel.x, 0));
 							}
 							break;
 						case HIT_BORDER_RIGHT:
-							captureTarget->ResizeRel({ rel.x, 0 });
+							captureTarget->ResizeRel(&Point(rel.x, 0));
 							break;
 						case HIT_BORDER_TOP:
-							if (captureTarget->MoveRel(SDL_Point({ 0, rel.y })))
+							if (captureTarget->MoveRel(&Point(0, rel.y)))
 							{
-								captureTarget->ResizeRel({ 0, -rel.y });
+								captureTarget->ResizeRel(&Point(0, -rel.y));
 							}
 							break;
 						case HIT_BORDER_BOTTOM:
-							captureTarget->ResizeRel({ 0, rel.y });
+							captureTarget->ResizeRel(&Point(0, rel.y));
 							break;
 						case HIT_CORNER_TOPLEFT:
-							if (captureTarget->MoveRel(rel))
+							if (captureTarget->MoveRel(&rel))
 							{
-								captureTarget->ResizeRel({ -rel.x, -rel.y });
+								captureTarget->ResizeRel(&Point(-rel.x, -rel.y));
 							}
 							break;
 						case HIT_CORNER_TOPRIGHT:
-							if (captureTarget->MoveRel(SDL_Point({ 0, rel.y })))
+							if (captureTarget->MoveRel(&Point(0, rel.y)))
 							{
-								captureTarget->ResizeRel({ rel.x, -rel.y });
+								captureTarget->ResizeRel(&Point(rel.x, -rel.y));
 							}
 							break;
 						case HIT_CORNER_BOTTOMLEFT:
-							if (captureTarget->MoveRel(SDL_Point({ rel.x, 0 })))
+							if (captureTarget->MoveRel(&Point(rel.x, 0)))
 							{
-								captureTarget->ResizeRel({ -rel.x, rel.y });
+								captureTarget->ResizeRel(&Point(-rel.x, rel.y));
 							}
 							break;
 						case HIT_CORNER_BOTTOMRIGHT:
-							if (captureTarget->MoveRel(SDL_Point({ 0, 0 })))
+							if (captureTarget->MoveRel(&Point( 0, 0 )))
 							{
-								captureTarget->ResizeRel({ rel.x, rel.y });
+								captureTarget->ResizeRel(&Point(rel.x, rel.y));
 							}
 							break;
 						case HIT_SYSMENU:
 						case HIT_MAXBUTTON:
 						case HIT_MINBUTTON:
-							captureTarget->ToggleButtonState(captureZone, captureTarget->HitTest(pt) == captureZone);
+							captureTarget->ToggleButtonState(captureZone, captureTarget->HitTest(&pt) == captureZone);
 							break;
 						case HIT_HSCROLL_SLIDER:
-							captureTarget->ClickHScrollBar(pt);
+							captureTarget->ClickHScrollBar(&pt);
 							break;
 						case HIT_VSCROLL_SLIDER:
-							captureTarget->ClickVScrollBar(pt);
+							captureTarget->ClickVScrollBar(&pt);
 							break;
 						}
 						lastPos = pt;
@@ -215,10 +215,10 @@ int main(int argc, char ** argv)
 					}
 					else
 					{
-						WindowPtr hit = WINMGR().HitTest(pt);
+						WindowPtr hit = WINMGR().HitTest(&pt);
 						if (hit)
 						{
-							switch (hit->HitTest(pt))
+							switch (hit->HitTest(&pt))
 							{
 							case HIT_BORDER_TOP:
 							case HIT_BORDER_BOTTOM:
@@ -247,12 +247,12 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEBUTTONDOWN) {
 					if (e.button.button == SDL_BUTTON_LEFT)
 					{
-						SDL_Point pt = { e.button.x, e.button.y };
-						WindowPtr hit = WINMGR().HitTest(pt);
+						Point pt(e.button.x, e.button.y);
+						WindowPtr hit = WINMGR().HitTest(&pt);
 						if (hit)
 						{
 							WINMGR().SetActive(hit);
-							captureZone = hit->HitTest(pt);
+							captureZone = hit->HitTest(&pt);
 							if (captureZone == HIT_SYSMENU || 
 								captureZone == HIT_MINBUTTON ||
 								captureZone == HIT_MAXBUTTON ||
@@ -270,11 +270,11 @@ int main(int argc, char ** argv)
 							}
 							else if (captureZone == HIT_HSCROLL_AREA)
 							{
-								hit->ClickHScrollBar(pt);
+								hit->ClickHScrollBar(&pt);
 							}
 							else if (captureZone == HIT_VSCROLL_AREA)
 							{
-								hit->ClickVScrollBar(pt);
+								hit->ClickVScrollBar(&pt);
 							}
 							else if (captureZone == HIT_TITLEBAR)
 							{
@@ -295,7 +295,7 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEBUTTONUP) {
 					if (mouseCaptured)
 					{
-						SDL_Point pt = { e.button.x, e.button.y };
+						Point pt = { e.button.x, e.button.y };
 						switch (captureZone)
 						{
 						case HIT_SYSMENU:
@@ -308,7 +308,7 @@ int main(int argc, char ** argv)
 						case HIT_HSCROLL_SLIDER:
 						case HIT_VSCROLL_SLIDER:
 							captureTarget->ToggleButtonState(captureZone, false);
-							if (captureTarget->HitTest(pt) == captureZone)
+							if (captureTarget->HitTest(&pt) == captureZone)
 							{
 								captureTarget->ButtonPushed(captureZone);
 							}
@@ -323,13 +323,13 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_KEYDOWN) {
 					switch (e.key.keysym.sym) {
 					case SDLK_LEFT:
-						WINMGR().GetActive()->ScrollRel(SDL_Point({ -2, 0 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(&Point(-2, 0)); Render(ren); break;
 					case SDLK_RIGHT:
-						WINMGR().GetActive()->ScrollRel(SDL_Point({ 2, 0 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(&Point(2, 0)); Render(ren); break;
 					case SDLK_UP:
-						WINMGR().GetActive()->ScrollRel(SDL_Point({ 0, -2 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(&Point(0, -2)); Render(ren); break;
 					case SDLK_DOWN:
-						WINMGR().GetActive()->ScrollRel(SDL_Point({ 0, 2 })); Render(ren); break;
+						WINMGR().GetActive()->ScrollRel(&Point(0, 2)); Render(ren); break;
 
 					case SDLK_RETURN:
 						if (SDL_GetModState() & KMOD_ALT)

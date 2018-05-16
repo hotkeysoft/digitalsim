@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Color.h"
 #include "Rect.h"
+#include "Point.h"
 #include <string>
 #include <list>
 #include <functional>
@@ -31,7 +32,7 @@ namespace GUI
 
 		void MoveToFront(WindowPtr);
 
-		WindowPtr HitTest(SDL_Point);
+		WindowPtr HitTest(PointRef);
 		WindowRef GetActive();
 		void SetActive(WindowPtr);
 

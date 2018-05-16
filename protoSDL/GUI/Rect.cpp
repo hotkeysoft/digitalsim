@@ -10,7 +10,7 @@ namespace GUI
 		SDL_IntersectRect(this, otherRect, &ret);
 		return ret;
 	}
-	bool Rect::PointInRect(const SDL_Point* pt, const RectRef rect)
+	bool Rect::PointInRect(const PointRef pt, const RectRef rect)
 	{
 		return SDL_PointInRect(pt, rect);
 	}

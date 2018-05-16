@@ -70,7 +70,7 @@ namespace GUI
 		return childWindows;
 	}
 
-	WindowPtr WindowManager::HitTest(SDL_Point pt)
+	WindowPtr WindowManager::HitTest(PointRef pt)
 	{
 		for (auto it = m_windows.rbegin(); it != m_windows.rend(); ++it)
 		{
