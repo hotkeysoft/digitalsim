@@ -10,7 +10,7 @@
 namespace GUI
 {
 	ScrollBars::ScrollBars(RendererRef renderer, WindowRef parent) :
-		Widget(renderer), m_parent(parent)
+		Widget("scroll", renderer, nullptr, Rect(), nullptr), m_parent(parent)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -199,7 +199,7 @@ namespace GUI
 
 	void ScrollBars::Draw()
 	{
-		Rect rect = m_parent->GetWindowRect(false);
+		Rect rect = m_parent->GetRect(false);
 
 		if (!(m_parent->GetShowState() & WS_MINIMIZED))
 		{

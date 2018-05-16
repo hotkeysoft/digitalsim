@@ -5,6 +5,7 @@
 #include "GUI\Window.h"
 #include "GUI\WindowManager.h"
 #include "GUI\ResourceManager.h"
+#include "GUI\Button.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -99,29 +100,29 @@ int main(int argc, char ** argv)
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 
 		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
-		mainWnd->SetTitle("DIGI-SIM");
+		mainWnd->SetText("DIGI-SIM");
 		mainWnd->SetImage(image);
 		Rect client = mainWnd->GetClientRect();
 
-		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
+		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetText("Editor");
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
-		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetTitle("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 100, 100 }, WindowFlags::WIN_CANRESIZE| WindowFlags::WIN_CANMOVE)->SetTitle("edit.2");
+		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetText("edit.1");
+		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 200, 200 }, WindowFlags::WIN_CANRESIZE| WindowFlags::WIN_CANMOVE)->SetText("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
-		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 })->SetTitle("edit.1.1  With a long name");
-		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 200, 0, 200, 100 })->SetTitle("edit.1.2  With a long name");
-		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 400, 0, 200, 100 })->SetTitle("edit.1.3  With a long name");
-		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetTitle("edit.1.4  With a long name");
-		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 200, 100, 200, 100 })->SetTitle("edit.1.5  With a long name");
-		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetTitle("edit.1.6  With a long name");
+		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 })->SetText("edit.1.1  With a long name");
+		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 200, 0, 200, 100 })->SetText("edit.1.2  With a long name");
+		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 400, 0, 200, 100 })->SetText("edit.1.3  With a long name");
+		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetText("edit.1.4  With a long name");
+		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 200, 100, 200, 100 })->SetText("edit.1.5  With a long name");
+		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetText("edit.1.6  With a long name");
 
-		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetTitle("Simulation");
+		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
 
-		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetTitle("Parts Bin");
+		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetText("Parts Bin");
 
 		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
 		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
@@ -130,6 +131,9 @@ int main(int argc, char ** argv)
 
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
 		SDL_SetCursor(normalCursor);
+
+		WindowPtr e2 = WINMGR().FindWindow("edit.2");
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(5, 5, 100, 20), "Button"));
 
 		Render(ren);
 

@@ -75,6 +75,14 @@ namespace GUI
 		return (uint32_t(selfValue) & uint32_t(inValue));
 	}
 
+	class Widget;
+	using WidgetPtr = std::shared_ptr<Widget>;
+	using WidgetRef = Widget * ;
+
+	class Button;
+	using ButtonPtr = std::shared_ptr<Button>;
+	using ButtonRef = Button * ;
+
 	class ScrollBars;
 	using ScrollBarsPtr = std::unique_ptr<ScrollBars>;
 	using ScrollBarsRef = ScrollBars * ;

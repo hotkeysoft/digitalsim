@@ -18,6 +18,11 @@ namespace GUI
 		bool PointInRect(const PointRef pt) { return SDL_PointInRect(pt, this); }
 		Rect IntersectRect(const RectRef);
 
+		Point Origin() const { return Point(x, y); }
+		Point Size() const { return Point(w, h); }
+
+		Rect Offset(const PointRef pt) const { return Rect(x + pt->x, y + pt->y, w, h); }
+
 		static bool PointInRect(const PointRef, const RectRef);
 		static bool IntersectRect(const RectRef r1, const RectRef r2, const RectRef out);
 

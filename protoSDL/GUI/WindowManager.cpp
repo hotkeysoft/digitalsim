@@ -112,7 +112,6 @@ namespace GUI
 		{
 			RaiseChildren(child.get());
 		}
-
 	}
 
 	void WindowManager::MoveToFront(WindowPtr win)
@@ -122,7 +121,7 @@ namespace GUI
 
 		if (win->HasParent())
 		{
-			RaiseChildren(win->GetParent());
+			RaiseChildren(win->GetParentWnd());
 		}
 		RaiseChildren(win.get());
 	}

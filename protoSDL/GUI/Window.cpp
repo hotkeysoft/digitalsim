@@ -12,12 +12,19 @@ namespace GUI
 
 	Window Window::m_nullWnd;
 
-	Window::Window() : Widget(nullptr), m_id("null"), m_parent(nullptr), m_image(nullptr), m_font(nullptr), 
-		m_showState(), m_pushedState(HIT_NOTHING) {}
+	void DeleteTexture(SDL_Texture* surface)
+	{
+		SDL_DestroyTexture(surface);
+	}
 
-	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags) : 
-		Widget(renderer), m_parent(parent), m_image(nullptr), m_font(font), 
-		m_rect(rect), m_showState(WindowState::WS_VISIBLE), m_flags(flags), m_pushedState(HIT_NOTHING)
+
+	Window::Window() : Widget("null", nullptr, nullptr, Rect(), nullptr), m_showState(), m_pushedState(HIT_NOTHING)
+	{
+	}
+
+	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags) :
+		Widget(id, renderer, parent, rect, nullptr, nullptr, font), 
+		m_showState(WindowState::WS_VISIBLE), m_flags(flags), m_pushedState(HIT_NOTHING)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -44,22 +51,10 @@ namespace GUI
 		return std::static_pointer_cast<Window>(ptr);
 	}
 
-	void Window::SetTitle(const char * title)
+	void Window::SetText(const char * title)
 	{
-		if (title == nullptr)
-		{
-			m_title = "";
-		}
-		else
-		{
-			m_title = title;
-		}
+		Widget::SetText(title);
 		RenderTitle();
-	}
-
-	void Window::SetImage(ImageRef image)
-	{
-		m_image = image;
 	}
 
 	void Window::DrawSystemMenuButton(Rect pos, const GUI::Color & col)
@@ -83,9 +78,9 @@ namespace GUI
 
 		if (m_parent != nullptr && !(m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED)))
 		{
-			Rect thisRect = GetWindowRect(true, false);
-			Rect parentRect = m_parent->GetClientRect(true);
-		
+			Rect thisRect = GetRect(true, false);
+			Rect parentRect = GetParentWnd()->GetClientRect(true);
+
 			ret.showH = ((thisRect.x + thisRect.w) > parentRect.w);
 			ret.showV = ((thisRect.y + thisRect.h) > parentRect.h);
 			ret.hMax = ((thisRect.x + thisRect.w) - parentRect.w);
@@ -99,9 +94,39 @@ namespace GUI
 		return WINMGR().GetWindowList(this);
 	}
 
+	void Window::AddControl(WidgetPtr widget)
+	{
+		if (widget == nullptr)
+		{
+			throw std::invalid_argument("widget is null");
+		}
+
+		if (FindControl(widget->GetId().c_str()) != nullptr)
+		{
+			throw std::invalid_argument("control already exists:" + widget->GetId());
+		}
+		widget->SetParent(this);
+
+		m_controls[widget->GetId()] = widget;
+	}
+
+	WidgetPtr Window::FindControl(const char * id)
+	{
+		if (id == nullptr)
+			return nullptr;
+
+		auto ctrl = m_controls.find(id);
+		if (ctrl != m_controls.end())
+		{
+			return ctrl->second;
+		}
+
+		return nullptr;
+	}
+
 	Rect Window::GetClientRect(bool relative) const
 	{
-		Rect rect = GetWindowRect(relative, false);
+		Rect rect = GetRect(relative, false);
 		if (relative)
 		{
 			rect.x = 0;
@@ -166,19 +191,19 @@ namespace GUI
 		return rect;
 	}
 
-	Rect Window::GetWindowRect(bool relative, bool scrolled) const
+	Rect Window::GetRect(bool relative, bool scrolled) const
 	{
 		Rect rect = m_rect;
 		if (m_showState & WindowState::WS_MAXIMIZED)
 		{
-			rect = m_parent->GetClientRect(true);
+			rect = GetParentWnd()->GetClientRect(true);
 		}
 		else if (m_showState & WindowState::WS_MINIMIZED)
 		{
 			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth) + 2;
-			rect = m_parent->GetClientRect(true);
+			rect = GetParentWnd()->GetClientRect(true);
 			rect.w = 200;			
-			rect.x = m_parent->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
+			rect.x = GetParentWnd()->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
 			rect.y = (rect.h - minimizedHeight);
 			rect.h = minimizedHeight;
 		}
@@ -187,14 +212,14 @@ namespace GUI
 		{
 			if (!relative)
 			{
-				Rect parentClient = m_parent->GetClientRect(false);
+				Rect parentClient = GetParentWnd()->GetClientRect(false);
 				rect.x += parentClient.x;
 				rect.y += parentClient.y;
 			}
 
 			if (scrolled)
 			{
-				PointRef scrollOffset = m_parent->GetScroll();
+				PointRef scrollOffset = GetParentWnd()->GetScroll();
 				rect.x -= scrollOffset->x;
 				rect.y -= scrollOffset->y;
 			}
@@ -256,11 +281,11 @@ namespace GUI
 			return HIT_NOTHING;
 		}
 
-		Rect wndRect = GetWindowRect(false);
+		Rect wndRect = GetRect(false);
 		Rect intersect = wndRect;
 		if (m_parent != nullptr)
 		{
-			intersect = wndRect.IntersectRect(&GetClipRect(m_parent));
+			intersect = wndRect.IntersectRect(&GetClipRect(GetParentWnd()));
 		}
 
 		if (!intersect.PointInRect(pt))
@@ -328,7 +353,7 @@ namespace GUI
 		while (win)
 		{
 			rect = rect.IntersectRect(&win->GetClientRect(false));
-			win = win->GetParent();
+			win = win->GetParentWnd();
 		}
 
 		return rect;
@@ -341,11 +366,11 @@ namespace GUI
 
 		if (m_parent != nullptr)
 		{
-			Rect clip = GetClipRect(m_parent);
+			Rect clip = GetClipRect(GetParentWnd());
 			SDL_RenderSetClipRect(m_renderer, &clip);
 		}
 
-		Rect rect = GetWindowRect(false);
+		Rect rect = GetRect(false);
 
 		bool active = (WINMGR().GetActive() == this || (m_flags & WindowFlags::WIN_ACTIVE));
 		DrawReliefBox(&rect, Color::C_LIGHT_GREY, false);
@@ -364,14 +389,19 @@ namespace GUI
 		if (!(m_showState & WS_MINIMIZED))
 		{
 			m_scrollBars->Draw();
+
+			DrawControls();
 		}
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);
 	}
 	
-	void DeleteTexture(SDL_Texture* surface)
+	void Window::DrawControls()
 	{
-		SDL_DestroyTexture(surface);
+		for (auto ctrl : m_controls)
+		{
+			ctrl.second->Draw();
+		}
 	}
 
 	TexturePtr Window::SurfaceToTexture(SDL_Surface* surf)
@@ -385,10 +415,10 @@ namespace GUI
 
 	void Window::RenderTitle()
 	{
-		SDL_Surface* active = TTF_RenderText_Blended(m_font, m_title.c_str(), GUI::Color::C_WHITE);
+		SDL_Surface* active = TTF_RenderText_Blended(m_font, m_text.c_str(), GUI::Color::C_WHITE);
 		m_activeTitle = SurfaceToTexture(active);
 
-		SDL_Surface* inactive = TTF_RenderText_Blended(m_font, m_title.c_str(), GUI::Color::C_DARK_GREY);
+		SDL_Surface* inactive = TTF_RenderText_Blended(m_font, m_text.c_str(), GUI::Color::C_DARK_GREY);
 		m_inactiveTitle = SurfaceToTexture(inactive);
 
 		SDL_QueryTexture(m_activeTitle.get(), NULL, NULL, &m_titleStrRect.w, &m_titleStrRect.h);
@@ -483,14 +513,14 @@ namespace GUI
 		if (m_showState & WindowState::WS_MINIMIZED)
 		{
 			Restore();
-			m_parent->SetMinimizedChild(this, false);
+			GetParentWnd()->SetMinimizedChild(this, false);
 		}
 		else
 		{
 			m_showState = WindowState(m_showState | WindowState::WS_MINIMIZED);
 			m_showState = WindowState(m_showState & ~WindowState::WS_MAXIMIZED);
 
-			m_parent->SetMinimizedChild(this, true);
+			GetParentWnd()->SetMinimizedChild(this, true);
 		}
 	}
 

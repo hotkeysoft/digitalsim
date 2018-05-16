@@ -4,7 +4,7 @@
 
 namespace GUI
 {
-	Image::Image(RendererRef renderer) : Widget(renderer)
+	Image::Image(RendererRef renderer) : Widget("image", renderer, nullptr, Rect(), nullptr)
 	{
 		if (m_renderer == nullptr)
 		{
