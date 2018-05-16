@@ -1,30 +1,19 @@
 #pragma once
 #include "Common.h"
+#include "Widget.h"
 #include "Rect.h"
 #include "Color.h"
 #include "WindowManager.h"
+#include "ScrollBars.h"
 #include <string>
 #include <vector>
 
 namespace GUI
 {
-	class Window
+	class Window : public Widget
 	{
 	public:
-		using MinWindowList = std::vector<WindowRef>;
-		
-		struct ScrollState 
-		{ 
-			ScrollState() : showH(false), showV(false), hMax(0), vMax(0) {}
-			bool showH, showV;
-			Point scrollPos;
-			int hMax, vMax;
-
-			Rect leftButton, rightButton;
-			Rect upButton, downButton;
-			Rect hSlider, vSlider;
-			Rect hScrollArea, vScrollArea;
-		};
+		using MinWindowList = std::vector<WindowRef>;	
 
 		virtual ~Window() = default;
 		Window(const Window&) = delete;
@@ -44,9 +33,8 @@ namespace GUI
 		Rect GetClientRect(bool relative = true) const;
 		Rect GetWindowRect(bool relative = true, bool scrolled = true) const;
 
-		HitZone HitTest(PointRef);
-
-		void Draw();
+		HitZone HitTest(const PointRef) override;
+		void Draw() override;
 
 		WindowState GetShowState() const { return m_showState; }
 
@@ -59,16 +47,15 @@ namespace GUI
 
 		bool MoveRel(PointRef rel);
 		bool ResizeRel(PointRef rel);
-		void ScrollRel(PointRef pt);
-		void ScrollTo(PointRef pt);
-		void ClickHScrollBar(PointRef pt);
-		void ClickVScrollBar(PointRef pt);
 
 		void Maximize();
 		void Minimize();
 		void Restore();
 
-		PointRef GetScroll() { return &m_scrollState.scrollPos; }
+		PointRef GetScroll() { return m_scrollBars->GetScrollPos(); }
+		ScrollBarsRef GetScrollBars() { return m_scrollBars.get(); }
+
+		bool GetPushedState(HitZone id) { return m_pushedState & id; }
 
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
@@ -84,15 +71,8 @@ namespace GUI
 		void SetMinimizedChild(WindowRef child, bool add);
 		int GetMinimizedChildIndex(WindowRef child) const;
 
-		void SetDrawColor(const GUI::Color & col);
-		void Draw3dFrame(Rect pos, bool raised);
-		void DrawReliefBox(Rect pos, const GUI::Color & col, bool raised);
 		void DrawMinMaxButtons(Rect pos, const GUI::Color & col);
 		void DrawSystemMenuButton(Rect pos, const GUI::Color & col);
-		void DrawButton(Rect pos, const GUI::Color & col, ImageRef image, bool raised);
-		void DrawScrollBars(Rect pos);
-		void DrawHScrollBar(Rect pos);
-		void DrawVScrollBar(Rect pos);
 		void DrawTitleBar(Rect rect, bool active);
 		void DrawTitle(Rect rect, bool active);
 		void RenderTitle();
@@ -106,23 +86,20 @@ namespace GUI
 		Rect m_rect;
 		Rect m_titleStrRect;
 
-		static uint8_t constexpr m_borderWidth = 4;
-		static uint8_t constexpr m_buttonSize = 24;
-		static uint8_t constexpr m_scrollBarSize = 17;
-
 		std::string m_id;
 		GUI::WindowRef m_parent;
-		RendererRef m_renderer;
 		FontRef m_font;
 		static ImagePtr m_titleBackground;
 		TexturePtr m_activeTitle;
 		TexturePtr m_inactiveTitle;
 		ImageRef m_image;
 		MinWindowList m_minimizedChildren;
-		ScrollState m_scrollState;
+		ScrollBarsPtr m_scrollBars;
 
 		static Window m_nullWnd;		
 
 		struct shared_enabler;
+
+		friend class ScrollBars;
 	};
 }

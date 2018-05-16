@@ -204,10 +204,10 @@ int main(int argc, char ** argv)
 							captureTarget->ToggleButtonState(captureZone, captureTarget->HitTest(&pt) == captureZone);
 							break;
 						case HIT_HSCROLL_SLIDER:
-							captureTarget->ClickHScrollBar(&pt);
+							captureTarget->GetScrollBars()->ClickHScrollBar(&pt);
 							break;
 						case HIT_VSCROLL_SLIDER:
-							captureTarget->ClickVScrollBar(&pt);
+							captureTarget->GetScrollBars()->ClickVScrollBar(&pt);
 							break;
 						}
 						lastPos = pt;
@@ -270,11 +270,11 @@ int main(int argc, char ** argv)
 							}
 							else if (captureZone == HIT_HSCROLL_AREA)
 							{
-								hit->ClickHScrollBar(&pt);
+								hit->GetScrollBars()->ClickHScrollBar(&pt);
 							}
 							else if (captureZone == HIT_VSCROLL_AREA)
 							{
-								hit->ClickVScrollBar(&pt);
+								hit->GetScrollBars()->ClickVScrollBar(&pt);
 							}
 							else if (captureZone == HIT_TITLEBAR)
 							{
@@ -323,13 +323,13 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_KEYDOWN) {
 					switch (e.key.keysym.sym) {
 					case SDLK_LEFT:
-						WINMGR().GetActive()->ScrollRel(&Point(-2, 0)); Render(ren); break;
+						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(-2, 0)); Render(ren); break;
 					case SDLK_RIGHT:
-						WINMGR().GetActive()->ScrollRel(&Point(2, 0)); Render(ren); break;
+						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(2, 0)); Render(ren); break;
 					case SDLK_UP:
-						WINMGR().GetActive()->ScrollRel(&Point(0, -2)); Render(ren); break;
+						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(0, -2)); Render(ren); break;
 					case SDLK_DOWN:
-						WINMGR().GetActive()->ScrollRel(&Point(0, 2)); Render(ren); break;
+						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(0, 2)); Render(ren); break;
 
 					case SDLK_RETURN:
 						if (SDL_GetModState() & KMOD_ALT)

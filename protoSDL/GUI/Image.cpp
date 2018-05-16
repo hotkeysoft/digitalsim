@@ -4,7 +4,7 @@
 
 namespace GUI
 {
-	Image::Image(RendererRef & renderer) : m_renderer(renderer)
+	Image::Image(RendererRef renderer) : Widget(renderer)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -12,7 +12,7 @@ namespace GUI
 		}
 	}
 
-	ImagePtr Image::Create(RendererRef & renderer)
+	ImagePtr Image::Create(RendererRef renderer)
 	{
 		auto ptr = std::make_shared<shared_enabler>(renderer);
 		return std::static_pointer_cast<Image>(ptr);

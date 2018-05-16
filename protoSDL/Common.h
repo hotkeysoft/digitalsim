@@ -75,6 +75,13 @@ namespace GUI
 		return (uint32_t(selfValue) & uint32_t(inValue));
 	}
 
+	class ScrollBars;
+	using ScrollBarsPtr = std::unique_ptr<ScrollBars>;
+	using ScrollBarsRef = ScrollBars * ;
+
+	struct ScrollState;
+	using ScrollStateRef = ScrollState *;
+
 	class Rect;
 	using RectRef = Rect * ;
 

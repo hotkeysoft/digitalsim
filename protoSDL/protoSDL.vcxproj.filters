@@ -42,6 +42,12 @@
     <ClCompile Include="GUI\Point.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\ScrollBars.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Widget.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI\Window.h">
@@ -66,6 +72,12 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Point.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Widget.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ScrollBars.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
