@@ -30,7 +30,8 @@ namespace GUI
 		WindowManager::WindowList GetChildWindows();
 
 		void AddControl(WidgetPtr);
-		WidgetPtr FindControl(const char* id);
+		WidgetPtr FindControl(const char* id) const;
+		const ControlList &GetControls() const { return m_controls; }
 
 		WindowRef GetParentWnd() const { return static_cast<WindowRef>(m_parent); }
 
@@ -54,7 +55,6 @@ namespace GUI
 		void Minimize();
 		void Restore();
 
-		PointRef GetScroll() { return m_scrollBars->GetScrollPos(); }
 		ScrollBarsRef GetScrollBars() { return m_scrollBars.get(); }
 
 		bool GetPushedState(HitZone id) { return m_pushedState & id; }
@@ -62,8 +62,6 @@ namespace GUI
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
 		Window();
-
-		ScrollState GetScrollBarState() const;
 
 		Rect GetTitleBarRect(Rect base) const;
 		Rect GetSystemMenuButtonRect(Rect base) const;

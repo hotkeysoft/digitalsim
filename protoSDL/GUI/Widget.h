@@ -13,6 +13,7 @@ namespace GUI
 	{
 	public:
 		Widget(const char* id, RendererRef renderer, WidgetRef parent, Rect rect, const char* text, ImageRef image = nullptr, FontRef font = nullptr) :
+			m_id(id?id:""),
 			m_renderer(renderer),
 			m_parent(parent),
 			m_rect(rect),
@@ -48,6 +49,8 @@ namespace GUI
 
 		virtual HitZone HitTest(const PointRef) { return HitZone::HIT_NOTHING; }
 
+		virtual PointRef GetScrollPos() { return &m_scrollPos; }
+
 		virtual void Draw() = 0;
 
 		virtual std::string ToString() const { return ""; }
@@ -65,6 +68,7 @@ namespace GUI
 		WidgetRef m_parent;
 		Rect m_rect;
 		FontRef m_font;
+		Point m_scrollPos;
 
 		static uint8_t constexpr m_borderWidth = 4;
 		static uint8_t constexpr m_buttonSize = 24;

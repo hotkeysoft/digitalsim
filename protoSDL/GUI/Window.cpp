@@ -72,23 +72,6 @@ namespace GUI
 		DrawButton(&GetMaximizeButtonRect(pos), col, RES().FindImage(resStr), !(m_pushedState & HIT_MAXBUTTON));
 	}
 
-	ScrollState Window::GetScrollBarState() const
-	{
-		ScrollState ret;
-
-		if (m_parent != nullptr && !(m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED)))
-		{
-			Rect thisRect = GetRect(true, false);
-			Rect parentRect = GetParentWnd()->GetClientRect(true);
-
-			ret.showH = ((thisRect.x + thisRect.w) > parentRect.w);
-			ret.showV = ((thisRect.y + thisRect.h) > parentRect.h);
-			ret.hMax = ((thisRect.x + thisRect.w) - parentRect.w);
-			ret.vMax = ((thisRect.y + thisRect.h) - parentRect.h);
-		}
-		return ret;
-	}
-
 	WindowManager::WindowList Window::GetChildWindows()
 	{
 		return WINMGR().GetWindowList(this);
@@ -110,7 +93,7 @@ namespace GUI
 		m_controls[widget->GetId()] = widget;
 	}
 
-	WidgetPtr Window::FindControl(const char * id)
+	WidgetPtr Window::FindControl(const char * id) const
 	{
 		if (id == nullptr)
 			return nullptr;
@@ -196,12 +179,12 @@ namespace GUI
 		Rect rect = m_rect;
 		if (m_showState & WindowState::WS_MAXIMIZED)
 		{
-			rect = GetParentWnd()->GetClientRect(true);
+			rect = GetParent()->GetClientRect(true);
 		}
 		else if (m_showState & WindowState::WS_MINIMIZED)
 		{
 			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth) + 2;
-			rect = GetParentWnd()->GetClientRect(true);
+			rect = GetParent()->GetClientRect(true);
 			rect.w = 200;			
 			rect.x = GetParentWnd()->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
 			rect.y = (rect.h - minimizedHeight);
@@ -212,14 +195,14 @@ namespace GUI
 		{
 			if (!relative)
 			{
-				Rect parentClient = GetParentWnd()->GetClientRect(false);
+				Rect parentClient = GetParent()->GetClientRect(false);
 				rect.x += parentClient.x;
 				rect.y += parentClient.y;
 			}
 
 			if (scrolled)
 			{
-				PointRef scrollOffset = GetParentWnd()->GetScroll();
+				PointRef scrollOffset = GetParentWnd()->GetScrollPos();
 				rect.x -= scrollOffset->x;
 				rect.y -= scrollOffset->y;
 			}
@@ -390,7 +373,7 @@ namespace GUI
 		{
 			m_scrollBars->Draw();
 
-			DrawControls();
+			DrawControls();	
 		}
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);
@@ -398,6 +381,12 @@ namespace GUI
 	
 	void Window::DrawControls()
 	{
+		Rect parent = GetClientRect(false);
+
+		Rect oldClipRect;
+		SDL_RenderGetClipRect(m_renderer, &oldClipRect);
+		SDL_RenderSetClipRect(m_renderer, &oldClipRect.IntersectRect(&parent));
+
 		for (auto ctrl : m_controls)
 		{
 			ctrl.second->Draw();

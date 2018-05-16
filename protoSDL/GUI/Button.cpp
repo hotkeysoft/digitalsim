@@ -18,7 +18,6 @@ namespace GUI
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, image, font);
 		return std::static_pointer_cast<Button>(ptr);
-
 	}
 
 	HitZone Button::HitTest(const PointRef)
@@ -31,8 +30,7 @@ namespace GUI
 		if (m_parent == nullptr)
 			return;
 
-		Rect parent = m_parent->GetClientRect(false);
-
+		Rect parent = m_parent->GetClientRect(false).OffsetNeg(m_parent->GetScrollPos());
 		DrawButton(&m_rect.Offset(&parent.Origin()), Color::C_WHITE, nullptr, true);
 	}
 

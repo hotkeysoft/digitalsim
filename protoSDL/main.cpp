@@ -133,7 +133,8 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(5, 5, 100, 20), "Button"));
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(500, 5, 50, 50), "Button"));
+		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(5, 300, 100, 50), "Button"));
 
 		Render(ren);
 

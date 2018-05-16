@@ -50,7 +50,7 @@ namespace GUI
 			sliderHeight = m_borderWidth * 2;
 		}
 
-		int currPos = m_scrollState.scrollPos.x * scrollAreaWidth / pos->w;
+		int currPos = m_parent->m_scrollPos.x * scrollAreaWidth / pos->w;
 		if (currPos + sliderHeight > scrollAreaWidth)
 		{
 			currPos = scrollAreaWidth - (int)sliderHeight + 1;
@@ -79,7 +79,7 @@ namespace GUI
 			sliderHeight = m_borderWidth * 2;
 		}
 
-		int currPos = m_scrollState.scrollPos.y * scrollAreaHeight / pos->h;
+		int currPos = m_parent->m_scrollPos.y * scrollAreaHeight / pos->h;
 		if (currPos + sliderHeight > scrollAreaHeight)
 		{
 			currPos = scrollAreaHeight - (int)sliderHeight + 1;
@@ -88,6 +88,25 @@ namespace GUI
 		m_scrollState.vSlider = { pos->x, pos->y + m_scrollBarSize + currPos, m_scrollBarSize, (int)sliderHeight };
 
 		DrawButton(&m_scrollState.vSlider, Color::C_LIGHT_GREY, nullptr, !m_parent->GetPushedState(HIT_VSCROLL_SLIDER));
+	}
+
+	void ScrollBars::CheckChildScrollStatus(WidgetRef child, RectRef thisRect, bool &showH, bool &showV)
+	{
+		Rect parentRect = child->GetParent()->GetClientRect(true);
+
+		if (((thisRect->x + thisRect->w) > parentRect.w))
+		{
+			showH = true;
+			int hMax = ((thisRect->x + thisRect->w) - parentRect.w);
+			m_scrollState.hMax = std::max(m_scrollState.hMax, hMax);
+		}
+
+		if ((thisRect->y + thisRect->h) > parentRect.h)
+		{
+			showV = true;
+			int vMax = ((thisRect->y + thisRect->h) - parentRect.h);
+			m_scrollState.vMax = std::max(m_scrollState.vMax, vMax);
+		}
 	}
 
 	void ScrollBars::DrawScrollBars(RectRef pos)
@@ -102,21 +121,19 @@ namespace GUI
 		bool showV = false;
 		for (auto & child : m_parent->GetChildWindows())
 		{
-			ScrollState childScroll = child->GetScrollBarState();
-			if (childScroll.showH)
+			if (child->GetParent() != nullptr && !(child->GetShowState() & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED)))
 			{
-				showH = true;
-				m_scrollState.hMax = std::max(m_scrollState.hMax, childScroll.hMax);
-			}
-			if (childScroll.showV)
-			{
-				showV = true;
-				m_scrollState.vMax = std::max(m_scrollState.vMax, childScroll.vMax);
+				Rect childRect = child->GetRect(true, false);
+				CheckChildScrollStatus(child.get(), &childRect, showH, showV);
 			}
 		}
+		for (auto & child : m_parent->GetControls())
+		{
+			CheckChildScrollStatus(child.second.get(), &child.second->GetRect(), showH, showV);
+		}
 		
-		m_scrollState.showH = showH || m_scrollState.scrollPos.x;
-		m_scrollState.showV = showV || m_scrollState.scrollPos.y;
+		m_scrollState.showH = showH || m_parent->m_scrollPos.x;
+		m_scrollState.showV = showV || m_parent->m_scrollPos.y;
 
 		if (m_scrollState.showH)
 		{
@@ -214,14 +231,14 @@ namespace GUI
 
 		if (m_scrollState.showH)
 		{
-			m_scrollState.scrollPos.x += pt->x;
-			m_scrollState.scrollPos.x = clip(m_scrollState.scrollPos.x, 0, m_scrollState.hMax);
+			m_parent->m_scrollPos.x += pt->x;
+			m_parent->m_scrollPos.x = clip(m_parent->m_scrollPos.x, 0, m_scrollState.hMax);
 		}
 
 		if (m_scrollState.showV)
 		{
-			m_scrollState.scrollPos.y += pt->y;
-			m_scrollState.scrollPos.y = clip(m_scrollState.scrollPos.y, 0, m_scrollState.vMax);
+			m_parent->m_scrollPos.y += pt->y;
+			m_parent->m_scrollPos.y = clip(m_parent->m_scrollPos.y, 0, m_scrollState.vMax);
 		}
 	}
 
@@ -230,19 +247,19 @@ namespace GUI
 		if (m_parent->GetFlags() & WindowFlags::WIN_NOSCROLL)
 			return;
 
-		m_scrollState.scrollPos.x = clip(pt->x, 0, m_scrollState.hMax);
-		m_scrollState.scrollPos.y = clip(pt->y, 0, m_scrollState.vMax);
+		m_parent->m_scrollPos.x = clip(pt->x, 0, m_scrollState.hMax);
+		m_parent->m_scrollPos.y = clip(pt->y, 0, m_scrollState.vMax);
 	}
 
 	void ScrollBars::ClickHScrollBar(PointRef pt)
 	{
 		int rel = (pt->x - m_scrollState.hScrollArea.x) * m_scrollState.hMax / m_scrollState.hScrollArea.w;
-		m_scrollState.scrollPos.x = clip(rel, 0, m_scrollState.hMax);
+		m_parent->m_scrollPos.x = clip(rel, 0, m_scrollState.hMax);
 	}
 
 	void ScrollBars::ClickVScrollBar(PointRef pt)
 	{
 		int rel = (pt->y - m_scrollState.vScrollArea.y) * m_scrollState.vMax / m_scrollState.vScrollArea.h;
-		m_scrollState.scrollPos.y = clip(rel, 0, m_scrollState.vMax);
+		m_parent->m_scrollPos.y = clip(rel, 0, m_scrollState.vMax);
 	}
 }

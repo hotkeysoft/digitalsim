@@ -13,7 +13,6 @@ namespace GUI
 	{
 		ScrollState() : showH(false), showV(false), hMax(0), vMax(0) {}
 		bool showH, showV;
-		Point scrollPos;
 		int hMax, vMax;
 
 		Rect leftButton, rightButton;
@@ -41,12 +40,13 @@ namespace GUI
 		void ClickHScrollBar(PointRef pt);
 		void ClickVScrollBar(PointRef pt);
 
-		PointRef GetScrollPos() { return &m_scrollState.scrollPos; }
 		ScrollStateRef GetScrollState() { return &m_scrollState; }
 		uint8_t GetSize() const { return m_scrollBarSize; }
 
 	protected:
 		ScrollBars(RendererRef renderer, WindowRef parent);
+
+		void CheckChildScrollStatus(WidgetRef child, RectRef rect, bool &showH, bool &showV);
 
 		void DrawScrollBars(RectRef pos);
 		void DrawHScrollBar(RectRef pos);
