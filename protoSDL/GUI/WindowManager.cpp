@@ -1,5 +1,4 @@
 #include "SDL.h"
-#include "SDL_rect.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
 #include "Window.h"
@@ -27,12 +26,12 @@ namespace GUI
 		}
 	}
 
-	WindowPtr WindowManager::AddWindow(const char * id, SDL_Rect pos, WindowFlags flags)
+	WindowPtr WindowManager::AddWindow(const char * id, Rect pos, WindowFlags flags)
 	{
 		return AddWindow(id, nullptr, pos, flags);
 	}
 
-	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, SDL_Rect pos, WindowFlags flags)
+	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, Rect pos, WindowFlags flags)
 	{
 		if (FindWindow(id) != nullptr)
 		{

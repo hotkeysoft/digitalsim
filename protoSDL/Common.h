@@ -37,8 +37,10 @@ namespace GUI
 		WIN_SYSMENU = 1, // Top left button in titlebar (left side)
 		WIN_MINMAX = 2, // Minimize / Maximize buttons in titlebar (right side)
 		WIN_CANMOVE = 4, // Window can be moved
-		WIN_CANRESIZE = 8, // Window can me resized
-		WIN_ACTIVE = 16, // Always look active, usually for main window
+		WIN_CANRESIZE = 8, // Window can be resized
+		WIN_ACTIVE = 32, // Always look active, usually for main window
+
+		WIN_NOSCROLL = 64, // No scroll bars
 
 		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE
 	};
@@ -58,6 +60,9 @@ namespace GUI
 	{
 		return (uint32_t(selfValue) & uint32_t(inValue));
 	}
+
+	class Rect;
+	using RectRef = Rect * ;
 
 	class Image;
 	using ImagePtr = std::shared_ptr<Image>;

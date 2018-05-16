@@ -98,10 +98,10 @@ int main(int argc, char ** argv)
 
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 
-		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE);
+		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
 		mainWnd->SetTitle("DIGI-SIM");
 		mainWnd->SetImage(image);
-		SDL_Rect client = mainWnd->GetClientRect();
+		Rect client = mainWnd->GetClientRect();
 
 		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetTitle("Editor");
 

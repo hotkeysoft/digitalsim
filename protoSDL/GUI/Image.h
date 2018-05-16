@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "Rect.h"
 #include <string>
 
 namespace GUI
@@ -19,7 +20,7 @@ namespace GUI
 
 		bool LoadFromFile(const char* fileName);
 		void Draw(SDL_Point pos);
-		void Draw(SDL_Rect pos);
+		void Draw(Rect pos);
 		bool IsSet() const { return m_texture != nullptr; }
 
 	protected:

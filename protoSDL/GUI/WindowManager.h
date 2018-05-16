@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "Color.h"
+#include "Rect.h"
 #include <string>
 #include <list>
 #include <functional>
@@ -23,8 +24,8 @@ namespace GUI
 		void Init(RendererPtr & renderer);
 
 		void Draw();
-		WindowPtr AddWindow(const char* id, SDL_Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
-		WindowPtr AddWindow(const char* id, WindowPtr parent, SDL_Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
+		WindowPtr AddWindow(const char* id, Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
+		WindowPtr AddWindow(const char* id, WindowPtr parent, Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
 		WindowPtr FindWindow(const char* id);
 		WindowList GetWindowList(WindowRef parent);
 

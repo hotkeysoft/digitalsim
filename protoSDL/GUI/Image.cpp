@@ -34,16 +34,16 @@ namespace GUI
 
 	void Image::Draw(SDL_Point pos)
 	{
-		SDL_Rect rect = { pos.x, pos.y, m_width, m_height };
+		Rect rect = { pos.x, pos.y, m_width, m_height };
 		if (m_texture && m_renderer)
 		{
 			SDL_RenderCopy(m_renderer, m_texture.get(), NULL, &rect);
 		}
 	}
 	
-	void Image::Draw(SDL_Rect pos)
+	void Image::Draw(Rect pos)
 	{
-		SDL_Rect src = { 0, 0, pos.w, pos.h };
+		Rect src = { 0, 0, pos.w, pos.h };
 		if (m_texture && m_renderer)
 		{
 			SDL_RenderCopy(m_renderer, m_texture.get(), &src, &pos);

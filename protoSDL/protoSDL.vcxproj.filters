@@ -36,6 +36,9 @@
     <ClCompile Include="GUI\ResourceManager.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\Rect.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI\Window.h">
@@ -54,6 +57,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\ResourceManager.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Rect.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>

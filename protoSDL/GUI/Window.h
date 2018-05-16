@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "Rect.h"
 #include "Color.h"
 #include "WindowManager.h"
 #include <string>
@@ -26,7 +27,7 @@ namespace GUI
 		Window(Window&&) = delete;
 		Window& operator=(Window&&) = delete;
 
-		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowFlags flags);
+		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
 		void SetTitle(const char* title);
 		void SetImage(ImageRef image);
 
@@ -35,8 +36,8 @@ namespace GUI
 		std::string GetId() const { return m_id; }
 		WindowManager::WindowList GetChildWindows();
 
-		SDL_Rect GetClientRect(bool relative = true) const;
-		SDL_Rect GetWindowRect(bool relative = true, bool scrolled = true) const;
+		Rect GetClientRect(bool relative = true) const;
+		Rect GetWindowRect(bool relative = true, bool scrolled = true) const;
 
 		HitZone HitTest(SDL_Point);
 
@@ -60,44 +61,43 @@ namespace GUI
 		void Minimize();
 		void Restore();
 
-
 		SDL_Point GetScroll() const { return SDL_Point({m_scrollState.hScroll, m_scrollState.vScroll}); }
 
 	protected:
-		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, SDL_Rect rect, WindowFlags flags);
+		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
 		Window();
 
 		ScrollState GetScrollBarState() const;
 
-		SDL_Rect GetTitleBarRect(SDL_Rect base) const;
-		SDL_Rect GetSystemMenuButtonRect(SDL_Rect base) const;
-		SDL_Rect GetMinimizeButtonRect(SDL_Rect base) const;
-		SDL_Rect GetMaximizeButtonRect(SDL_Rect base) const;
+		Rect GetTitleBarRect(Rect base) const;
+		Rect GetSystemMenuButtonRect(Rect base) const;
+		Rect GetMinimizeButtonRect(Rect base) const;
+		Rect GetMaximizeButtonRect(Rect base) const;
 
 		void SetMinimizedChild(WindowRef child, bool add);
 		int GetMinimizedChildIndex(WindowRef child) const;
 
 		void SetDrawColor(const GUI::Color & col);
-		void Draw3dFrame(SDL_Rect pos, bool raised);
-		void DrawReliefBox(SDL_Rect pos, const GUI::Color & col, bool raised);
-		void DrawMinMaxButtons(SDL_Rect pos, const GUI::Color & col);
-		void DrawSystemMenuButton(SDL_Rect pos, const GUI::Color & col);
-		void DrawButton(SDL_Rect pos, const GUI::Color & col, ImageRef image, bool raised);
-		void DrawScrollBars(SDL_Rect pos);
-		void DrawHScrollBar(SDL_Rect pos);
-		void DrawVScrollBar(SDL_Rect pos);
-		void DrawTitleBar(SDL_Rect rect, bool active);
-		void DrawTitle(SDL_Rect rect, bool active);
+		void Draw3dFrame(Rect pos, bool raised);
+		void DrawReliefBox(Rect pos, const GUI::Color & col, bool raised);
+		void DrawMinMaxButtons(Rect pos, const GUI::Color & col);
+		void DrawSystemMenuButton(Rect pos, const GUI::Color & col);
+		void DrawButton(Rect pos, const GUI::Color & col, ImageRef image, bool raised);
+		void DrawScrollBars(Rect pos);
+		void DrawHScrollBar(Rect pos);
+		void DrawVScrollBar(Rect pos);
+		void DrawTitleBar(Rect rect, bool active);
+		void DrawTitle(Rect rect, bool active);
 		void RenderTitle();
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
-		SDL_Rect GetClipRect(WindowRef win);
+		Rect GetClipRect(WindowRef win);
 
 		std::string m_title;
 		WindowFlags m_flags;
 		WindowState m_showState;
 		HitZone m_pushedState;
-		SDL_Rect m_rect;
-		SDL_Rect m_titleStrRect;
+		Rect m_rect;
+		Rect m_titleStrRect;
 
 		static uint8_t constexpr m_borderWidth = 4;
 		static uint8_t constexpr m_buttonSize = 24;
