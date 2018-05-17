@@ -70,26 +70,28 @@ namespace GUI
 		return childWindows;
 	}
 
-	WindowPtr WindowManager::HitTest(PointRef pt)
+	HitResult WindowManager::HitTest(PointRef pt)
 	{
 		for (auto it = m_windows.rbegin(); it != m_windows.rend(); ++it)
 		{
 			auto & window = *it;
-			if (window->HitTest(pt) != HIT_NOTHING)
+			auto hitResult = window->HitTest(pt);
+
+			if (std::get<0>(hitResult) != HIT_NOTHING)
 			{
-				return window;
+				return hitResult;
 			}
 		}
 
-		return nullptr;
+		return std::make_tuple(HIT_NOTHING, nullptr);
 	}
 
 	GUI::WindowRef WindowManager::GetActive()
 	{
-		return m_activeWindow ? m_activeWindow.get() : Window::GetNullWnd();
+		return m_activeWindow ? m_activeWindow : Window::GetNullWnd();
 	}
 
-	void WindowManager::SetActive(WindowPtr win)
+	void WindowManager::SetActive(WindowRef win)
 	{
 		m_activeWindow = win;
 		MoveToFront(win);
@@ -114,7 +116,7 @@ namespace GUI
 		}
 	}
 
-	void WindowManager::MoveToFront(WindowPtr win)
+	void WindowManager::MoveToFront(WindowRef win)
 	{
 		if (win == nullptr)
 			return;
@@ -123,6 +125,6 @@ namespace GUI
 		{
 			RaiseChildren(win->GetParentWnd());
 		}
-		RaiseChildren(win.get());
+		RaiseChildren(win);
 	}
 }

@@ -64,7 +64,7 @@ namespace GUI
 		virtual const WidgetRef GetParent() const { return m_parent; }
 		virtual void SetParent(WidgetRef parent) { m_parent = parent; }
 
-		virtual HitZone HitTest(const PointRef) { return HitZone::HIT_NOTHING; }
+		virtual HitResult HitTest(const PointRef) { return std::make_tuple(HitZone::HIT_NOTHING, nullptr); }
 
 		virtual PointRef GetScrollPos() { return &m_scrollPos; }
 

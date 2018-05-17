@@ -43,9 +43,9 @@ namespace GUI
 		HIT_VSCROLL_SLIDER		= 0x80000,
 		HIT_VSCROLL_AREA		= 0x100000,
 
-		HIT_CONTROL				= 0x200000,
-
 		HIT_VSCROLL_ANY = HIT_VSCROLL_UP | HIT_VSCROLL_DOWN | HIT_VSCROLL_SLIDER | HIT_VSCROLL_AREA,
+
+		HIT_CONTROL				= 0x200000,
 	};
 
 	// Creation flags.  These attribute don't change during the lifetime of the window
@@ -109,6 +109,8 @@ namespace GUI
 	class Window;
 	using WindowPtr = std::shared_ptr<Window>;
 	using WindowRef = Window * ;
+
+	using HitResult = std::tuple<HitZone, WidgetRef>;
 
 	// SDL Wrappers
 	using MainWindowRef = SDL_Window * ;

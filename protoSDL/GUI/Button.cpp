@@ -29,15 +29,15 @@ namespace GUI
 		return std::static_pointer_cast<Button>(ptr);
 	}
 
-	HitZone Button::HitTest(const PointRef pt)
+	HitResult Button::HitTest(const PointRef pt)
 	{
 		Rect parent = m_parent->GetClientRect(false, true);
 		if (m_rect.Offset(&parent.Origin()).PointInRect(pt))
 		{
-			return HitZone::HIT_CONTROL;
+			return std::make_tuple(HitZone::HIT_CONTROL, this);
 		}
 		
-		return HitZone::HIT_NOTHING;
+		return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
 	}
 
 	Rect Button::GetRect(bool relative, bool scrolled) const

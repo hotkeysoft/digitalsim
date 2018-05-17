@@ -171,47 +171,47 @@ namespace GUI
 		}
 	}
 
-	HitZone ScrollBars::HitTest(const PointRef pt)
+	HitResult ScrollBars::HitTest(const PointRef pt)
 	{
 		if (m_scrollState.showH)
 		{
 			if (m_scrollState.leftButton.PointInRect(pt))
 			{
-				return HIT_HSCROLL_LEFT;
+				return std::make_tuple(HIT_HSCROLL_LEFT, this);
 			}
 			if (m_scrollState.rightButton.PointInRect(pt))
 			{
-				return HIT_HSCROLL_RIGHT;
+				return std::make_tuple(HIT_HSCROLL_RIGHT, this);
 			}
 			if (m_scrollState.hSlider.PointInRect(pt))
 			{
-				return HIT_HSCROLL_SLIDER;
+				return std::make_tuple(HIT_HSCROLL_SLIDER, this);
 			}
 			if (m_scrollState.hScrollArea.PointInRect(pt))
 			{
-				return HIT_HSCROLL_AREA;
+				return std::make_tuple(HIT_HSCROLL_AREA, this);
 			}
 		}
 		if (m_scrollState.showV)
 		{
 			if (m_scrollState.upButton.PointInRect(pt))
 			{
-				return HIT_VSCROLL_UP;
+				return std::make_tuple(HIT_VSCROLL_UP, this);
 			}
 			if (m_scrollState.downButton.PointInRect(pt))
 			{
-				return HIT_VSCROLL_DOWN;
+				return std::make_tuple(HIT_VSCROLL_DOWN, this);
 			}
 			if (m_scrollState.vSlider.PointInRect(pt))
 			{
-				return HIT_VSCROLL_SLIDER;
+				return std::make_tuple(HIT_VSCROLL_SLIDER, this);
 			}
 			if (m_scrollState.vScrollArea.PointInRect(pt))
 			{
-				return HIT_VSCROLL_AREA;
+				return std::make_tuple(HIT_VSCROLL_AREA, this);
 			}
 		}
-		return HIT_NOTHING;
+		return std::make_tuple(HIT_NOTHING, this);
 	}
 
 	void ScrollBars::Draw()

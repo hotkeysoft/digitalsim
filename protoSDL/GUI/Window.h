@@ -38,7 +38,7 @@ namespace GUI
 		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 		Rect GetRect(bool relative = true, bool scrolled = true) const override;
 
-		HitZone HitTest(const PointRef) override;
+		HitResult HitTest(const PointRef) override;
 		void Draw() override;
 
 		WindowState GetShowState() const { return m_showState; }

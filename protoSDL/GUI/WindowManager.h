@@ -30,11 +30,11 @@ namespace GUI
 		WindowPtr FindWindow(const char* id);
 		WindowList GetWindowList(WindowRef parent);
 
-		void MoveToFront(WindowPtr);
+		void MoveToFront(WindowRef);
 
-		WindowPtr HitTest(PointRef);
+		HitResult HitTest(PointRef);
 		WindowRef GetActive();
-		void SetActive(WindowPtr);
+		void SetActive(WindowRef);
 
 	protected:
 		void RaiseSingleWindow(WindowRef);
@@ -44,7 +44,7 @@ namespace GUI
 		RendererRef m_renderer;
 
 		WindowList m_windows;
-		WindowPtr m_activeWindow;
+		WindowRef m_activeWindow;
 	};
 
 	constexpr auto WINMGR = &WindowManager::Get;

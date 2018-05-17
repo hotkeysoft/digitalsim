@@ -259,11 +259,11 @@ namespace GUI
 		}
 	}
 
-	HitZone Window::HitTest(const PointRef pt)
+	HitResult Window::HitTest(const PointRef pt)
 	{
 		if (!(m_showState & WindowState::WS_VISIBLE))
 		{
-			return HIT_NOTHING;
+			return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
 		}
 
 		Rect wndRect = GetRect(false);
@@ -275,47 +275,50 @@ namespace GUI
 
 		if (!intersect.PointInRect(pt))
 		{
-			return HIT_NOTHING;
+			return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
 		}
 
 		if (GetTitleBarRect(wndRect).PointInRect(pt))
 		{
-			return HIT_TITLEBAR;
+			return std::make_tuple(HitZone::HIT_TITLEBAR, this);
 		}
 		else if (GetClientRect(false, false).PointInRect(pt))
 		{
 			for (auto & child : m_controls)
 			{
-				HitZone childHit = child.second->HitTest(pt);
-				if (childHit != HIT_NOTHING)
+				HitResult childHit = child.second->HitTest(pt);
+				if (std::get<0>(childHit) != HIT_NOTHING)
 					return childHit;
 			}
-			return HIT_CLIENT;
+			return std::make_tuple(HitZone::HIT_CLIENT, this);
 		}
 
 		// Title bar buttons
 		if (GetSystemMenuButtonRect(wndRect).PointInRect(pt))
 		{
-			return HIT_SYSMENU;
+			return std::make_tuple(HitZone::HIT_SYSMENU, this);
 		}
 		if (GetMinimizeButtonRect(wndRect).PointInRect(pt))
 		{
-			return HIT_MINBUTTON;
+			return std::make_tuple(HitZone::HIT_MINBUTTON, this);
 		}
 		if (GetMaximizeButtonRect(wndRect).PointInRect(pt))
 		{
-			return HIT_MAXBUTTON;
+			return std::make_tuple(HitZone::HIT_MAXBUTTON, this);
 		}
 
-		HitZone scrollHit = m_scrollBars->HitTest(pt);
-		if (scrollHit != HIT_NOTHING)
-			return scrollHit;
+		HitResult scrollHit = m_scrollBars->HitTest(pt);
+		if (std::get<0>(scrollHit) != HIT_NOTHING)
+		{
+			// TODO: make scollbar handle own events
+			return std::make_tuple(std::get<0>(scrollHit), this);
+		}
 
 		// Resize handles
 		if (m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED) ||
 			!(m_flags & WindowFlags::WIN_CANRESIZE))
 		{
-			return HIT_NOTHING;
+			return std::make_tuple(HitZone::HIT_NOTHING, this);
 		}
 
 		bool left = pt->x < wndRect.x + 2*m_borderWidth;
@@ -324,17 +327,20 @@ namespace GUI
 		bool bottom = pt->y > wndRect.y + wndRect.h - 2*m_borderWidth;
 		if (top)
 		{
-			if (left) return HIT_CORNER_TOPLEFT;
-			else if (right) return HIT_CORNER_TOPRIGHT;
-			else return HIT_BORDER_TOP;
+			if (left) return std::make_tuple(HitZone::HIT_CORNER_TOPLEFT, this);
+			else if (right) return std::make_tuple(HitZone::HIT_CORNER_TOPRIGHT, this);
+			else return std::make_tuple(HitZone::HIT_BORDER_TOP, this);
 		}
 		else if (bottom)
 		{
-			if (left) return HIT_CORNER_BOTTOMLEFT;
-			else if (right) return HIT_CORNER_BOTTOMRIGHT;
-			else return HIT_BORDER_BOTTOM;
+			if (left) return std::make_tuple(HitZone::HIT_CORNER_BOTTOMLEFT, this);
+			else if (right) return std::make_tuple(HitZone::HIT_CORNER_BOTTOMRIGHT, this);
+			else return std::make_tuple(HitZone::HIT_BORDER_BOTTOM, this);
 		}
-		else return left ? HIT_BORDER_LEFT : HIT_BORDER_RIGHT;
+		else
+		{
+			return left ? std::make_tuple(HitZone::HIT_BORDER_LEFT, this) : std::make_tuple(HitZone::HIT_BORDER_RIGHT, this);
+		}
 	}
 
 	Rect Window::GetClipRect(WindowRef win)

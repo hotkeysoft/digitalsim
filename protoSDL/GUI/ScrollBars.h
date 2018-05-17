@@ -32,7 +32,7 @@ namespace GUI
 
 		static ScrollBarsPtr Create(RendererRef renderer, WindowRef parent);
 
-		HitZone HitTest(const PointRef) override;
+		HitResult HitTest(const PointRef) override;
 		void Draw() override;
 
 		void ScrollRel(PointRef pt);
