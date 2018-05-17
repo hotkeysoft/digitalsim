@@ -37,8 +37,8 @@ namespace GUI
 		virtual ImageRef GetImage() const { return m_image; }
 		virtual void SetImage(ImageRef image) { m_image = image;  }
 
-		virtual Rect GetClientRect(bool relative = true) const { return m_rect; }
-		virtual Rect GetRect(bool relative = true) const { return m_rect; }
+		virtual Rect GetClientRect(bool relative = true, bool scrolled = true) const { return m_rect; }
+		virtual Rect GetRect(bool relative = true, bool scrolled = true) const { return m_rect; }
 
 		virtual const FontRef GetFont() const { return m_font == nullptr? RES().FindFont("default") : m_font; }
 		virtual void SetFonc(FontRef font) { m_font = font; }

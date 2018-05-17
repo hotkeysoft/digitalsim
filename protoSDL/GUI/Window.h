@@ -35,9 +35,8 @@ namespace GUI
 
 		WindowRef GetParentWnd() const { return static_cast<WindowRef>(m_parent); }
 
-		Rect GetClientRect(bool relative = true) const override;
-		Rect GetRect(bool relative = true) const override { return GetRect(relative, true); }
-		Rect GetRect(bool relative, bool scrolled) const;
+		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
+		Rect GetRect(bool relative = true, bool scrolled = true) const override;
 
 		HitZone HitTest(const PointRef) override;
 		void Draw() override;

@@ -107,9 +107,47 @@ namespace GUI
 		return nullptr;
 	}
 
-	Rect Window::GetClientRect(bool relative) const
+	Rect Window::GetRect(bool relative, bool scrolled) const
 	{
-		Rect rect = GetRect(relative, false);
+		Rect rect = m_rect;
+		if (m_showState & WindowState::WS_MAXIMIZED)
+		{
+			rect = GetParent()->GetClientRect(true, false);
+		}
+		else if (m_showState & WindowState::WS_MINIMIZED)
+		{
+			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth) + 2;
+			rect = GetParent()->GetClientRect(true, false);
+			rect.w = 200;
+			rect.x = GetParentWnd()->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
+			rect.y = (rect.h - minimizedHeight);
+			rect.h = minimizedHeight;
+		}
+
+		if (m_parent != nullptr)
+		{
+			if (!relative)
+			{
+				Rect parentClient = GetParent()->GetClientRect(false, false);
+				rect.x += parentClient.x;
+				rect.y += parentClient.y;
+			}
+
+			if (scrolled)
+			{
+				PointRef scrollOffset = GetParentWnd()->GetScrollPos();
+				rect.x -= scrollOffset->x;
+				rect.y -= scrollOffset->y;
+			}
+		}
+
+		return rect;
+	}
+
+
+	Rect Window::GetClientRect(bool relative, bool scrolled) const
+	{
+		Rect rect = GetRect(relative, true);
 		if (relative)
 		{
 			rect.x = 0;
@@ -126,6 +164,12 @@ namespace GUI
 
 		rect.w -= (2 * (m_borderWidth + 1)) + (scroll->showV ? size : 0);
 		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2) + (scroll->showH ? size : 0);
+
+		if (scrolled)
+		{		
+			rect.x -= m_scrollPos.x;
+			rect.y -= m_scrollPos.y;
+		}
 
 		return rect;
 	}
@@ -171,43 +215,6 @@ namespace GUI
 		rect.w = m_buttonSize + 2;
 		rect.h = m_buttonSize + 2;
 
-		return rect;
-	}
-
-	Rect Window::GetRect(bool relative, bool scrolled) const
-	{
-		Rect rect = m_rect;
-		if (m_showState & WindowState::WS_MAXIMIZED)
-		{
-			rect = GetParent()->GetClientRect(true);
-		}
-		else if (m_showState & WindowState::WS_MINIMIZED)
-		{
-			int minimizedHeight = (m_buttonSize + 2) + (2 * m_borderWidth) + 2;
-			rect = GetParent()->GetClientRect(true);
-			rect.w = 200;			
-			rect.x = GetParentWnd()->GetMinimizedChildIndex(const_cast<WindowRef>(this)) * 200;
-			rect.y = (rect.h - minimizedHeight);
-			rect.h = minimizedHeight;
-		}
-
-		if (m_parent != nullptr)
-		{
-			if (!relative)
-			{
-				Rect parentClient = GetParent()->GetClientRect(false);
-				rect.x += parentClient.x;
-				rect.y += parentClient.y;
-			}
-
-			if (scrolled)
-			{
-				PointRef scrollOffset = GetParentWnd()->GetScrollPos();
-				rect.x -= scrollOffset->x;
-				rect.y -= scrollOffset->y;
-			}
-		}
-	
 		return rect;
 	}
 
@@ -280,7 +287,7 @@ namespace GUI
 		{
 			return HIT_TITLEBAR;
 		}
-		else if (GetClientRect(false).PointInRect(pt))
+		else if (GetClientRect(false, false).PointInRect(pt))
 		{
 			return HIT_CLIENT;
 		}
@@ -331,11 +338,11 @@ namespace GUI
 
 	Rect Window::GetClipRect(WindowRef win)
 	{
-		Rect rect = win->GetClientRect(false);
+		Rect rect = win->GetClientRect(false, false);
 
 		while (win)
 		{
-			rect = rect.IntersectRect(&win->GetClientRect(false));
+			rect = rect.IntersectRect(&win->GetClientRect(false, false));
 			win = win->GetParentWnd();
 		}
 
@@ -381,7 +388,7 @@ namespace GUI
 	
 	void Window::DrawControls()
 	{
-		Rect parent = GetClientRect(false);
+		Rect parent = GetClientRect(false, false);
 
 		Rect oldClipRect;
 		SDL_RenderGetClipRect(m_renderer, &oldClipRect);

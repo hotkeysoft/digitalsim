@@ -108,10 +108,10 @@ int main(int argc, char ** argv)
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetText("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 200, 200 }, WindowFlags::WIN_CANRESIZE| WindowFlags::WIN_CANMOVE)->SetText("edit.2");
+		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 200, 200 })->SetText("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
-		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 })->SetText("edit.1.1  With a long name");
+		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
 		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 200, 0, 200, 100 })->SetText("edit.1.2  With a long name");
 		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 400, 0, 200, 100 })->SetText("edit.1.3  With a long name");
 		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetText("edit.1.4  With a long name");

@@ -30,7 +30,8 @@ namespace GUI
 		if (m_parent == nullptr)
 			return;
 
-		Rect parent = m_parent->GetClientRect(false).OffsetNeg(m_parent->GetScrollPos());
+		Rect parent = m_parent->GetClientRect(false, true);
+
 		DrawButton(&m_rect.Offset(&parent.Origin()), Color::C_WHITE, nullptr, true);
 	}
 
