@@ -568,15 +568,42 @@ namespace GUI
 		if (m_flags & WindowFlags::WIN_CANRESIZE &&
 			!(m_showState & WindowState::WS_MAXIMIZED))
 		{
-			if (rect->x < 0 ||
-				rect->y < 0 ||
-				rect->w < 100 ||
-				rect->h < 100)
+			Point origin = m_rect.Origin();
+			m_rect.x = rect->x;
+			m_rect.y = rect->y;
+
+			if (m_rect.x < 0)
 			{
-				return false;
+				m_rect.x = 0;
+				m_rect.w = rect->w + rect->x;
 			}
-			m_rect = *rect;
-			return true;
+			else
+			{
+				m_rect.w = rect->w;
+			}
+
+			if (m_rect.y < 0)
+			{
+				m_rect.y = 0;
+				m_rect.h = rect->h + rect->y;
+			}
+			else
+			{
+				m_rect.h = rect->h;
+			}
+			
+			if (m_rect.w <= 100)
+			{
+				m_rect.w = 100;
+				m_rect.x = origin.x;
+			}
+
+			if (m_rect.h <= 100)
+			{
+				m_rect.h = 100;
+				m_rect.y = origin.y;
+			}
+
 		}
 		return false;
 	}
