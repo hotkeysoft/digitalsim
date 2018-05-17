@@ -462,6 +462,31 @@ namespace GUI
 		}
 	}
 
+	bool Window::MovePos(PointRef pos)
+	{
+		bool clip = false;
+		if ((m_flags & WindowFlags::WIN_CANMOVE) &&
+			!(m_showState & WindowState::WS_MAXIMIZED))
+		{
+			m_rect.x = pos->x;
+			m_rect.y = pos->y;
+
+			if (m_rect.x < 0)
+			{
+				clip = true;
+				m_rect.x = 0;
+			}
+
+			if (m_rect.y < 0)
+			{
+				clip = true;
+				m_rect.y = 0;
+			}
+		}
+
+		return !clip;
+	}
+
 	bool Window::MoveRel(PointRef rel)
 	{
 		bool clip = false;
@@ -509,7 +534,51 @@ namespace GUI
 			}
 		}
 
-		return clip;
+		return !clip;
+	}
+
+	bool Window::Resize(PointRef size)
+	{
+		bool clip = false;
+		if (m_flags & WindowFlags::WIN_CANRESIZE &&
+			!(m_showState & WindowState::WS_MAXIMIZED))
+		{
+			m_rect.w = size->x;
+			m_rect.h = size->y;
+
+			if (m_rect.w < 100)
+			{
+				clip = true;
+				m_rect.w = 100;
+			}
+
+			if (m_rect.h < 100)
+			{
+				clip = true;
+				m_rect.h = 100;
+			}
+		}
+
+		return !clip;
+	}
+
+	bool Window::MoveRect(RectRef rect)
+	{
+		bool clip = false;
+		if (m_flags & WindowFlags::WIN_CANRESIZE &&
+			!(m_showState & WindowState::WS_MAXIMIZED))
+		{
+			if (rect->x < 0 ||
+				rect->y < 0 ||
+				rect->w < 100 ||
+				rect->h < 100)
+			{
+				return false;
+			}
+			m_rect = *rect;
+			return true;
+		}
+		return false;
 	}
 
 	void Window::Minimize()

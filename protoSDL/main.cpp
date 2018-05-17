@@ -222,8 +222,9 @@ int main(int argc, char ** argv)
 
 		bool mouseCaptured = false;
 		WindowPtr captureTarget = nullptr;
+		Point captureDelta;
+		Rect captureOrigin;
 		HitZone captureZone = HIT_NOTHING;
-		Point lastPos;
 
 		SDL_Event e;
 		bool quit = false;
@@ -237,53 +238,39 @@ int main(int argc, char ** argv)
 					Point pt = { e.button.x, e.button.y };
 					if (mouseCaptured && captureTarget)
 					{
-						Point rel = { pt.x - lastPos.x, pt.y - lastPos.y };
+						Point newPos = pt;
+						newPos.x += captureDelta.x;
+						newPos.y += captureDelta.y;
+						Point delta = { (captureOrigin.x - newPos.x) , (captureOrigin.y - newPos.y) };
+
 						switch (captureZone)
 						{
 						case HIT_TITLEBAR:
-							captureTarget->MoveRel(&rel);
+							captureTarget->MovePos(&newPos);
 							break;
 						case HIT_BORDER_LEFT:
-							if (captureTarget->MoveRel(&Point(rel.x, 0)))
-							{
-								captureTarget->ResizeRel(&Point(-rel.x, 0));
-							}
+							captureTarget->MoveRect(&Rect(newPos.x, captureOrigin.y, captureOrigin.w + delta.x, captureOrigin.h));
 							break;
 						case HIT_BORDER_RIGHT:
-							captureTarget->ResizeRel(&Point(rel.x, 0));
+							captureTarget->Resize(&Point(captureOrigin.w - delta.x, captureOrigin.h));
 							break;
 						case HIT_BORDER_TOP:
-							if (captureTarget->MoveRel(&Point(0, rel.y)))
-							{
-								captureTarget->ResizeRel(&Point(0, -rel.y));
-							}
+							captureTarget->MoveRect(&Rect(captureOrigin.x, newPos.y, captureOrigin.w, captureOrigin.h + delta.y));
 							break;
 						case HIT_BORDER_BOTTOM:
-							captureTarget->ResizeRel(&Point(0, rel.y));
+							captureTarget->Resize(&Point(captureOrigin.w, captureOrigin.h - delta.y));
 							break;
 						case HIT_CORNER_TOPLEFT:
-							if (captureTarget->MoveRel(&rel))
-							{
-								captureTarget->ResizeRel(&Point(-rel.x, -rel.y));
-							}
+							captureTarget->MoveRect(&Rect(newPos.x, newPos.y, captureOrigin.w + delta.x, captureOrigin.h + delta.y));
 							break;
 						case HIT_CORNER_TOPRIGHT:
-							if (captureTarget->MoveRel(&Point(0, rel.y)))
-							{
-								captureTarget->ResizeRel(&Point(rel.x, -rel.y));
-							}
+							captureTarget->MoveRect(&Rect(captureOrigin.x, newPos.y, captureOrigin.w - delta.x, captureOrigin.h + delta.y));
 							break;
 						case HIT_CORNER_BOTTOMLEFT:
-							if (captureTarget->MoveRel(&Point(rel.x, 0)))
-							{
-								captureTarget->ResizeRel(&Point(-rel.x, rel.y));
-							}
+							captureTarget->MoveRect(&Rect(newPos.x, captureOrigin.y, captureOrigin.w + delta.x, captureOrigin.h - delta.y));
 							break;
 						case HIT_CORNER_BOTTOMRIGHT:
-							if (captureTarget->MoveRel(&Point( 0, 0 )))
-							{
-								captureTarget->ResizeRel(&Point(rel.x, rel.y));
-							}
+							captureTarget->Resize(&Point(captureOrigin.w - delta.x, captureOrigin.h - delta.y));
 							break;
 						case HIT_SYSMENU:
 						case HIT_MAXBUTTON:
@@ -297,7 +284,6 @@ int main(int argc, char ** argv)
 							captureTarget->GetScrollBars()->ClickVScrollBar(&pt);
 							break;
 						}
-						lastPos = pt;
 						Render(ren);
 					}
 					else
@@ -338,6 +324,12 @@ int main(int argc, char ** argv)
 						WindowPtr hit = WINMGR().HitTest(&pt);
 						if (hit)
 						{
+							captureTarget = hit;
+							captureOrigin = hit->GetRect(true, false);
+							captureDelta = captureOrigin.Origin();
+							captureDelta.x -= pt.x;
+							captureDelta.y -= pt.y;
+
 							WINMGR().SetActive(hit);
 							captureZone = hit->HitTest(&pt);
 							if (captureZone == HIT_SYSMENU || 
@@ -352,8 +344,6 @@ int main(int argc, char ** argv)
 							{
 								hit->ToggleButtonState(captureZone, true);
 								mouseCaptured = true;
-								captureTarget = hit;
-								lastPos = pt;
 							}
 							else if (captureZone == HIT_HSCROLL_AREA)
 							{
@@ -366,14 +356,10 @@ int main(int argc, char ** argv)
 							else if (captureZone == HIT_TITLEBAR)
 							{
 								mouseCaptured = true;
-								captureTarget = hit;
-								lastPos = pt;
 							}
 							else if (captureZone & HIT_BORDER_ANY | HIT_CORNER_ANY)
 							{
 								mouseCaptured = true;
-								captureTarget = hit;
-								lastPos = pt;
 							}
 						}
 						Render(ren);

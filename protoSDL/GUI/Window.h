@@ -48,7 +48,10 @@ namespace GUI
 		void ButtonPushed(HitZone button);
 
 		bool MoveRel(PointRef rel);
+		bool MovePos(PointRef pos);
+		bool MoveRect(RectRef rect);
 		bool ResizeRel(PointRef rel);
+		bool Resize(PointRef size);
 
 		void Maximize();
 		void Minimize();
