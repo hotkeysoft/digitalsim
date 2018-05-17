@@ -129,7 +129,7 @@ namespace GUI
 		}
 		for (auto & child : m_parent->GetControls())
 		{
-			CheckChildScrollStatus(child.second.get(), &child.second->GetRect(), showH, showV);
+			CheckChildScrollStatus(child.second.get(), &child.second->GetRect(true, false), showH, showV);
 		}
 		
 		m_scrollState.showH = showH || m_parent->m_scrollPos.x;
