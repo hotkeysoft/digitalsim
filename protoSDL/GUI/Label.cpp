@@ -32,8 +32,7 @@ namespace GUI
 		if (m_parent == nullptr)
 			return;
 
-		Rect parent = m_parent->GetClientRect(false, true);
-		Rect drawRect = m_rect.Offset(&parent.Origin());
+		Rect drawRect = m_parent->GetClientRect(false, true);
 
 		if (m_margin)
 		{

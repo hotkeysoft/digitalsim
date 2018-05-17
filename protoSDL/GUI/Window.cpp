@@ -140,7 +140,6 @@ namespace GUI
 		return rect;
 	}
 
-
 	Rect Window::GetClientRect(bool relative, bool scrolled) const
 	{
 		Rect rect = GetRect(relative, true);
@@ -387,7 +386,7 @@ namespace GUI
 
 			m_scrollBars->Draw();
 
-			DrawControls();	
+			DrawControls(); // Changes clip region so draw last
 		}
 
 		SDL_RenderSetClipRect(m_renderer, nullptr);

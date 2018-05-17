@@ -22,6 +22,9 @@ namespace GUI
 
 		static ButtonPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image = nullptr, FontRef font = nullptr);
 
+		Rect GetRect(bool relative = true, bool scrolled = true) const override;
+		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
+
 		HitZone HitTest(const PointRef) override;
 		void Draw() override;
 
@@ -30,11 +33,8 @@ namespace GUI
 	protected:
 		Button(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image, FontRef font);
 
-		void RenderLabel();
-		void DrawLabel(RectRef rect);
-
-		TexturePtr m_labelText;
-		Rect m_labelRect;
+		void CreateLabel();
+		LabelPtr m_label;
 
 		struct shared_enabler;
 	};

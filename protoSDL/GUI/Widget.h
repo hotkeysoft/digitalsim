@@ -30,6 +30,7 @@ namespace GUI
 
 		virtual Rect GetClientRect(bool relative = true, bool scrolled = true) const { return m_rect; }
 		virtual Rect GetRect(bool relative = true, bool scrolled = true) const { return m_rect; }
+		virtual void SetRect(RectRef rect) { m_rect = rect?(*rect):Rect(); }
 
 		// Margins & Padding
 		virtual uint8_t GetMargin() { return m_margin; }

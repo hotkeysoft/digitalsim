@@ -139,9 +139,14 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 50, 24), "Button"));
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
-		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
+
+		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(200, 50, 70, 70), "A Big Button"));
+
+		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
+
+		e2->FindControl("b1")->SetBorderWidth(1);
 
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
@@ -212,7 +217,6 @@ int main(int argc, char ** argv)
 		WINMGR().FindWindow("edit.1.7")->SetBackgroundColor(Color::C_LIGHT_GREY);
 		WINMGR().FindWindow("edit.1.8")->SetBackgroundColor(Color::C_WHITE);
 		WINMGR().FindWindow("edit.1.9")->SetBackgroundColor(Color::C_DARK_GREY);
-
 
 		Render(ren);
 
