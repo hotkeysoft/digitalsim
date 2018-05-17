@@ -31,6 +31,15 @@ namespace GUI
 		return SDL_IntersectRect(r1, r2, out);
 	}
 
+	Rect Rect::CenterInTarget(const RectRef target)
+	{
+		Rect centered(target->x + (target->w - w)/2, 
+			target->y + (target->h-h)/2, 
+			w, h);
+
+		return centered;
+	}
+
 	std::string Rect::ToString() const
 	{
 		std::ostringstream os;

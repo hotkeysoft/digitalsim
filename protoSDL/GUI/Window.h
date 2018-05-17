@@ -76,17 +76,19 @@ namespace GUI
 		void DrawTitle(Rect rect, bool active);
 		void DrawControls();
 		void RenderTitle();
-		TexturePtr SurfaceToTexture(SDL_Surface* surf);
+
 		Rect GetClipRect(WindowRef win);
 
 		WindowFlags m_flags;
 		WindowState m_showState;
 		HitZone m_pushedState;
-		Rect m_titleStrRect;
 
 		static ImagePtr m_titleBackground;
+
 		TexturePtr m_activeTitle;
 		TexturePtr m_inactiveTitle;
+		Rect m_titleStrRect;
+
 		MinWindowList m_minimizedChildren;
 		ScrollBarsPtr m_scrollBars;
 

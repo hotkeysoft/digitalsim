@@ -24,6 +24,10 @@ namespace GUI
 		Rect Offset(const PointRef pt) const { return Rect(x + pt->x, y + pt->y, w, h); }
 		Rect OffsetNeg(const PointRef pt) const { return Rect(x - pt->x, y - pt->y, w, h); }
 
+		Rect Deflate(int size) const { return Rect(x + size, y + size, w - (2 * size), h - (2 * size)); }
+
+		Rect CenterInTarget(const RectRef);
+
 		static bool PointInRect(const PointRef, const RectRef);
 		static bool IntersectRect(const RectRef r1, const RectRef r2, const RectRef out);
 

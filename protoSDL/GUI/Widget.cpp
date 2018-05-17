@@ -6,6 +6,40 @@
 
 namespace GUI
 {
+	Widget::Widget(const char* id) :
+		m_id(id ? id : "")
+	{
+	}
+
+	Widget::Widget(const char* id, RendererRef renderer, WidgetRef parent, 
+		Rect rect, const char* text, ImageRef image, FontRef font) :
+		m_id(id ? id : ""),
+		m_renderer(renderer),
+		m_parent(parent),
+		m_rect(rect),
+		m_text(text ? text : ""),
+		m_image(image),
+		m_foregroundColor(Color::C_BLACK),
+		m_backgroundColor(Color::C_LIGHT_GREY)
+	{
+		SetFont(font);
+	}
+
+	void Widget::SetFont(FontRef font)
+	{
+		if (font == nullptr)
+		{
+			m_font = RES().FindFont("default");
+			if (m_font == nullptr)
+			{
+				throw std::exception("Unable to load default font");
+			}
+		}
+		else
+		{
+			m_font = font;
+		}
+	}
 
 	void Widget::SetDrawColor(const GUI::Color & col)
 	{
@@ -57,6 +91,20 @@ namespace GUI
 		{
 			image->Draw(&Point(pos->x + 1, pos->y + 1));
 		}
+	}
+
+	void DeleteTexture(SDL_Texture* surface)
+	{
+		SDL_DestroyTexture(surface);
+	}
+
+	TexturePtr Widget::SurfaceToTexture(SDL_Surface* surf)
+	{
+		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), DeleteTexture);
+
+		SDL_FreeSurface(surf);
+
+		return std::move(texture);
 	}
 
 }

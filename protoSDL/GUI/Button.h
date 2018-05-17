@@ -18,13 +18,23 @@ namespace GUI
 		Button(Button&&) = delete;
 		Button& operator=(Button&&) = delete;
 
+		void Init() override;
+
 		static ButtonPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image = nullptr, FontRef font = nullptr);
 
 		HitZone HitTest(const PointRef) override;
 		void Draw() override;
 
+		void SetText(const char *) override;
+
 	protected:
 		Button(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image, FontRef font);
+
+		void RenderLabel();
+		void DrawLabel(RectRef rect);
+
+		TexturePtr m_labelText;
+		Rect m_labelRect;
 
 		struct shared_enabler;
 	};

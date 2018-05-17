@@ -12,13 +12,7 @@ namespace GUI
 
 	Window Window::m_nullWnd;
 
-	void DeleteTexture(SDL_Texture* surface)
-	{
-		SDL_DestroyTexture(surface);
-	}
-
-
-	Window::Window() : Widget("null", nullptr, nullptr, Rect(), nullptr), m_showState(), m_pushedState(HIT_NOTHING)
+	Window::Window() : Widget("null"), m_showState(), m_pushedState(HIT_NOTHING)
 	{
 	}
 
@@ -89,6 +83,7 @@ namespace GUI
 			throw std::invalid_argument("control already exists:" + widget->GetId());
 		}
 		widget->SetParent(this);
+		widget->Init();
 
 		m_controls[widget->GetId()] = widget;
 	}
@@ -255,7 +250,7 @@ namespace GUI
 			Rect target = GetTitleBarRect(rect);
 
 			target.x += m_borderWidth;
-			target.y += m_borderWidth / 2;
+			target.y += (target.h - m_titleStrRect.h)/2;
 			target.w = std::min(m_titleStrRect.w, target.w - (2 * m_borderWidth));
 			target.h = std::min(m_titleStrRect.h, target.h);
 
@@ -289,6 +284,12 @@ namespace GUI
 		}
 		else if (GetClientRect(false, false).PointInRect(pt))
 		{
+			for (auto & child : m_controls)
+			{
+				HitZone childHit = child.second->HitTest(pt);
+				if (childHit != HIT_NOTHING)
+					return childHit;
+			}
 			return HIT_CLIENT;
 		}
 
@@ -400,21 +401,23 @@ namespace GUI
 		}
 	}
 
-	TexturePtr Window::SurfaceToTexture(SDL_Surface* surf)
-	{
-		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), DeleteTexture);
-
-		SDL_FreeSurface(surf);
-
-		return std::move(texture);
-	}
-
 	void Window::RenderTitle()
 	{
-		SDL_Surface* active = TTF_RenderText_Blended(m_font, m_text.c_str(), GUI::Color::C_WHITE);
+		FontRef titleFont = RES().FindFont("win.title");
+		if (titleFont == nullptr)
+		{
+			std::cout << "win.title font not found";
+			titleFont = m_font;
+		}
+		if (titleFont == nullptr)
+		{
+			throw std::invalid_argument("no font");
+		}
+
+		SDL_Surface* active = TTF_RenderText_Blended(titleFont, m_text.c_str(), GUI::Color::C_WHITE);
 		m_activeTitle = SurfaceToTexture(active);
 
-		SDL_Surface* inactive = TTF_RenderText_Blended(m_font, m_text.c_str(), GUI::Color::C_DARK_GREY);
+		SDL_Surface* inactive = TTF_RenderText_Blended(titleFont, m_text.c_str(), GUI::Color::C_DARK_GREY);
 		m_inactiveTitle = SurfaceToTexture(inactive);
 
 		SDL_QueryTexture(m_activeTitle.get(), NULL, NULL, &m_titleStrRect.w, &m_titleStrRect.h);

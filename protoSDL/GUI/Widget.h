@@ -12,17 +12,6 @@ namespace GUI
 	class Widget
 	{
 	public:
-		Widget(const char* id, RendererRef renderer, WidgetRef parent, Rect rect, const char* text, ImageRef image = nullptr, FontRef font = nullptr) :
-			m_id(id?id:""),
-			m_renderer(renderer),
-			m_parent(parent),
-			m_rect(rect),
-			m_text(text?text:""),
-			m_image(image),
-			m_font(font)
-		{
-		}
-
 		virtual ~Widget() = default;
 		Widget(const Widget&) = delete;
 		Widget& operator=(const Widget&) = delete;
@@ -30,6 +19,8 @@ namespace GUI
 		Widget& operator=(Widget&&) = delete;
 
 		virtual const std::string &GetId() const { return m_id; }
+
+		virtual void Init() {};
 
 		virtual std::string GetText() const { return m_text; }
 		virtual void SetText(const char *text) { m_text = text ? text : ""; }
@@ -40,8 +31,8 @@ namespace GUI
 		virtual Rect GetClientRect(bool relative = true, bool scrolled = true) const { return m_rect; }
 		virtual Rect GetRect(bool relative = true, bool scrolled = true) const { return m_rect; }
 
-		virtual const FontRef GetFont() const { return m_font == nullptr? RES().FindFont("default") : m_font; }
-		virtual void SetFonc(FontRef font) { m_font = font; }
+		virtual const FontRef GetFont() const { return m_font; }
+		virtual void SetFont(FontRef font);
 
 		virtual bool HasParent() const { return m_parent != nullptr; }
 		virtual const WidgetRef GetParent() const { return m_parent; }
@@ -56,10 +47,16 @@ namespace GUI
 		virtual std::string ToString() const { return ""; }
 
 	protected:
+		Widget(const char* id, RendererRef renderer, WidgetRef parent, Rect rect,
+			const char* text, ImageRef image = nullptr, FontRef font = nullptr);
+		Widget(const char* id);
+
 		void SetDrawColor(const GUI::Color & col);
 		void DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised);
 		void Draw3dFrame(const RectRef pos, bool raised);
 		void DrawReliefBox(const RectRef pos, const GUI::Color & col, bool raised);
+
+		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 		std::string m_id;
 		RendererRef m_renderer;
@@ -69,6 +66,9 @@ namespace GUI
 		Rect m_rect;
 		FontRef m_font;
 		Point m_scrollPos;
+
+		Color m_backgroundColor;
+		Color m_foregroundColor;
 
 		static uint8_t constexpr m_borderWidth = 4;
 		static uint8_t constexpr m_buttonSize = 24;

@@ -86,7 +86,8 @@ int main(int argc, char ** argv)
 		RES().Init(ren);
 		WINMGR().Init(ren);
 
-		FontRef font = RES().LoadFont("default", "./Resources/Oxygen-Bold.ttf", 14);
+		RES().LoadFont("default", "./Resources/Oxygen-Regular.ttf", 14);
+		RES().LoadFont("win.title", "./Resources/Oxygen-Bold.ttf", 14);
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 		RES().LoadImage("win.maximize", "./Resources/iconMaximize.png");
@@ -133,8 +134,9 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(500, 5, 50, 50), "Button"));
-		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(5, 300, 100, 50), "Button"));
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 5, 50, 24), "Button"));
+		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(5, 50, 110, 24), "Another Button"));
+		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 
 		Render(ren);
 
