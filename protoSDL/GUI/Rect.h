@@ -26,7 +26,7 @@ namespace GUI
 
 		Rect Deflate(int size) const { return Rect(x + size, y + size, w - (2 * size), h - (2 * size)); }
 
-		Rect CenterInTarget(const RectRef);
+		Rect CenterInTarget(const RectRef, bool hCenter = true, bool vCenter = true);
 
 		static bool PointInRect(const PointRef, const RectRef);
 		static bool IntersectRect(const RectRef r1, const RectRef r2, const RectRef out);

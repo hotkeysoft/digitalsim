@@ -37,6 +37,7 @@ namespace GUI
 		m_id = id;
 
 		m_scrollBars = ScrollBars::Create(renderer, this);
+		m_backgroundColor = Color::C_LIGHT_GREY;
 	}
 
 	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags)
@@ -379,6 +380,11 @@ namespace GUI
 
 		if (!(m_showState & WS_MINIMIZED))
 		{
+			if (!m_backgroundColor.IsTransparent())
+			{
+				DrawFilledRect(&GetClientRect(false, false), m_backgroundColor);
+			}
+
 			m_scrollBars->Draw();
 
 			DrawControls();	

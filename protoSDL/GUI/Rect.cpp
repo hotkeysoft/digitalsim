@@ -31,10 +31,13 @@ namespace GUI
 		return SDL_IntersectRect(r1, r2, out);
 	}
 
-	Rect Rect::CenterInTarget(const RectRef target)
+	Rect Rect::CenterInTarget(const RectRef target, bool hCenter, bool vCenter)
 	{
-		Rect centered(target->x + (target->w - w)/2, 
-			target->y + (target->h-h)/2, 
+		int xOffset = hCenter ? ((target->w - w) / 2) : 0;
+		int yOffset = vCenter ? ((target->h - h) / 2) : 0;
+		Rect centered(
+			target->x + xOffset, 
+			target->y + yOffset,
 			w, h);
 
 		return centered;

@@ -19,8 +19,13 @@ namespace GUI
 		m_rect(rect),
 		m_text(text ? text : ""),
 		m_image(image),
+		m_showBorder(false),
 		m_foregroundColor(Color::C_BLACK),
-		m_backgroundColor(Color::C_LIGHT_GREY)
+		m_backgroundColor(Color::C_LIGHT_GREY),
+		m_borderColor(Color::C_BLACK),
+		m_padding(0),
+		m_margin(0),
+		m_borderWidth(4)
 	{
 		SetFont(font);
 	}
@@ -57,6 +62,20 @@ namespace GUI
 
 		SetDrawColor(raised ? Color::C_WHITE : Color::C_DARK_GREY);
 		SDL_RenderDrawLines(m_renderer, points + 2, 3);
+	}
+
+	void Widget::DrawRect(const RectRef pos, const GUI::Color & col)
+	{
+		SetDrawColor(col);
+
+		SDL_RenderDrawRect(m_renderer, pos);
+	}
+
+	void Widget::DrawFilledRect(const RectRef pos, const GUI::Color & col)
+	{
+		SetDrawColor(col);
+
+		SDL_RenderFillRect(m_renderer, pos);
 	}
 
 	void Widget::DrawReliefBox(const RectRef pos, const GUI::Color & col, bool raised)

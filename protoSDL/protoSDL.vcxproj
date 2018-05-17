@@ -166,6 +166,7 @@ xcopy /d /Y "$(SDLTTFLib64)\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="GUI\Button.cpp" />
     <ClCompile Include="GUI\Color.cpp" />
     <ClCompile Include="GUI\Image.cpp" />
+    <ClCompile Include="GUI\Label.cpp" />
     <ClCompile Include="GUI\Point.cpp" />
     <ClCompile Include="GUI\Rect.cpp" />
     <ClCompile Include="GUI\ResourceManager.cpp" />
@@ -185,6 +186,7 @@ xcopy /d /Y "$(SDLTTFLib64)\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="GUI\Button.h" />
     <ClInclude Include="GUI\Color.h" />
     <ClInclude Include="GUI\Image.h" />
+    <ClInclude Include="GUI\Label.h" />
     <ClInclude Include="GUI\Point.h" />
     <ClInclude Include="GUI\Rect.h" />
     <ClInclude Include="GUI\ResourceManager.h" />

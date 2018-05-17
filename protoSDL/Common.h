@@ -81,6 +81,10 @@ namespace GUI
 	using WidgetPtr = std::shared_ptr<Widget>;
 	using WidgetRef = Widget * ;
 
+	class Label;
+	using LabelPtr = std::shared_ptr<Label>;
+	using LabelRef = Label *;
+
 	class Button;
 	using ButtonPtr = std::shared_ptr<Button>;
 	using ButtonRef = Button * ;

@@ -6,6 +6,7 @@
 #include "GUI\WindowManager.h"
 #include "GUI\ResourceManager.h"
 #include "GUI\Button.h"
+#include "GUI\Label.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -108,16 +109,20 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetText("Editor");
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
-		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 400, 200 })->SetText("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 400, 0, 200, 200 })->SetText("edit.2");
+		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 650, 400 })->SetText("edit.1");
+		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 200, 400 })->SetText("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
 		WINMGR().AddWindow("edit.1.2", edit1Wnd, { 200, 0, 200, 100 })->SetText("edit.1.2  With a long name");
 		WINMGR().AddWindow("edit.1.3", edit1Wnd, { 400, 0, 200, 100 })->SetText("edit.1.3  With a long name");
-		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetText("edit.1.4  With a long name");
-		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 200, 100, 200, 100 })->SetText("edit.1.5  With a long name");
-		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetText("edit.1.6  With a long name");
+		WINMGR().AddWindow("edit.1.4", edit1Wnd, { 0, 100, 200, 100 })->SetText("edit.1.4");
+		WINMGR().AddWindow("edit.1.5", edit1Wnd, { 200, 100, 200, 100 })->SetText("edit.1.5");
+		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetText("edit.1.6");
+		WINMGR().AddWindow("edit.1.7", edit1Wnd, { 0, 200, 200, 100 })->SetText("edit.1.7");
+		WINMGR().AddWindow("edit.1.8", edit1Wnd, { 200, 200, 200, 100 })->SetText("edit.1.8");
+		WINMGR().AddWindow("edit.1.9", edit1Wnd, { 400, 200, 200, 100 })->SetText("edit.1.9");
+
 
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
@@ -134,9 +139,80 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 5, 50, 24), "Button"));
-		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(5, 50, 110, 24), "Another Button"));
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 50, 24), "Button"));
+		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
 		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
+
+		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
+
+		LabelPtr l1 = GUI::Label::Create("l1", ren.get(), rect, "HLeft, VTop, b0m5");
+		l1->SetBorder(false);
+		l1->SetPadding(5);
+		l1->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_TOP);
+
+		LabelPtr l2 = GUI::Label::Create("l2", ren.get(), rect, "HCenter, VTop, b1");
+		l2->SetBorder(true);
+		l2->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_TOP);
+
+		LabelPtr l3 = GUI::Label::Create("l3", ren.get(), rect, "HRight, VTop, b2p5");
+		l3->SetBorder(true);
+		l3->SetPadding(5);
+		l3->SetBorderWidth(2);
+		l3->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_TOP);
+
+		LabelPtr l4 = GUI::Label::Create("l4", ren.get(), rect, "HLeft VCenter, b0");
+		l4->SetBorder(false);
+		l4->SetBorderWidth(1);
+		l4->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_CENTER);
+
+		LabelPtr l5 = GUI::Label::Create("l5", ren.get(), rect, "HCenter, VCenter, b0");
+		l5->SetBorder(false);
+		l5->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_CENTER);
+
+		LabelPtr l6 = GUI::Label::Create("l6", ren.get(), rect, "HRight, VCenter, b1p5m5");
+		l6->SetBorder(true);
+		l6->SetMargin(5);
+		l6->SetPadding(5);
+		l6->SetBorderWidth(1);
+		l6->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_CENTER);
+
+		LabelPtr l7 = GUI::Label::Create("l7", ren.get(), rect, "HLeft, VBottom, b2");
+		l7->SetBorder(true);
+		l7->SetBorderWidth(2);
+		l7->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_BOTTOM);
+
+		LabelPtr l8 = GUI::Label::Create("l8", ren.get(), rect, "HCenter, VBottom, b4m4");
+		l8->SetBorder(true);
+		l8->SetBorderWidth(4);
+		l8->SetMargin(4);		
+		l8->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_BOTTOM);
+
+		LabelPtr l9 = GUI::Label::Create("l9", ren.get(), rect, "HRight, VBottom, b2p5");
+		l9->SetBorder(true);
+		l9->SetBorderWidth(2);
+		l9->SetPadding(5);
+		l9->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_BOTTOM);
+
+		WINMGR().FindWindow("edit.1.1")->AddControl(l1);
+		WINMGR().FindWindow("edit.1.2")->AddControl(l2);
+		WINMGR().FindWindow("edit.1.3")->AddControl(l3);
+		WINMGR().FindWindow("edit.1.4")->AddControl(l4);
+		WINMGR().FindWindow("edit.1.5")->AddControl(l5);
+		WINMGR().FindWindow("edit.1.6")->AddControl(l6);
+		WINMGR().FindWindow("edit.1.7")->AddControl(l7);
+		WINMGR().FindWindow("edit.1.8")->AddControl(l8);
+		WINMGR().FindWindow("edit.1.9")->AddControl(l9);
+
+		WINMGR().FindWindow("edit.1.1")->SetBackgroundColor(Color::C_DARK_GREY);
+		WINMGR().FindWindow("edit.1.2")->SetBackgroundColor(Color::C_MED_GREY);
+		WINMGR().FindWindow("edit.1.3")->SetBackgroundColor(Color::C_LIGHT_GREY);
+		WINMGR().FindWindow("edit.1.4")->SetBackgroundColor(Color::C_WHITE);
+		WINMGR().FindWindow("edit.1.5")->SetBackgroundColor(Color::C_DARK_GREY);
+		WINMGR().FindWindow("edit.1.6")->SetBackgroundColor(Color::C_MED_GREY);
+		WINMGR().FindWindow("edit.1.7")->SetBackgroundColor(Color::C_LIGHT_GREY);
+		WINMGR().FindWindow("edit.1.8")->SetBackgroundColor(Color::C_WHITE);
+		WINMGR().FindWindow("edit.1.9")->SetBackgroundColor(Color::C_DARK_GREY);
+
 
 		Render(ren);
 
