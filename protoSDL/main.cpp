@@ -7,6 +7,7 @@
 #include "GUI\ResourceManager.h"
 #include "GUI\Button.h"
 #include "GUI\Label.h"
+#include "GUI\TextBox.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -55,10 +56,9 @@ SDL_Texture* SurfaceToTexture(RendererPtr & ren, SDL_Surface* surf)
 
 void OnClick(WidgetRef widget)
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
-		widget->GetId().c_str(),
-		"Click!",
-		NULL);
+	std::string text = WINMGR().FindWindow("parts")->FindControl("text")->GetText();
+	text += "\nYet another line";
+	WINMGR().FindWindow("parts")->FindControl("text")->SetText(text.c_str());
 }
 
 int main(int argc, char ** argv)
@@ -137,6 +137,7 @@ int main(int argc, char ** argv)
 		simWnd->SetImage(RES().FindImage("iconSim"));
 
 		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetText("Parts Bin");
+		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(0, 0, 100, 200), "Text\nAnother line\n\tThird line.\n A veryveryveryveryveryveryveryveryveryveryveryvery long line"));
 
 		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
 		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
@@ -149,9 +150,7 @@ int main(int argc, char ** argv)
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
-
-		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(200, 50, 70, 70), "A Big Button"));
-
+		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(200, 50, 80, 70), "A Big Button"));
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 
 		e2->FindControl("b1")->SetBorderWidth(1);

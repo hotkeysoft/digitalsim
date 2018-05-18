@@ -81,9 +81,13 @@ namespace GUI
 	using WidgetPtr = std::shared_ptr<Widget>;
 	using WidgetRef = Widget * ;
 
+	class TextBox;
+	using TextBoxPtr = std::shared_ptr<TextBox>;
+	using TextBoxRef = TextBox * ;
+
 	class Label;
 	using LabelPtr = std::shared_ptr<Label>;
-	using LabelRef = Label *;
+	using LabelRef = Label * ;
 
 	class Button;
 	using ButtonPtr = std::shared_ptr<Button>;
@@ -130,7 +134,7 @@ namespace GUI
 	using RendererPtr = std::unique_ptr<SDL_Renderer, sdl_deleter>;
 	using FontPtr = std::unique_ptr<TTF_Font, sdl_deleter>;
 	using CursorPtr = std::unique_ptr<SDL_Cursor, sdl_deleter>;
-	using TexturePtr = std::shared_ptr<::SDL_Texture>;
+	using TexturePtr = std::shared_ptr<SDL_Texture>;
 
 	template <typename T>
 	T clip(const T& n, const T& lower, const T& upper) {

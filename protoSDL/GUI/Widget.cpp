@@ -112,14 +112,9 @@ namespace GUI
 		}
 	}
 
-	void DeleteTexture(SDL_Texture* surface)
-	{
-		SDL_DestroyTexture(surface);
-	}
-
 	TexturePtr Widget::SurfaceToTexture(SDL_Surface* surf)
 	{
-		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), DeleteTexture);
+		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), sdl_deleter());
 
 		SDL_FreeSurface(surf);
 
