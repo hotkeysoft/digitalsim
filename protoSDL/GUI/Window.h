@@ -57,6 +57,8 @@ namespace GUI
 		void Minimize();
 		void Restore();
 
+		bool HandleEvent(SDL_Event *) override;
+
 		ScrollBarsRef GetScrollBars() { return m_scrollBars.get(); }
 
 		bool GetPushedState(HitZone id) { return m_pushedState & id; }

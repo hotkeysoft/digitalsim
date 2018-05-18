@@ -262,4 +262,95 @@ namespace GUI
 		int rel = (pt->y - m_scrollState.vScrollArea.y) * m_scrollState.vMax / m_scrollState.vScrollArea.h;
 		m_parent->m_scrollPos.y = clip(rel, 0, m_scrollState.vMax);
 	}
+
+	bool ScrollBars::HandleEvent(SDL_Event * e)
+	{
+		Point pt(e->button.x, e->button.y);
+		HitResult hit = HitTest(&pt);
+
+		if (e->type == SDL_MOUSEBUTTONDOWN)
+		{
+			if (e->button.button == SDL_BUTTON_LEFT)
+			{
+				WINMGR().SetActive(m_parent);
+				bool capture = false;
+				switch (HitZone(hit))
+				{
+				case HIT_HSCROLL_LEFT:
+				case HIT_HSCROLL_RIGHT:
+				case HIT_VSCROLL_UP:
+				case HIT_VSCROLL_DOWN:
+				case HIT_HSCROLL_SLIDER:
+				case HIT_VSCROLL_SLIDER:
+					m_parent->ToggleButtonState(hit, true);
+					capture = true;
+					break;
+				case HIT_HSCROLL_AREA:
+					ClickHScrollBar(&pt);
+					capture = true;
+					break;
+				case HIT_VSCROLL_AREA:
+					ClickVScrollBar(&pt);
+					capture = true;
+					break;
+				case HIT_TITLEBAR:
+					capture = true;
+					break;
+				}
+
+				if (capture)
+				{
+					WINMGR().StartCapture(hit, &pt);
+					return true;
+				}
+			}
+		}
+		else if (e->type == SDL_MOUSEBUTTONUP)
+		{
+			const CaptureInfo & capture = WINMGR().GetCapture();
+			if (capture && capture.Target.target == this)
+			{
+				switch (HitZone(hit))
+				{
+				case HIT_HSCROLL_LEFT:
+				case HIT_HSCROLL_RIGHT:
+				case HIT_VSCROLL_UP:
+				case HIT_VSCROLL_DOWN:
+				case HIT_HSCROLL_SLIDER:
+				case HIT_VSCROLL_SLIDER:
+					m_parent->ToggleButtonState(hit, false);
+					if (hit == capture.Target)
+					{
+						m_parent->ButtonPushed(capture.Target);
+					}
+				}
+				WINMGR().ReleaseCapture();
+				return true;
+			}
+		}
+		else if (e->type == SDL_MOUSEMOTION)
+		{
+			const CaptureInfo & capture = WINMGR().GetCapture();
+			Point newPos = pt;
+			newPos.x += capture.Delta.x;
+			newPos.y += capture.Delta.y;
+			Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
+
+			bool handled = true;
+			switch ((HitZone)capture.Target)
+			{
+			case HIT_HSCROLL_SLIDER:
+				ClickHScrollBar(&pt);
+				break;
+			case HIT_VSCROLL_SLIDER:
+				ClickVScrollBar(&pt);
+				break;
+			default:
+				handled = false;
+			}
+			return handled;
+		}
+
+		return false;
+	}
 }

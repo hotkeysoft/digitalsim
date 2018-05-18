@@ -309,8 +309,7 @@ namespace GUI
 		HitResult scrollHit = m_scrollBars->HitTest(pt);
 		if (scrollHit)
 		{
-			// TODO: make scollbar handle own events
-			return HitResult(scrollHit, this);
+			return scrollHit;
 		}
 
 		// Resize handles
@@ -684,6 +683,111 @@ namespace GUI
 				*find = nullptr;
 			}
 		}
+	}
+
+	bool Window::HandleEvent(SDL_Event * e)
+	{
+		Point pt(e->button.x, e->button.y);
+		HitResult hit = HitTest(&pt);
+
+		if (e->type == SDL_MOUSEBUTTONDOWN)
+		{
+			if (e->button.button == SDL_BUTTON_LEFT)
+			{
+				WINMGR().SetActive(this);
+				bool capture = false;
+				switch (HitZone(hit))
+				{
+				case HIT_SYSMENU:
+				case HIT_MINBUTTON:
+				case HIT_MAXBUTTON:
+				case HIT_TITLEBAR:
+					capture = true;
+					break;
+				}
+
+				if (hit.zone & (HIT_BORDER_ANY | HIT_CORNER_ANY))
+				{
+					capture = true;
+				}
+
+				if (capture)
+				{
+					WINMGR().StartCapture(hit, &pt);
+					return true;
+				}
+			}
+		}
+		else if (e->type == SDL_MOUSEBUTTONUP)
+		{
+			const CaptureInfo & capture = WINMGR().GetCapture();
+			if (capture && capture.Target.target == this)
+			{
+				switch (HitZone(hit))
+				{
+				case HIT_SYSMENU:
+				case HIT_MAXBUTTON:
+				case HIT_MINBUTTON:
+					ToggleButtonState(hit, false);
+					if (hit == capture.Target)
+					{
+						ButtonPushed(capture.Target);
+					}
+				}
+				WINMGR().ReleaseCapture();
+				return true;
+			}
+		}
+		else if (e->type == SDL_MOUSEMOTION)
+		{
+			const CaptureInfo & capture = WINMGR().GetCapture();
+			Point newPos = pt;
+			newPos.x += capture.Delta.x;
+			newPos.y += capture.Delta.y;
+			Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
+
+			bool handled = true;
+			switch ((HitZone)capture.Target)
+			{
+			case HIT_TITLEBAR:
+				MovePos(&newPos);
+				break;
+			case HIT_BORDER_LEFT:
+				MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h));
+				break;
+			case HIT_BORDER_RIGHT:
+				Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h));
+				break;
+			case HIT_BORDER_TOP:
+				MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w, capture.Origin.h + delta.y));
+				break;
+			case HIT_BORDER_BOTTOM:
+				Resize(&Point(capture.Origin.w, capture.Origin.h - delta.y));
+				break;
+			case HIT_CORNER_TOPLEFT:
+				MoveRect(&Rect(newPos.x, newPos.y, capture.Origin.w + delta.x, capture.Origin.h + delta.y));
+				break;
+			case HIT_CORNER_TOPRIGHT:
+				MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w - delta.x, capture.Origin.h + delta.y));
+				break;
+			case HIT_CORNER_BOTTOMLEFT:
+				MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h - delta.y));
+				break;
+			case HIT_CORNER_BOTTOMRIGHT:
+				Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h - delta.y));
+				break;
+			case HIT_SYSMENU:
+			case HIT_MAXBUTTON:
+			case HIT_MINBUTTON:
+				ToggleButtonState(capture.Target, capture.Target.target->HitTest(&pt) == capture.Target);
+				break;
+			default:
+				handled = false;
+			}
+			return handled;
+		}
+
+		return false;
 	}
 
 	struct Window::shared_enabler : public Window

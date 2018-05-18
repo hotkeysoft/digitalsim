@@ -31,21 +31,31 @@ namespace GUI
 
 	bool Button::HandleEvent(SDL_Event *e)
 	{
+		Point pt(e->button.x, e->button.y);
+		HitResult hit = HitTest(&pt);
+		const CaptureInfo & capture = WINMGR().GetCapture();
 		switch (e->type)
 		{
 		case SDL_MOUSEBUTTONDOWN:
 			m_pushed = true;
+			WINMGR().StartCapture(hit, &pt);
 			return true;
 		case SDL_MOUSEBUTTONUP:
 			m_pushed = false;
-			if (HitTest(&Point(e->button.x, e->button.y)))
+			if (capture && capture.Target.target == this && hit.target == this)
 			{
+				WINMGR().ReleaseCapture();
 				if (m_onClickHandler)
 				{
 					m_onClickHandler(this);
 				}
 			}
 			return true;
+		case SDL_MOUSEMOTION:
+			if (capture && capture.Target.target == this)
+			{
+				m_pushed = (hit.target == this);
+			}
 		}
 		return false;
 	}

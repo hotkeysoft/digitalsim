@@ -96,6 +96,19 @@ namespace GUI
 		m_activeWindow = win;
 		MoveToFront(win);
 	}
+	const CaptureInfo & WindowManager::StartCapture(HitResult hit, PointRef pt)
+	{
+		if (hit && hit.target)
+		{
+			m_capture.Captured = true;
+			m_capture.Target = hit;
+			m_capture.Origin = hit.target->GetRect(true, false);
+			m_capture.Delta = m_capture.Origin.Origin();
+			m_capture.Delta.x -= pt->x;
+			m_capture.Delta.y -= pt->y;
+		}
+		return m_capture;
+	}
 	void WindowManager::RaiseSingleWindow(WindowRef win)
 	{
 		const std::string & id = win->GetId();

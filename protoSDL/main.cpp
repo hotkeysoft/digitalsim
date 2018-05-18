@@ -234,10 +234,6 @@ int main(int argc, char ** argv)
 
 		Render(ren);
 
-		bool mouseCaptured = false;
-		HitResult captureGroup;
-		Point captureDelta;
-		Rect captureOrigin;
 
 		SDL_Event e;
 		bool quit = false;
@@ -248,60 +244,14 @@ int main(int argc, char ** argv)
 				}
 				else if (e.type == SDL_MOUSEMOTION)
 				{
-					Point pt = { e.button.x, e.button.y };
-					WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
-					if (mouseCaptured && wnd)
+					if (WINMGR().GetCapture())
 					{
-						Point newPos = pt;
-						newPos.x += captureDelta.x;
-						newPos.y += captureDelta.y;
-						Point delta = { (captureOrigin.x - newPos.x) , (captureOrigin.y - newPos.y) };
-
-						switch ((HitZone)captureGroup)
-						{
-						case HIT_TITLEBAR:
-							wnd->MovePos(&newPos);
-							break;
-						case HIT_BORDER_LEFT:
-							wnd->MoveRect(&Rect(newPos.x, captureOrigin.y, captureOrigin.w + delta.x, captureOrigin.h));
-							break;
-						case HIT_BORDER_RIGHT:
-							wnd->Resize(&Point(captureOrigin.w - delta.x, captureOrigin.h));
-							break;
-						case HIT_BORDER_TOP:
-							wnd->MoveRect(&Rect(captureOrigin.x, newPos.y, captureOrigin.w, captureOrigin.h + delta.y));
-							break;
-						case HIT_BORDER_BOTTOM:
-							wnd->Resize(&Point(captureOrigin.w, captureOrigin.h - delta.y));
-							break;
-						case HIT_CORNER_TOPLEFT:
-							wnd->MoveRect(&Rect(newPos.x, newPos.y, captureOrigin.w + delta.x, captureOrigin.h + delta.y));
-							break;
-						case HIT_CORNER_TOPRIGHT:
-							wnd->MoveRect(&Rect(captureOrigin.x, newPos.y, captureOrigin.w - delta.x, captureOrigin.h + delta.y));
-							break;
-						case HIT_CORNER_BOTTOMLEFT:
-							wnd->MoveRect(&Rect(newPos.x, captureOrigin.y, captureOrigin.w + delta.x, captureOrigin.h - delta.y));
-							break;
-						case HIT_CORNER_BOTTOMRIGHT:
-							wnd->Resize(&Point(captureOrigin.w - delta.x, captureOrigin.h - delta.y));
-							break;
-						case HIT_SYSMENU:
-						case HIT_MAXBUTTON:
-						case HIT_MINBUTTON:
-							wnd->ToggleButtonState(captureGroup, captureGroup.target->HitTest(&pt) == captureGroup);
-							break;
-						case HIT_HSCROLL_SLIDER:
-							wnd->GetScrollBars()->ClickHScrollBar(&pt);
-							break;
-						case HIT_VSCROLL_SLIDER:
-							wnd->GetScrollBars()->ClickVScrollBar(&pt);
-							break;
-						}
+						WINMGR().GetCapture().Target.target->HandleEvent(&e);
 						Render(ren);
 					}
 					else
 					{
+						Point pt(e.button.x, e.button.y);
 						HitResult hit = WINMGR().HitTest(&pt);
 						if (hit)
 						{
@@ -329,99 +279,23 @@ int main(int argc, char ** argv)
 							Render(ren);
 						}
 					}
-
 				}
 				else if (e.type == SDL_MOUSEBUTTONDOWN) {
 					if (e.button.button == SDL_BUTTON_LEFT)
 					{
 						Point pt(e.button.x, e.button.y);
-						captureGroup = WINMGR().HitTest(&pt);
-						if (captureGroup)
+						HitResult hit = WINMGR().HitTest(&pt);
+						if (hit)
 						{
-							WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
-							if (wnd)
-							{
-								captureOrigin = wnd->GetRect(true, false);
-								captureDelta = captureOrigin.Origin();
-								captureDelta.x -= pt.x;
-								captureDelta.y -= pt.y;
-
-								WINMGR().SetActive(wnd);
-								if (captureGroup == HIT_SYSMENU ||
-									captureGroup == HIT_MINBUTTON ||
-									captureGroup == HIT_MAXBUTTON ||
-									captureGroup == HIT_HSCROLL_LEFT ||
-									captureGroup == HIT_HSCROLL_RIGHT ||
-									captureGroup == HIT_VSCROLL_UP ||
-									captureGroup == HIT_VSCROLL_DOWN ||
-									captureGroup == HIT_HSCROLL_SLIDER ||
-									captureGroup == HIT_VSCROLL_SLIDER)
-								{
-									wnd->ToggleButtonState(captureGroup, true);
-									mouseCaptured = true;
-								}
-								else if (captureGroup == HIT_HSCROLL_AREA)
-								{
-									wnd->GetScrollBars()->ClickHScrollBar(&pt);
-								}
-								else if (captureGroup == HIT_VSCROLL_AREA)
-								{
-									wnd->GetScrollBars()->ClickVScrollBar(&pt);
-								}
-								else if (captureGroup == HIT_TITLEBAR)
-								{
-									mouseCaptured = true;
-								}
-								else if (captureGroup.zone & (HIT_BORDER_ANY | HIT_CORNER_ANY))
-								{
-									mouseCaptured = true;
-								}
-							}
-							else if (captureGroup == HIT_CONTROL && captureGroup.target->HandleEvent(&e))
-							{
-								mouseCaptured = true;
-							}
+							hit.target->HandleEvent(&e);
 						}
 						Render(ren);
 					}
 				}
-				else if (e.type == SDL_MOUSEBUTTONUP) {
-					if (mouseCaptured)
+				else if (e.type == SDL_MOUSEBUTTONUP) 
+				{
+					if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
 					{
-						WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
-						if (wnd)
-						{
-							Point pt = { e.button.x, e.button.y };
-							switch ((HitZone)captureGroup)
-							{
-							case HIT_SYSMENU:
-							case HIT_MAXBUTTON:
-							case HIT_MINBUTTON:
-							case HIT_HSCROLL_LEFT:
-							case HIT_HSCROLL_RIGHT:
-							case HIT_VSCROLL_UP:
-							case HIT_VSCROLL_DOWN:
-							case HIT_HSCROLL_SLIDER:
-							case HIT_VSCROLL_SLIDER:
-							{
-								wnd->ToggleButtonState(captureGroup, false);
-								HitResult finalHit = captureGroup.target->HitTest(&pt);
-
-								if (finalHit == captureGroup)
-								{
-									wnd->ButtonPushed(captureGroup);
-								}
-								break;
-							}
-							}
-						}
-						else if (captureGroup == HIT_CONTROL)
-						{
-							captureGroup.target->HandleEvent(&e);
-						}
-
-						mouseCaptured = false;
-						captureGroup = HIT_NOTHING;
 						Render(ren);
 					}
 				}

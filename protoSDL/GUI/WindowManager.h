@@ -10,6 +10,17 @@
 
 namespace GUI
 {
+	struct CaptureInfo
+	{
+		CaptureInfo() : Captured(false) {}
+		void Reset() { Captured = false; Target = HIT_NOTHING; Delta = Point(); Origin = Rect(); }
+		operator bool() const { return Captured; }
+		bool Captured;
+		HitResult Target;
+		Point Delta;
+		Rect Origin;
+	};
+
 	class WindowManager
 	{
 	public:
@@ -37,6 +48,10 @@ namespace GUI
 		WindowRef GetActive();
 		void SetActive(WindowRef);
 
+		const CaptureInfo & StartCapture(HitResult, PointRef);
+		const CaptureInfo & GetCapture() const { return m_capture; }
+		void ReleaseCapture() { m_capture.Reset(); }
+
 	protected:
 		void RaiseSingleWindow(WindowRef);
 		void RaiseChildren(WindowRef);
@@ -46,6 +61,8 @@ namespace GUI
 
 		WindowList m_windows;
 		WindowRef m_activeWindow;
+
+		CaptureInfo m_capture;
 	};
 
 	constexpr auto WINMGR = &WindowManager::Get;

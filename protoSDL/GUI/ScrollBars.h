@@ -33,6 +33,7 @@ namespace GUI
 		static ScrollBarsPtr Create(RendererRef renderer, WindowRef parent);
 
 		HitResult HitTest(const PointRef) override;
+		bool HandleEvent(SDL_Event *) override;
 		void Draw() override;
 
 		void ScrollRel(PointRef pt);
