@@ -155,16 +155,19 @@ namespace GUI
 			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
 		}
 
-		ScrollStateRef scroll = m_scrollBars->GetScrollState();
-		auto size = m_scrollBars->GetSize();
+		if (m_scrollBars)
+		{
+			ScrollStateRef scroll = m_scrollBars->GetScrollState();
+			auto size = m_scrollBars->GetSize();
 
-		rect.w -= (2 * (m_borderWidth + 1)) + (scroll->showV ? size : 0);
-		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2) + (scroll->showH ? size : 0);
+			rect.w -= (2 * (m_borderWidth + 1)) + (scroll->showV ? size : 0);
+			rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2) + (scroll->showH ? size : 0);
 
-		if (scrolled)
-		{		
-			rect.x -= m_scrollPos.x;
-			rect.y -= m_scrollPos.y;
+			if (scrolled)
+			{
+				rect.x -= m_scrollPos.x;
+				rect.y -= m_scrollPos.y;
+			}
 		}
 
 		return rect;
@@ -785,6 +788,32 @@ namespace GUI
 				handled = false;
 			}
 			return handled;
+		}
+
+		// Pass to controls
+		{
+			for (auto & child : m_controls)
+			{
+				if (child.second->HandleEvent(e))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (e->type == SDL_KEYDOWN && GetScrollBars())
+		{
+			switch (e->key.keysym.sym)
+			{
+			case SDLK_LEFT:
+				GetScrollBars()->ScrollRel(&Point(-2, 0)); return true;
+			case SDLK_RIGHT:
+				GetScrollBars()->ScrollRel(&Point(2, 0)); return true;
+			case SDLK_UP:
+				GetScrollBars()->ScrollRel(&Point(0, -2)); return true;
+			case SDLK_DOWN:
+				GetScrollBars()->ScrollRel(&Point(0, 2)); return true;
+			}
 		}
 
 		return false;

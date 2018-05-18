@@ -13,6 +13,7 @@
 #include <memory>
 #include <cassert>
 #include <sstream>
+#include <fstream>
 
 using namespace GUI;
 
@@ -78,7 +79,7 @@ void OnClick(WidgetRef widget)
 
 int main(int argc, char ** argv)
 {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
 		return 1;
@@ -124,6 +125,15 @@ int main(int argc, char ** argv)
 
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 
+		std::string sampleText;
+
+		{
+			std::ifstream t("./Resources/sample.txt");
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			sampleText = buffer.str();
+		}
+
 		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
 		mainWnd->SetText("DIGI-SIM");
 		mainWnd->SetImage(image);
@@ -151,8 +161,8 @@ int main(int argc, char ** argv)
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
 
-		WINMGR().AddWindow("parts", mainWnd, { client.w - 300, 0, 300, client.h })->SetText("Parts Bin");
-		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(0, 0, 100, 200), "Text\nAnother line\n\tThird line.\n A veryveryveryveryveryveryveryveryveryveryveryvery long line"));
+		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
+		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(0, 0, 100, 200), sampleText.c_str()));
 
 		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
 		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
@@ -249,6 +259,7 @@ int main(int argc, char ** argv)
 		Render(ren);
 
 
+		SDL_StartTextInput();
 		SDL_Event e;
 		bool quit = false;
 		while (!quit) {
@@ -314,24 +325,30 @@ int main(int argc, char ** argv)
 					}
 				}
 				else if (e.type == SDL_KEYDOWN) {
-					switch (e.key.keysym.sym) {
-					case SDLK_LEFT:
-						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(-2, 0)); Render(ren); break;
-					case SDLK_RIGHT:
-						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(2, 0)); Render(ren); break;
-					case SDLK_UP:
-						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(0, -2)); Render(ren); break;
-					case SDLK_DOWN:
-						WINMGR().GetActive()->GetScrollBars()->ScrollRel(&Point(0, 2)); Render(ren); break;
-
-					case SDLK_RETURN:
-						if (SDL_GetModState() & KMOD_ALT)
-						{
-							ToggleFullscreen(win);
-							Render(ren);
+					// Pass to active window first
+					if (!WINMGR().GetActive()->HandleEvent(&e))
+					{
+						switch (e.key.keysym.sym) {
+						case SDLK_RETURN:
+							if (SDL_GetModState() & KMOD_ALT)
+							{
+								ToggleFullscreen(win);
+								Render(ren);
+							}
+							break;
+						case SDLK_q: quit = true; break;
 						}
-						break;
-					case SDLK_q: quit = true; break;
+					}
+					else
+					{
+						Render(ren);
+					}
+				}
+				else // Pass to active window
+				{
+					if (WINMGR().GetActive()->HandleEvent(&e))
+					{
+						Render(ren);
 					}
 				}
 			}

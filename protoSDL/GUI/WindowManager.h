@@ -24,6 +24,7 @@ namespace GUI
 	class WindowManager
 	{
 	public:
+		using TimerMap = std::map<Uint32, SDL_TimerID>;
 		using WindowList = std::list<WindowPtr>;
 
 		virtual ~WindowManager() = default;
@@ -52,6 +53,9 @@ namespace GUI
 		const CaptureInfo & GetCapture() const { return m_capture; }
 		void ReleaseCapture() { m_capture.Reset(); }
 
+		Uint32 AddTimer(Uint32 interval);
+		void DeleteTimer(Uint32 timerID);
+
 	protected:
 		void RaiseSingleWindow(WindowRef);
 		void RaiseChildren(WindowRef);
@@ -63,6 +67,8 @@ namespace GUI
 		WindowRef m_activeWindow;
 
 		CaptureInfo m_capture;
+
+		TimerMap m_timers;
 	};
 
 	constexpr auto WINMGR = &WindowManager::Get;

@@ -4,6 +4,7 @@
 #include "Window.h"
 #include <algorithm>
 #include <iostream>
+#include "Basetsd.h"
 
 namespace GUI
 {
@@ -109,6 +110,51 @@ namespace GUI
 		}
 		return m_capture;
 	}
+
+	Uint32 timerCallbackFunc(Uint32 interval, void *param)
+	{
+		SDL_Event event;
+		SDL_UserEvent userevent;
+
+		userevent.type = SDL_USEREVENT;
+		userevent.code = PtrToUlong(param);
+		userevent.data1 = NULL;
+		userevent.data2 = NULL;
+
+		event.type = SDL_USEREVENT;
+		event.user = userevent;
+
+		SDL_PushEvent(&event);
+		return(interval);
+	}
+
+	Uint32 WindowManager::AddTimer(Uint32 interval)
+	{
+		Uint32 eventID = SDL_RegisterEvents(1);
+		if (eventID == ((Uint32)-1))
+		{
+			throw std::exception("Unable to allocate timer");
+		}
+		
+		SDL_TimerID timerID = SDL_AddTimer(interval, timerCallbackFunc, LongToPtr(eventID));
+		m_timers[eventID] = timerID;
+		return eventID;
+	}
+
+	void WindowManager::DeleteTimer(Uint32 timerID)
+	{
+		const auto & it = m_timers.find(timerID);
+		if (it == m_timers.end())
+		{
+			throw std::invalid_argument("timer not found");
+		}
+
+		if (SDL_RemoveTimer(it->second))
+		{
+			m_timers.erase(timerID);
+		}
+	}
+
 	void WindowManager::RaiseSingleWindow(WindowRef win)
 	{
 		const std::string & id = win->GetId();

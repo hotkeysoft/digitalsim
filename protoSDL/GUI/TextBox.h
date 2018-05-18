@@ -23,10 +23,21 @@ namespace GUI
 
 		void Draw() override;
 
+		bool HandleEvent(SDL_Event *) override;
+
 		void SetText(const char *) override;
 
+		void MoveCursor(int x, int y);
+		void MoveCursorRel(int16_t deltaX, int16_t deltaY);
+		void Insert(const char * text);
 		void InsertAt(const char * text, size_t line = std::numeric_limits<size_t>::max(), size_t col = std::numeric_limits<size_t>::max());
 		void InsertLine(const char * text = nullptr, size_t at = std::numeric_limits<size_t>::max());
+		void DeleteLine(size_t at);
+		void Backspace();
+		void Delete();
+		void Return();
+
+		Point CursorAt(PointRef);
 
 	protected:
 		struct TextLine
@@ -49,10 +60,18 @@ namespace GUI
 		void SplitLines();
 		void RenderLines();
 		void DrawText(RectRef rect);
+		void DrawBackground(const GUI::RectRef &rect);
+		void DrawCursor(RectRef rect);	
 
 		TextLines m_lines;
 		int m_lineHeight;
 		Rect m_textRect;
+
+		Point m_currentPos;
+		Point m_caretPos;
+
+		static Uint32 m_blinkTimerID;
+		bool m_blink;
 
 		struct shared_enabler;
 	};
