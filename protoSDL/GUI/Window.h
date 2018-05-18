@@ -86,7 +86,7 @@ namespace GUI
 		WindowState m_showState;
 		HitZone m_pushedState;
 
-		static ImagePtr m_titleBackground;
+		static const Color m_activeTitleBarColor;
 
 		TexturePtr m_activeTitle;
 		TexturePtr m_inactiveTitle;
@@ -95,7 +95,7 @@ namespace GUI
 		MinWindowList m_minimizedChildren;
 		ScrollBarsPtr m_scrollBars;
 
-		static Window m_nullWnd;		
+		static Window m_nullWnd;			
 
 		ControlList m_controls;
 

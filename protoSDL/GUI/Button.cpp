@@ -34,10 +34,10 @@ namespace GUI
 		Rect parent = m_parent->GetClientRect(false, true);
 		if (m_rect.Offset(&parent.Origin()).PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_CONTROL, this);
+			return HitResult(HitZone::HIT_CONTROL, this);
 		}
 		
-		return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
+		return HitZone::HIT_NOTHING;
 	}
 
 	Rect Button::GetRect(bool relative, bool scrolled) const

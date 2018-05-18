@@ -235,7 +235,7 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEMOTION)
 				{
 					Point pt = { e.button.x, e.button.y };
-					WindowRef wnd = dynamic_cast<WindowRef>(std::get<1>(captureGroup));
+					WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
 					if (mouseCaptured && wnd)
 					{
 						Point newPos = pt;
@@ -243,7 +243,7 @@ int main(int argc, char ** argv)
 						newPos.y += captureDelta.y;
 						Point delta = { (captureOrigin.x - newPos.x) , (captureOrigin.y - newPos.y) };
 
-						switch (std::get<0>(captureGroup))
+						switch ((HitZone)captureGroup)
 						{
 						case HIT_TITLEBAR:
 							wnd->MovePos(&newPos);
@@ -275,7 +275,7 @@ int main(int argc, char ** argv)
 						case HIT_SYSMENU:
 						case HIT_MAXBUTTON:
 						case HIT_MINBUTTON:
-							wnd->ToggleButtonState(std::get<0>(captureGroup), std::get<1>(captureGroup)->HitTest(&pt) == captureGroup);
+							wnd->ToggleButtonState(captureGroup, captureGroup.target->HitTest(&pt) == captureGroup);
 							break;
 						case HIT_HSCROLL_SLIDER:
 							wnd->GetScrollBars()->ClickHScrollBar(&pt);
@@ -288,12 +288,10 @@ int main(int argc, char ** argv)
 					}
 					else
 					{
-						HitZone zone;
-						WidgetRef target;
-						std::tie(zone, target) = WINMGR().HitTest(&pt);
-						if (zone != HIT_NOTHING)
+						HitResult hit = WINMGR().HitTest(&pt);
+						if (hit)
 						{
-							switch (zone)
+							switch ((HitZone)hit)
 							{
 							case HIT_BORDER_TOP:
 							case HIT_BORDER_BOTTOM:
@@ -324,9 +322,9 @@ int main(int argc, char ** argv)
 					{
 						Point pt(e.button.x, e.button.y);
 						captureGroup = WINMGR().HitTest(&pt);
-						if (std::get<0>(captureGroup) != HIT_NOTHING)
+						if (captureGroup)
 						{
-							WindowRef wnd = dynamic_cast<WindowRef>(std::get<1>(captureGroup));
+							WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
 							if (wnd)
 							{
 								captureOrigin = wnd->GetRect(true, false);
@@ -334,38 +332,37 @@ int main(int argc, char ** argv)
 								captureDelta.x -= pt.x;
 								captureDelta.y -= pt.y;
 
-								HitZone zone = std::get<0>(captureGroup);
 								WINMGR().SetActive(wnd);
-								if (zone == HIT_SYSMENU ||
-									zone == HIT_MINBUTTON ||
-									zone == HIT_MAXBUTTON ||
-									zone == HIT_HSCROLL_LEFT ||
-									zone == HIT_HSCROLL_RIGHT ||
-									zone == HIT_VSCROLL_UP ||
-									zone == HIT_VSCROLL_DOWN ||
-									zone == HIT_HSCROLL_SLIDER ||
-									zone == HIT_VSCROLL_SLIDER)
+								if (captureGroup == HIT_SYSMENU ||
+									captureGroup == HIT_MINBUTTON ||
+									captureGroup == HIT_MAXBUTTON ||
+									captureGroup == HIT_HSCROLL_LEFT ||
+									captureGroup == HIT_HSCROLL_RIGHT ||
+									captureGroup == HIT_VSCROLL_UP ||
+									captureGroup == HIT_VSCROLL_DOWN ||
+									captureGroup == HIT_HSCROLL_SLIDER ||
+									captureGroup == HIT_VSCROLL_SLIDER)
 								{
-									wnd->ToggleButtonState(zone, true);
+									wnd->ToggleButtonState(captureGroup, true);
 									mouseCaptured = true;
 								}
-								else if (zone == HIT_CONTROL)
+								else if (captureGroup == HIT_CONTROL)
 								{
 									std::cout << "Control click" << std::endl;
 								}
-								else if (zone == HIT_HSCROLL_AREA)
+								else if (captureGroup == HIT_HSCROLL_AREA)
 								{
 									wnd->GetScrollBars()->ClickHScrollBar(&pt);
 								}
-								else if (zone == HIT_VSCROLL_AREA)
+								else if (captureGroup == HIT_VSCROLL_AREA)
 								{
 									wnd->GetScrollBars()->ClickVScrollBar(&pt);
 								}
-								else if (zone == HIT_TITLEBAR)
+								else if (captureGroup == HIT_TITLEBAR)
 								{
 									mouseCaptured = true;
 								}
-								else if (zone & HIT_BORDER_ANY | HIT_CORNER_ANY)
+								else if (captureGroup.zone & (HIT_BORDER_ANY | HIT_CORNER_ANY))
 								{
 									mouseCaptured = true;
 								}
@@ -377,11 +374,11 @@ int main(int argc, char ** argv)
 				else if (e.type == SDL_MOUSEBUTTONUP) {
 					if (mouseCaptured)
 					{
-						WindowRef wnd = dynamic_cast<WindowRef>(std::get<1>(captureGroup));
+						WindowRef wnd = dynamic_cast<WindowRef>(captureGroup.target);
 						if (wnd)
 						{
 							Point pt = { e.button.x, e.button.y };
-							switch (std::get<0>(captureGroup))
+							switch ((HitZone)captureGroup)
 							{
 							case HIT_SYSMENU:
 							case HIT_MAXBUTTON:
@@ -392,19 +389,19 @@ int main(int argc, char ** argv)
 							case HIT_VSCROLL_DOWN:
 							case HIT_HSCROLL_SLIDER:
 							case HIT_VSCROLL_SLIDER:
-								wnd->ToggleButtonState(std::get<0>(captureGroup), false);
-								HitResult finalHit = std::get<1>(captureGroup)->HitTest(&pt);
+								wnd->ToggleButtonState(captureGroup, false);
+								HitResult finalHit = captureGroup.target->HitTest(&pt);
 
 								if (finalHit == captureGroup)
 								{
-									wnd->ButtonPushed(std::get<0>(captureGroup));
+									wnd->ButtonPushed(captureGroup);
 								}
 								break;
 							}
 						}
 
 						mouseCaptured = false;
-						captureGroup = std::make_tuple(HIT_NOTHING, nullptr);
+						captureGroup = HIT_NOTHING;
 						Render(ren);
 					}
 				}

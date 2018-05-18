@@ -8,7 +8,7 @@
 
 namespace GUI
 {
-	ImagePtr Window::m_titleBackground = nullptr;
+	const Color Window::m_activeTitleBarColor = { 90, 128, 128, 255 };
 
 	Window Window::m_nullWnd;
 
@@ -37,6 +37,7 @@ namespace GUI
 		m_id = id;
 
 		m_scrollBars = ScrollBars::Create(renderer, this);
+
 		m_backgroundColor = Color::C_LIGHT_GREY;
 	}
 
@@ -218,12 +219,8 @@ namespace GUI
 		auto titleBar = GetTitleBarRect(rect);
 		if (active)
 		{
-			if (m_titleBackground == nullptr)
-			{
-				m_titleBackground = Image::Create(m_renderer);
-				m_titleBackground->LoadFromFile("Resources/TitlebarActive.png");				
-			}
-			m_titleBackground->Draw(&titleBar);
+			SetDrawColor(m_activeTitleBarColor);
+			SDL_RenderFillRect(m_renderer, &titleBar);
 		}
 		else
 		{
@@ -263,7 +260,7 @@ namespace GUI
 	{
 		if (!(m_showState & WindowState::WS_VISIBLE))
 		{
-			return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
+			return HitZone::HIT_NOTHING;
 		}
 
 		Rect wndRect = GetRect(false);
@@ -275,50 +272,52 @@ namespace GUI
 
 		if (!intersect.PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_NOTHING, nullptr);
+			return HitZone::HIT_NOTHING;
 		}
 
 		if (GetTitleBarRect(wndRect).PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_TITLEBAR, this);
+			return HitResult(HitZone::HIT_TITLEBAR, this);
 		}
 		else if (GetClientRect(false, false).PointInRect(pt))
 		{
 			for (auto & child : m_controls)
 			{
 				HitResult childHit = child.second->HitTest(pt);
-				if (std::get<0>(childHit) != HIT_NOTHING)
+				if (childHit)
+				{
 					return childHit;
+				}
 			}
-			return std::make_tuple(HitZone::HIT_CLIENT, this);
+			return HitResult(HitZone::HIT_CLIENT, this);
 		}
 
 		// Title bar buttons
 		if (GetSystemMenuButtonRect(wndRect).PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_SYSMENU, this);
+			return HitResult(HitZone::HIT_SYSMENU, this);
 		}
 		if (GetMinimizeButtonRect(wndRect).PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_MINBUTTON, this);
+			return HitResult(HitZone::HIT_MINBUTTON, this);
 		}
 		if (GetMaximizeButtonRect(wndRect).PointInRect(pt))
 		{
-			return std::make_tuple(HitZone::HIT_MAXBUTTON, this);
+			return HitResult(HitZone::HIT_MAXBUTTON, this);
 		}
 
 		HitResult scrollHit = m_scrollBars->HitTest(pt);
-		if (std::get<0>(scrollHit) != HIT_NOTHING)
+		if (scrollHit)
 		{
 			// TODO: make scollbar handle own events
-			return std::make_tuple(std::get<0>(scrollHit), this);
+			return HitResult(scrollHit, this);
 		}
 
 		// Resize handles
 		if (m_showState & (WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED) ||
 			!(m_flags & WindowFlags::WIN_CANRESIZE))
 		{
-			return std::make_tuple(HitZone::HIT_NOTHING, this);
+			return HitResult(HitZone::HIT_NOTHING, this);
 		}
 
 		bool left = pt->x < wndRect.x + 2*m_borderWidth;
@@ -327,19 +326,19 @@ namespace GUI
 		bool bottom = pt->y > wndRect.y + wndRect.h - 2*m_borderWidth;
 		if (top)
 		{
-			if (left) return std::make_tuple(HitZone::HIT_CORNER_TOPLEFT, this);
-			else if (right) return std::make_tuple(HitZone::HIT_CORNER_TOPRIGHT, this);
-			else return std::make_tuple(HitZone::HIT_BORDER_TOP, this);
+			if (left) return HitResult(HitZone::HIT_CORNER_TOPLEFT, this);
+			else if (right) return HitResult(HitZone::HIT_CORNER_TOPRIGHT, this);
+			else return HitResult(HitZone::HIT_BORDER_TOP, this);
 		}
 		else if (bottom)
 		{
-			if (left) return std::make_tuple(HitZone::HIT_CORNER_BOTTOMLEFT, this);
-			else if (right) return std::make_tuple(HitZone::HIT_CORNER_BOTTOMRIGHT, this);
-			else return std::make_tuple(HitZone::HIT_BORDER_BOTTOM, this);
+			if (left) return HitResult(HitZone::HIT_CORNER_BOTTOMLEFT, this);
+			else if (right) return HitResult(HitZone::HIT_CORNER_BOTTOMRIGHT, this);
+			else return HitResult(HitZone::HIT_BORDER_BOTTOM, this);
 		}
 		else
 		{
-			return left ? std::make_tuple(HitZone::HIT_BORDER_LEFT, this) : std::make_tuple(HitZone::HIT_BORDER_RIGHT, this);
+			return left ? HitResult(HitZone::HIT_BORDER_LEFT, this) : HitResult(HitZone::HIT_BORDER_RIGHT, this);
 		}
 	}
 

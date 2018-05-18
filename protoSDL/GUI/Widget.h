@@ -9,6 +9,20 @@
 
 namespace GUI
 {
+	struct HitResult
+	{
+		HitResult(HitZone z = HIT_NOTHING) : zone(z), target(nullptr) {}
+		HitResult(HitZone z, WidgetRef t) : zone(z), target(t) {}
+
+		bool operator==(const HitResult& rhs) const { return zone == rhs.zone && target == rhs.target; }
+		bool operator==(const HitZone& rhs) const { return zone == rhs; }
+		operator HitZone() const { return zone; }
+		operator bool() const { return zone != HIT_NOTHING; }
+
+		HitZone zone;
+		WidgetRef target;
+	};
+
 	class Widget
 	{
 	public:
@@ -64,7 +78,7 @@ namespace GUI
 		virtual const WidgetRef GetParent() const { return m_parent; }
 		virtual void SetParent(WidgetRef parent) { m_parent = parent; }
 
-		virtual HitResult HitTest(const PointRef) { return std::make_tuple(HitZone::HIT_NOTHING, nullptr); }
+		virtual HitResult HitTest(const PointRef) { return HitZone::HIT_NOTHING; }
 
 		virtual PointRef GetScrollPos() { return &m_scrollPos; }
 

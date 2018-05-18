@@ -3,6 +3,7 @@
 #include "Color.h"
 #include "Rect.h"
 #include "Point.h"
+#include "Widget.h"
 #include <string>
 #include <list>
 #include <functional>

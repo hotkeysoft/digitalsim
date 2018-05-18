@@ -77,13 +77,13 @@ namespace GUI
 			auto & window = *it;
 			auto hitResult = window->HitTest(pt);
 
-			if (std::get<0>(hitResult) != HIT_NOTHING)
+			if (hitResult)
 			{
 				return hitResult;
 			}
 		}
 
-		return std::make_tuple(HIT_NOTHING, nullptr);
+		return HIT_NOTHING;
 	}
 
 	GUI::WindowRef WindowManager::GetActive()

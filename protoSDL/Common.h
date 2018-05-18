@@ -110,8 +110,6 @@ namespace GUI
 	using WindowPtr = std::shared_ptr<Window>;
 	using WindowRef = Window * ;
 
-	using HitResult = std::tuple<HitZone, WidgetRef>;
-
 	// SDL Wrappers
 	using MainWindowRef = SDL_Window * ;
 	using RendererRef = SDL_Renderer * ;
