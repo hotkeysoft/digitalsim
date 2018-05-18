@@ -53,6 +53,14 @@ SDL_Texture* SurfaceToTexture(RendererPtr & ren, SDL_Surface* surf)
 	return text;
 }
 
+void OnClick(WidgetRef widget)
+{
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
+		widget->GetId().c_str(),
+		"Click!",
+		NULL);
+}
+
 int main(int argc, char ** argv)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
@@ -147,6 +155,12 @@ int main(int argc, char ** argv)
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 
 		e2->FindControl("b1")->SetBorderWidth(1);
+
+		std::static_pointer_cast<Button>(e2->FindControl("b1"))->SetOnClickHandler(OnClick);
+		std::static_pointer_cast<Button>(e2->FindControl("b2"))->SetOnClickHandler(OnClick);
+		std::static_pointer_cast<Button>(e2->FindControl("b3"))->SetOnClickHandler(OnClick);
+		std::static_pointer_cast<Button>(e2->FindControl("b4"))->SetOnClickHandler(OnClick);
+
 
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
@@ -346,10 +360,6 @@ int main(int argc, char ** argv)
 									wnd->ToggleButtonState(captureGroup, true);
 									mouseCaptured = true;
 								}
-								else if (captureGroup == HIT_CONTROL)
-								{
-									std::cout << "Control click" << std::endl;
-								}
 								else if (captureGroup == HIT_HSCROLL_AREA)
 								{
 									wnd->GetScrollBars()->ClickHScrollBar(&pt);
@@ -366,6 +376,10 @@ int main(int argc, char ** argv)
 								{
 									mouseCaptured = true;
 								}
+							}
+							else if (captureGroup == HIT_CONTROL && captureGroup.target->HandleEvent(&e))
+							{
+								mouseCaptured = true;
 							}
 						}
 						Render(ren);
@@ -389,6 +403,7 @@ int main(int argc, char ** argv)
 							case HIT_VSCROLL_DOWN:
 							case HIT_HSCROLL_SLIDER:
 							case HIT_VSCROLL_SLIDER:
+							{
 								wnd->ToggleButtonState(captureGroup, false);
 								HitResult finalHit = captureGroup.target->HitTest(&pt);
 
@@ -398,6 +413,11 @@ int main(int argc, char ** argv)
 								}
 								break;
 							}
+							}
+						}
+						else if (captureGroup == HIT_CONTROL)
+						{
+							captureGroup.target->HandleEvent(&e);
 						}
 
 						mouseCaptured = false;

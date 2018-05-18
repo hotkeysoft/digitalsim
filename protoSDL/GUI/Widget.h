@@ -26,6 +26,8 @@ namespace GUI
 	class Widget
 	{
 	public:
+		using EventHandler = void(*)(WidgetRef source);
+
 		virtual ~Widget() = default;
 		Widget(const Widget&) = delete;
 		Widget& operator=(const Widget&) = delete;
@@ -78,6 +80,8 @@ namespace GUI
 		virtual const WidgetRef GetParent() const { return m_parent; }
 		virtual void SetParent(WidgetRef parent) { m_parent = parent; }
 
+		//Events
+		virtual bool HandleEvent(SDL_Event *) { return false; }
 		virtual HitResult HitTest(const PointRef) { return HitZone::HIT_NOTHING; }
 
 		virtual PointRef GetScrollPos() { return &m_scrollPos; }

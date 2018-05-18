@@ -11,7 +11,7 @@
 namespace GUI
 {
 	Button::Button(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font) :
-		Widget(id, renderer, nullptr, rect, label, image, font)
+		Widget(id, renderer, nullptr, rect, label, image, font), m_pushed(false), m_onClickHandler(nullptr)
 	{
 	}
 
@@ -27,6 +27,27 @@ namespace GUI
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, image, font);
 		return std::static_pointer_cast<Button>(ptr);
+	}
+
+	bool Button::HandleEvent(SDL_Event *e)
+	{
+		switch (e->type)
+		{
+		case SDL_MOUSEBUTTONDOWN:
+			m_pushed = true;
+			return true;
+		case SDL_MOUSEBUTTONUP:
+			m_pushed = false;
+			if (HitTest(&Point(e->button.x, e->button.y)))
+			{
+				if (m_onClickHandler)
+				{
+					m_onClickHandler(this);
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	HitResult Button::HitTest(const PointRef pt)
@@ -59,7 +80,7 @@ namespace GUI
 
 		Rect drawRect = GetRect(false, true);
 
-		DrawButton(&drawRect, m_backgroundColor, nullptr, true);
+		DrawButton(&drawRect, m_backgroundColor, nullptr, !m_pushed);
 
 		if (m_label)
 		{
