@@ -146,6 +146,39 @@ namespace GUI
 		std::cout << "font line skip: " << m_lineHeight << ", rect = " << m_rect << std::endl;
 	}
 
+	void TextBox::InsertLine(const char * text, size_t at)
+	{
+		if (at > m_lines.size() - 1)
+		{
+			m_lines.push_back(text);
+		}
+		else
+		{
+			m_lines.insert(m_lines.begin() + at, text);
+		}
+		RenderLines();
+	}
+
+	void TextBox::InsertAt(const char * text, size_t line, size_t col)
+	{
+		if (text == nullptr)
+			return;
+
+		if (m_lines.size() == 0)
+		{
+			InsertLine(text);
+		}
+		else
+		{
+			line = std::min(m_lines.size() - 1, line);
+			std::string s = m_lines[line].text;
+			col = std::min(s.length(), col);
+			s.insert(col, text);
+			m_lines[line] = s;
+			RenderLines();
+		}
+	}
+
 	struct TextBox::shared_enabler : public TextBox
 	{
 		template <typename... Args>

@@ -25,10 +25,14 @@ namespace GUI
 
 		void SetText(const char *) override;
 
+		void InsertAt(const char * text, size_t line = std::numeric_limits<size_t>::max(), size_t col = std::numeric_limits<size_t>::max());
+		void InsertLine(const char * text = nullptr, size_t at = std::numeric_limits<size_t>::max());
+
 	protected:
 		struct TextLine
 		{
 			TextLine() = default;
+			TextLine(const char * str) : text(str ? str : "") {}
 			TextLine(std::string str) : text(str) {}
 			const bool operator==(const std::string& rhs) const { return text == rhs; }
 			const bool operator!=(const std::string& rhs) const { return text != rhs; }

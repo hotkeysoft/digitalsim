@@ -12,6 +12,7 @@
 #include <iostream>
 #include <memory>
 #include <cassert>
+#include <sstream>
 
 using namespace GUI;
 
@@ -56,9 +57,23 @@ SDL_Texture* SurfaceToTexture(RendererPtr & ren, SDL_Surface* surf)
 
 void OnClick(WidgetRef widget)
 {
-	std::string text = WINMGR().FindWindow("parts")->FindControl("text")->GetText();
-	text += "\nYet another line";
-	WINMGR().FindWindow("parts")->FindControl("text")->SetText(text.c_str());
+	int pos = 0;
+	int col = 0;
+	if (widget->GetId() == "b2")
+	{
+		pos = 2;
+		col = 2;
+	}
+	else if (widget->GetId() == "b3")
+	{
+		pos = 9999;
+		col = 9999;
+	}
+	//std::ostringstream os;
+	//os << "Insert from " << widget->GetId() << " at line " << pos;
+	//std::static_pointer_cast<TextBox>(WINMGR().FindWindow("parts")->FindControl("text"))->InsertLine(os.str().c_str(), pos);
+	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("parts")->FindControl("text"))->InsertAt("#", pos, col);
+
 }
 
 int main(int argc, char ** argv)
