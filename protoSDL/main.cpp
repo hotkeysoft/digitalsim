@@ -114,6 +114,7 @@ int main(int argc, char ** argv)
 		RES().LoadFont("default", "./Resources/Oxygen-Regular.ttf", 14);
 		RES().LoadFont("win.title", "./Resources/Oxygen-Bold.ttf", 14);
 		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
+		RES().LoadFont("big", "./Resources/Oxygen-Regular.ttf", 18);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 		RES().LoadImage("win.maximize", "./Resources/iconMaximize.png");
 		RES().LoadImage("win.minimize", "./Resources/iconMinimize.png");
@@ -160,9 +161,12 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
+		simWnd->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(), "Another text box"));
 
 		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
-		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(0, 0, 100, 200), sampleText.c_str()));
+		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(), sampleText.c_str()));
+
+		RES().LoadCursor("edit.ibeam", SDL_SYSTEM_CURSOR_IBEAM);
 
 		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
 		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
@@ -280,28 +284,35 @@ int main(int argc, char ** argv)
 						HitResult hit = WINMGR().HitTest(&pt);
 						if (hit)
 						{
-							switch ((HitZone)hit)
+							if (hit.target->HandleEvent(&e))
 							{
-							case HIT_BORDER_TOP:
-							case HIT_BORDER_BOTTOM:
-								SDL_SetCursor(sizeNSCursor);
-								break;
-							case HIT_BORDER_LEFT:
-							case HIT_BORDER_RIGHT:
-								SDL_SetCursor(sizeWECursor);
-								break;
-							case HIT_CORNER_TOPLEFT:
-							case HIT_CORNER_BOTTOMRIGHT:
-								SDL_SetCursor(sizeNWSECursor);
-								break;
-							case HIT_CORNER_TOPRIGHT:
-							case HIT_CORNER_BOTTOMLEFT:
-								SDL_SetCursor(sizeNESWCursor);
-								break;
-							default:
-								SDL_SetCursor(normalCursor);
+								Render(ren);
 							}
-							Render(ren);
+							else
+							{
+								switch ((HitZone)hit)
+								{
+								case HIT_BORDER_TOP:
+								case HIT_BORDER_BOTTOM:
+									SDL_SetCursor(sizeNSCursor);
+									break;
+								case HIT_BORDER_LEFT:
+								case HIT_BORDER_RIGHT:
+									SDL_SetCursor(sizeWECursor);
+									break;
+								case HIT_CORNER_TOPLEFT:
+								case HIT_CORNER_BOTTOMRIGHT:
+									SDL_SetCursor(sizeNWSECursor);
+									break;
+								case HIT_CORNER_TOPRIGHT:
+								case HIT_CORNER_BOTTOMLEFT:
+									SDL_SetCursor(sizeNESWCursor);
+									break;
+								default:
+									SDL_SetCursor(normalCursor);
+								}
+								Render(ren);
+							}
 						}
 					}
 				}

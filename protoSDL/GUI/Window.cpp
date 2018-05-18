@@ -787,7 +787,9 @@ namespace GUI
 			default:
 				handled = false;
 			}
-			return handled;
+			if (handled)
+				return handled;
+//			return handled;
 		}
 
 		// Pass to controls

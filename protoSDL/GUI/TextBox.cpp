@@ -13,7 +13,7 @@ namespace GUI
 	Uint32 TextBox::m_blinkTimerID = (Uint32)-1;
 
 	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text) :
-		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("default")), m_blink(true)
+		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true)
 	{
 		m_backgroundColor = Color::C_WHITE;
 		m_borderWidth = 0;
@@ -22,6 +22,16 @@ namespace GUI
 
 	void TextBox::Init()
 	{
+		m_lineHeight = TTF_FontLineSkip(m_font);
+		if (TTF_FontFaceIsFixedWidth(m_font))
+		{
+			TTF_SizeText(m_font, "X", &m_charWidth, nullptr);
+		}
+		else
+		{
+			m_charWidth = 0;
+		}
+
 		RenderText();
 		if (m_blinkTimerID == (Uint32)-1)
 		{
@@ -106,7 +116,6 @@ namespace GUI
 		fillRect.w = std::max(rect->w, m_rect.w + m_margin + m_borderWidth + m_padding);
 
 		DrawFilledRect(rect, m_backgroundColor);
-//		DrawFilledRect(&fillRect.Offset(&rect->Origin()), m_backgroundColor);
 	}
 
 	void TextBox::SetText(const char * text)
@@ -169,8 +178,7 @@ namespace GUI
 
 			maxWidth = std::max(maxWidth, line.rect.w);
 		}
-	
-		m_lineHeight = TTF_FontLineSkip(m_font);
+		
 		m_rect = { 0, 0, maxWidth, (int)m_lines.size() * TTF_FontLineSkip(m_font) };
 	}
 
@@ -256,6 +264,39 @@ namespace GUI
 		MoveCursorRel(INT16_MIN, 1);
 	}
 
+	// For proportial fonts
+	int TextBox::FindStringPos(const std::string & in, int pos, int len, int fraction)
+	{		
+		if (len <= 0)
+		{
+			return 0;
+		}
+
+		std::string subStr = in.substr(0, len);
+
+		int width;
+		TTF_SizeText(m_font, subStr.c_str(), &width, nullptr);
+
+		if (fraction == 1)
+		{
+			return (pos < width) ? len - 1 : len;
+		}
+
+		if (pos < width)
+		{
+			len -= (fraction+1) / 2;
+			return FindStringPos(in, pos, len, (fraction+1)/2);
+		}
+		else 
+		{
+			len += (fraction+1) / 2;
+			return FindStringPos(in, pos, len, (fraction+1)/2);
+		}
+
+		return 0;
+
+	}
+
 	Point TextBox::CursorAt(PointRef pt)
 	{
 		Point cursorPos(-1, -1);
@@ -265,7 +306,10 @@ namespace GUI
 		Point rel(pt->x - client.x, pt->y - client.y);
 
 		cursorPos.y = (rel.y / m_lineHeight);
-		std::cout << "CursorAt " << rel << ", computed: " << cursorPos << std::endl;
+		if (cursorPos.y > m_lines.size() - 1)
+		{
+			return Point(0, INT_MAX);
+		}
 
 		auto & line = m_lines[cursorPos.y];
 
@@ -277,12 +321,20 @@ namespace GUI
 		{
 			cursorPos.x = INT_MAX;
 		}
+		else if (line.text.size() == 1)
+		{
+			cursorPos.x = 0;
+		}
+		else if (m_charWidth > 0)
+		{
+			// Fixed fonts
+			cursorPos.x = (rel.x+1) / m_charWidth;
+		}
 		else
 		{
-
+			// Proportial fonts
+			cursorPos.x = FindStringPos(line.text, rel.x, (int)line.text.size(), (int)line.text.size());
 		}
-
-		std::cout << "CursorAt " << rel << ", computed: " << cursorPos << std::endl;
 
 		MoveCursor(cursorPos.x, cursorPos.y);
 		return cursorPos;
@@ -351,6 +403,9 @@ namespace GUI
 			}
 			return true;
 		}
+		case SDL_MOUSEMOTION:
+			SDL_SetCursor(RES().FindCursor("edit.ibeam"));
+			break;
 		case SDL_TEXTINPUT:
 			Insert(e->text.text);
 			break;

@@ -63,8 +63,11 @@ namespace GUI
 		void DrawBackground(const GUI::RectRef &rect);
 		void DrawCursor(RectRef rect);	
 
+		int FindStringPos(const std::string & in, int pos, int len, int fraction);
+
 		TextLines m_lines;
 		int m_lineHeight;
+		int m_charWidth;
 		Rect m_textRect;
 
 		Point m_currentPos;
