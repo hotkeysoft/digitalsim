@@ -161,18 +161,26 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
-		simWnd->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(), "Another text box"));
+		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), "Another text box"));
 
 		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
-		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(), sampleText.c_str()));
+		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
 		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(200, 50, 80, 70), "A Big Button"));
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
+		
+		{
+			LabelPtr label = GUI::Label::CreateSingle("l1", ren.get(), Rect(100, 8, 55, 24), "A label");
+			e2->AddControl(label);
+		}
 
-		e2->FindControl("b1")->SetBorderWidth(1);
+		{
+			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt", ren.get(), Rect(50, 90, 155, 24), "Text");
+			e2->AddControl(box);
+		}
 
 		std::static_pointer_cast<Button>(e2->FindControl("b1"))->SetOnClickHandler(OnClick);
 		std::static_pointer_cast<Button>(e2->FindControl("b2"))->SetOnClickHandler(OnClick);
@@ -181,49 +189,49 @@ int main(int argc, char ** argv)
 
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
-		LabelPtr l1 = GUI::Label::Create("l1", ren.get(), rect, "HLeft, VTop, b0m5");
+		LabelPtr l1 = GUI::Label::CreateFill("l1", ren.get(), "HLeft, VTop, b0m5");
 		l1->SetBorder(false);
 		l1->SetPadding(5);
 		l1->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_TOP);
 
-		LabelPtr l2 = GUI::Label::Create("l2", ren.get(), rect, "HCenter, VTop, b1");
+		LabelPtr l2 = GUI::Label::CreateFill("l2", ren.get(), "HCenter, VTop, b1");
 		l2->SetBorder(true);
 		l2->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_TOP);
 
-		LabelPtr l3 = GUI::Label::Create("l3", ren.get(), rect, "HRight, VTop, b2p5");
+		LabelPtr l3 = GUI::Label::CreateFill("l3", ren.get(), "HRight, VTop, b2p5");
 		l3->SetBorder(true);
 		l3->SetPadding(5);
 		l3->SetBorderWidth(2);
 		l3->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_TOP);
 
-		LabelPtr l4 = GUI::Label::Create("l4", ren.get(), rect, "HLeft VCenter, b0");
+		LabelPtr l4 = GUI::Label::CreateFill("l4", ren.get(), "HLeft VCenter, b0");
 		l4->SetBorder(false);
 		l4->SetBorderWidth(1);
 		l4->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_CENTER);
 
-		LabelPtr l5 = GUI::Label::Create("l5", ren.get(), rect, "HCenter, VCenter, b0");
+		LabelPtr l5 = GUI::Label::CreateFill("l5", ren.get(), "HCenter, VCenter, b0");
 		l5->SetBorder(false);
 		l5->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_CENTER);
 
-		LabelPtr l6 = GUI::Label::Create("l6", ren.get(), rect, "HRight, VCenter, b1p5m5");
+		LabelPtr l6 = GUI::Label::CreateFill("l6", ren.get(), "HRight, VCenter, b1p5m5");
 		l6->SetBorder(true);
 		l6->SetMargin(5);
 		l6->SetPadding(5);
 		l6->SetBorderWidth(1);
 		l6->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_CENTER);
 
-		LabelPtr l7 = GUI::Label::Create("l7", ren.get(), rect, "HLeft, VBottom, b2");
+		LabelPtr l7 = GUI::Label::CreateFill("l7", ren.get(), "HLeft, VBottom, b2");
 		l7->SetBorder(true);
 		l7->SetBorderWidth(2);
 		l7->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_BOTTOM);
 
-		LabelPtr l8 = GUI::Label::Create("l8", ren.get(), rect, "HCenter, VBottom, b4m4");
+		LabelPtr l8 = GUI::Label::CreateFill("l8", ren.get(), "HCenter, VBottom, b4m4");
 		l8->SetBorder(true);
 		l8->SetBorderWidth(4);
 		l8->SetMargin(4);		
 		l8->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_BOTTOM);
 
-		LabelPtr l9 = GUI::Label::Create("l9", ren.get(), rect, "HRight, VBottom, b2p5");
+		LabelPtr l9 = GUI::Label::CreateFill("l9", ren.get(), "HRight, VBottom, b2p5");
 		l9->SetBorder(true);
 		l9->SetBorderWidth(2);
 		l9->SetPadding(5);

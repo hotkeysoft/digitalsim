@@ -19,11 +19,18 @@ namespace GUI
 
 		void Init() override;
 
-		static TextBoxPtr Create(const char* id, RendererRef renderer, Rect rect, const char* text);
+		// Single line text box at 'rect' position
+		static TextBoxPtr CreateSingleLine(const char* id, RendererRef renderer, Rect rect, const char* text);
 
-		void Draw() override;
+		// Will fill the parent window
+		static TextBoxPtr CreateFill(const char* id, RendererRef renderer, const char* text);
+
+		Rect GetRect(bool relative = true, bool scrolled = true) const override;
+		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 
 		bool HandleEvent(SDL_Event *) override;
+		HitResult HitTest(const PointRef) override;
+		void Draw() override;
 
 		void SetText(const char *) override;
 
@@ -54,7 +61,7 @@ namespace GUI
 		};
 		using TextLines = std::vector<TextLine>;
 
-		TextBox(const char* id, RendererRef renderer, Rect rect, const char* text);
+		TextBox(const char* id, RendererRef renderer, Rect rect, const char* text, bool fill);
 
 		void RenderText();
 		void SplitLines();
@@ -65,6 +72,7 @@ namespace GUI
 
 		int FindStringPos(const std::string & in, int pos, int len, int fraction);
 
+		bool m_fill;
 		TextLines m_lines;
 		int m_lineHeight;
 		int m_charWidth;

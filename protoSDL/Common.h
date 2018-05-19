@@ -125,7 +125,7 @@ namespace GUI
 	{
 		void operator()(MainWindowRef p) const { SDL_DestroyWindow(p); std::cout << "DestroyWindow" << std::endl; }
 		void operator()(RendererRef p) const { SDL_DestroyRenderer(p); std::cout << "DestroyRenderer" << std::endl; }
-		void operator()(TextureRef p) const { SDL_DestroyTexture(p); std::cout << "DestroyTexture" << std::endl; }
+		void operator()(TextureRef p) const { SDL_DestroyTexture(p); std::cout << "DestroyTexture " << std::endl; }
 		void operator()(FontRef p) const { TTF_CloseFont(p); std::cout << "CloseFont" << std::endl; }
 		void operator()(CursorRef p) const { SDL_FreeCursor(p); std::cout << "FreeCursor" << std::endl; }
 	};

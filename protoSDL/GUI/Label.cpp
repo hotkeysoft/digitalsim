@@ -9,8 +9,8 @@
 
 namespace GUI
 {
-	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font) :
-		Widget(id, renderer, nullptr, rect, label, nullptr, font), m_labelAlign(TEXT_DEFAULT)
+	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align) :
+		Widget(id, renderer, nullptr, rect, label, nullptr, font), m_labelAlign(align)
 	{
 		m_backgroundColor = Color::C_TRANSPARENT;
 		m_borderWidth = 1;
@@ -21,18 +21,32 @@ namespace GUI
 		RenderLabel();
 	}
 
-	LabelPtr Label::Create(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font)
+	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
+	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align)
+	{
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT);
+		return std::static_pointer_cast<Label>(ptr);
+	}
+	
 	void Label::Draw()
 	{
 		if (m_parent == nullptr)
 			return;
 
-		Rect drawRect = m_parent->GetClientRect(false, true);
+		Rect drawRect;
+		if (m_rect.IsEmpty())
+		{
+			drawRect = m_parent->GetClientRect(false, true);
+		}
+		else
+		{
+			drawRect = m_rect.Offset(&m_parent->GetClientRect(false, true).Origin());
+		}
 
 		if (m_margin)
 		{
@@ -41,7 +55,7 @@ namespace GUI
 
 		if (!m_backgroundColor.IsTransparent())
 		{
-			DrawRect(&drawRect, m_backgroundColor);
+			DrawFilledRect(&drawRect, m_backgroundColor);
 		}
 
 		if (m_showBorder)

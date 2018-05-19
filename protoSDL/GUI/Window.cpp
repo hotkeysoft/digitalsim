@@ -827,9 +827,13 @@ namespace GUI
 					SDL_SetCursor(RES().FindCursor("size.NESW"));
 					break;
 				case HIT_TITLEBAR:
+				case HIT_SYSMENU:
+				case HIT_MAXBUTTON:
+				case HIT_MINBUTTON:
 					SDL_SetCursor(RES().FindCursor("default"));
 					break;
 				default:
+					SDL_SetCursor(RES().FindCursor("default"));
 					handled = false;
 				}
 

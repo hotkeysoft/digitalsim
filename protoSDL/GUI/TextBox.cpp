@@ -12,12 +12,15 @@ namespace GUI
 {
 	Uint32 TextBox::m_blinkTimerID = (Uint32)-1;
 
-	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text) :
-		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true)
+	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text, bool fill) :
+		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill)
 	{
 		m_backgroundColor = Color::C_WHITE;
-		m_borderWidth = 0;
-		m_margin = 5;
+		m_borderColor = Color::C_BLACK;
+		m_showBorder = fill ? false : true;
+		m_borderWidth = fill ? 0 : 1;
+		m_margin = m_fill ? 5 : 0;
+		m_padding = m_fill ? 0 : 2;
 	}
 
 	void TextBox::Init()
@@ -39,10 +42,29 @@ namespace GUI
 		}
 	}
 
-	TextBoxPtr TextBox::Create(const char * id, RendererRef renderer, Rect rect, const char * text)
+	TextBoxPtr TextBox::CreateSingleLine(const char * id, RendererRef renderer, Rect rect, const char * text)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, text);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, text, false);
 		return std::static_pointer_cast<TextBox>(ptr);
+	}
+	
+	TextBoxPtr TextBox::CreateFill(const char * id, RendererRef renderer, const char * text)
+	{
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), text, true);
+		return std::static_pointer_cast<TextBox>(ptr);
+	}
+
+
+	Rect TextBox::GetRect(bool relative, bool scrolled) const
+	{
+		Rect parent = m_parent->GetClientRect(relative, scrolled);
+
+		return m_rect.Offset(&parent.Origin());
+	}
+
+	Rect TextBox::GetClientRect(bool relative, bool scrolled) const
+	{
+		return GetRect(relative, scrolled);
 	}
 
 	void TextBox::Draw()
@@ -50,18 +72,25 @@ namespace GUI
 		if (m_parent == nullptr)
 			return;
 
-		DrawBackground(&m_parent->GetClientRect(false, false));
-
-		Rect drawRect = m_parent->GetClientRect(false, true);
+		Rect drawRect;
+		if (m_fill)
+		{
+			DrawBackground(&m_parent->GetClientRect(false, false));
+			drawRect = m_parent->GetClientRect(false, true);
+		}
+		else
+		{			
+			drawRect = GetRect(false, true);
+		}
 
 		if (m_margin)
 		{
 			drawRect = drawRect.Deflate(m_margin);
 		}
 
-		if (!m_backgroundColor.IsTransparent())
+		if (!m_fill && !m_backgroundColor.IsTransparent())
 		{
-			DrawRect(&drawRect, m_backgroundColor);
+			DrawFilledRect(&drawRect, m_backgroundColor);
 		}
 
 		if (m_showBorder)
@@ -80,15 +109,18 @@ namespace GUI
 
 		DrawCursor(&drawRect);
 		DrawText(&drawRect);
-
 	}
 
 	void TextBox::DrawCursor(RectRef rect)
 	{
 		int yPos = rect->y + m_caretPos.y;
-		int width = std::max(rect->w, m_rect.w + m_padding + m_borderWidth + m_margin);
-		Rect outlineBox = { rect->x, yPos, width, m_lineHeight };
-		DrawRect(&outlineBox, Color::C_VLIGHT_GREY);
+	
+		if (m_fill)
+		{
+			int width = std::max(rect->w, m_rect.w + m_padding + m_borderWidth + m_margin);
+			Rect outlineBox = { rect->x, yPos, width, m_lineHeight };
+			DrawRect(&outlineBox, Color::C_VLIGHT_GREY);
+		}
 
 		if (m_blink && (WINMGR().GetActive() == m_parent))
 		{
@@ -105,6 +137,13 @@ namespace GUI
 			auto & line = m_lines[i];
 
 			Rect target = { rect->x, rect->y + ((int)i*m_lineHeight), line.rect.w, line.rect.h };
+
+			if (!m_fill)
+			{
+				target.w = std::min(rect->w, target.w);
+				line.rect.w = target.w;
+			}
+
 			SDL_RenderCopy(m_renderer, line.texture.get(), &line.rect, &target);
 		}
 	}
@@ -169,7 +208,7 @@ namespace GUI
 
 		for (auto & line : m_lines)
 		{
-			if (!line.texture)
+			if (!line.texture && !line.text.empty())
 			{
 				SDL_Surface* surface = TTF_RenderText_Blended(m_font, line.text.c_str(), m_foregroundColor);
 				line.texture = SurfaceToTexture(surface);
@@ -179,7 +218,10 @@ namespace GUI
 			maxWidth = std::max(maxWidth, line.rect.w);
 		}
 		
-		m_rect = { 0, 0, maxWidth, (int)m_lines.size() * TTF_FontLineSkip(m_font) };
+		if (m_fill)
+		{
+			m_rect = { 0, 0, maxWidth, (int)m_lines.size() * TTF_FontLineSkip(m_font) };
+		}
 	}
 
 	void TextBox::InsertLine(const char * text, size_t at)
@@ -255,13 +297,16 @@ namespace GUI
 		MoveCursor(m_currentPos.x + deltaX, m_currentPos.y + deltaY);
 	}
 
-	void TextBox::Return()
+	void TextBox::Return()	
 	{	
-		const std::string &toSplit = m_lines[m_currentPos.y].text;
-		std::string endPart = toSplit.substr(m_currentPos.x);
-		m_lines[m_currentPos.y] = toSplit.substr(0, m_currentPos.x);
-		InsertLine(endPart.c_str(), m_currentPos.y+1); // RenderLines();
-		MoveCursorRel(INT16_MIN, 1);
+		if (m_fill)
+		{
+			const std::string &toSplit = m_lines[m_currentPos.y].text;
+			std::string endPart = toSplit.substr(m_currentPos.x);
+			m_lines[m_currentPos.y] = toSplit.substr(0, m_currentPos.x);
+			InsertLine(endPart.c_str(), m_currentPos.y + 1); // RenderLines();
+			MoveCursorRel(INT16_MIN, 1);
+		}
 	}
 
 	// For proportial fonts
@@ -301,7 +346,15 @@ namespace GUI
 	{
 		Point cursorPos(-1, -1);
 
-		Rect client = m_parent->GetClientRect(false, true).Deflate(m_margin + m_borderWidth + m_padding);
+		Rect client;
+		if (m_fill)
+		{
+			client = m_parent->GetClientRect(false, true).Deflate(m_margin + m_borderWidth + m_padding);
+		}
+		else
+		{
+			client = GetRect(false, true);
+		}
 				
 		Point rel(pt->x - client.x, pt->y - client.y);
 
@@ -389,10 +442,25 @@ namespace GUI
 		RenderLines();
 	}
 	
+	HitResult TextBox::HitTest(const PointRef pt)
+	{
+		Rect parent = m_parent->GetClientRect(false, true);
+		if (m_fill && parent.PointInRect(pt))
+		{
+			return HitResult(HitZone::HIT_CONTROL, this);
+		}
+		else if (m_rect.Offset(&parent.Origin()).PointInRect(pt))
+		{
+			return HitResult(HitZone::HIT_CONTROL, this);
+		}
+
+		return HitZone::HIT_NOTHING;
+	}
+
 	bool TextBox::HandleEvent(SDL_Event *e)
 	{
 		Point pt(e->button.x, e->button.y);
-//		HitResult hit = HitTest(&pt);
+		HitResult hit = HitTest(&pt);
 		switch (e->type)
 		{
 		case SDL_USEREVENT:
@@ -403,8 +471,11 @@ namespace GUI
 			}
 			return true;
 		}
-		case SDL_MOUSEMOTION:			
-			SDL_SetCursor(RES().FindCursor("edit.ibeam"));
+		case SDL_MOUSEMOTION:	
+			if (hit)
+			{
+				SDL_SetCursor(RES().FindCursor("edit.ibeam"));
+			}
 			break;
 		case SDL_TEXTINPUT:
 			Insert(e->text.text);

@@ -20,7 +20,8 @@ namespace GUI
 			TEXT_V_BOTTOM = 16,
 			TEXT_V_CENTER = TEXT_V_TOP | TEXT_V_BOTTOM,
 
-			TEXT_DEFAULT = TEXT_H_CENTER | TEXT_V_CENTER
+			TEXT_FILL_DEFAULT = TEXT_H_CENTER | TEXT_V_CENTER,
+			TEXT_SINGLE_DEFAULT = TEXT_H_LEFT | TEXT_V_TOP,
 		};
 
 		virtual ~Label() = default;
@@ -31,7 +32,11 @@ namespace GUI
 
 		void Init() override;
 
-		static LabelPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr);
+		// Single line label at position 'rect'
+		static LabelPtr CreateSingle(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_SINGLE_DEFAULT);
+
+		// Fills whole parent window
+		static LabelPtr CreateFill(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_FILL_DEFAULT);
 
 		void Draw() override;
 
@@ -41,7 +46,7 @@ namespace GUI
 		uint8_t GetAlign() { return m_labelAlign;  }
 
 	protected:
-		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font);
+		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align);
 
 		void RenderLabel();
 		void DrawLabel(RectRef rect);
