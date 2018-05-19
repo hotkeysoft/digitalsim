@@ -450,9 +450,9 @@ namespace GUI
 		}
 		else
 		{
-			client = GetRect(false, true);
+			client = GetRect(false, true).Deflate(GetShrinkFactor());
 		}
-				
+
 		Point rel(pt->x + m_xOffset - client.x, pt->y - client.y);
 
 		cursorPos.y = (rel.y / m_lineHeight);
