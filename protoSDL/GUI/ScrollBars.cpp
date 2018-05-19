@@ -109,11 +109,8 @@ namespace GUI
 		}
 	}
 
-	void ScrollBars::DrawScrollBars(RectRef pos)
+	void ScrollBars::RefreshScrollBarStatus()
 	{
-		if (m_parent->GetFlags() & WindowFlags::WIN_NOSCROLL)
-			return;
-
 		m_scrollState.hMax = 0;
 		m_scrollState.vMax = 0;
 
@@ -131,9 +128,17 @@ namespace GUI
 		{
 			CheckChildScrollStatus(child.second.get(), &child.second->GetRect(true, false), showH, showV);
 		}
-		
+
 		m_scrollState.showH = showH || m_parent->m_scrollPos.x;
 		m_scrollState.showV = showV || m_parent->m_scrollPos.y;
+	}
+
+	void ScrollBars::DrawScrollBars(RectRef pos)
+	{
+		if (m_parent->GetFlags() & WindowFlags::WIN_NOSCROLL)
+			return;
+
+		RefreshScrollBarStatus();
 
 		if (m_scrollState.showH)
 		{
@@ -231,14 +236,12 @@ namespace GUI
 
 		if (m_scrollState.showH)
 		{
-			m_parent->m_scrollPos.x += pt->x;
-			m_parent->m_scrollPos.x = clip(m_parent->m_scrollPos.x, 0, m_scrollState.hMax);
+			m_parent->m_scrollPos.x = clip(m_parent->m_scrollPos.x + pt->x, 0, m_scrollState.hMax);
 		}
 
 		if (m_scrollState.showV)
 		{
-			m_parent->m_scrollPos.y += pt->y;
-			m_parent->m_scrollPos.y = clip(m_parent->m_scrollPos.y, 0, m_scrollState.vMax);
+			m_parent->m_scrollPos.y = clip(m_parent->m_scrollPos.y + pt->y, 0, m_scrollState.vMax);
 		}
 	}
 

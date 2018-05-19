@@ -36,6 +36,7 @@ namespace GUI
 		bool HandleEvent(SDL_Event *) override;
 		void Draw() override;
 
+		void RefreshScrollBarStatus();
 		void ScrollRel(PointRef pt);
 		void ScrollTo(PointRef pt);
 		void ClickHScrollBar(PointRef pt);

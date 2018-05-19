@@ -161,7 +161,7 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
-		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), "Another text box"));
+		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), "Another text box Another text box Another text box Another text box Another text box Another text box "));
 
 		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
 		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));

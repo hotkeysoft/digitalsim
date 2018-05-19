@@ -125,7 +125,7 @@ namespace GUI
 	
 		if (m_fill)
 		{
-			int width = std::max(rect->w, m_rect.w + GetShrinkFactor());
+			int width = std::max(rect->w, m_rect.w);
 			Rect outlineBox = { rect->x, yPos, width, m_lineHeight };
 			DrawRect(&outlineBox, Color::C_VLIGHT_GREY);
 		}
@@ -161,7 +161,7 @@ namespace GUI
 	{
 		Rect fillRect = m_rect;
 		fillRect.h = std::max(rect->h, m_rect.h);
-		fillRect.w = std::max(rect->w, m_rect.w + m_margin + m_borderWidth + m_padding);
+		fillRect.w = std::max(rect->w, m_rect.w);
 
 		DrawFilledRect(rect, m_backgroundColor);
 	}
@@ -229,7 +229,12 @@ namespace GUI
 		
 		if (m_fill)
 		{
-			m_rect = { 0, 0, maxWidth, (int)m_lines.size() * TTF_FontLineSkip(m_font) };
+			Rect newRect = { 0, 0, maxWidth + (2 * GetShrinkFactor()), (int)m_lines.size() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor()) };
+			if (!newRect.IsEqual(&m_rect))
+			{
+				m_rect = newRect;
+				GetParentWnd()->GetScrollBars()->RefreshScrollBarStatus();
+			}
 		}
 	}
 
@@ -363,7 +368,8 @@ namespace GUI
 				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX - GetShrinkFactor(), 0));
 			}
 
-			deltaX = (m_caretPos.x + rect.x) - rect.w;
+			// TODO: m_charWidth not set for proportional fonts
+			deltaX = (m_caretPos.x + rect.x + m_charWidth) - rect.w;
 			if (deltaX > 0)
 			{
 				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX, 0));
@@ -374,7 +380,7 @@ namespace GUI
 			{
 				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor()));
 			}
-
+			
 			deltaY = (m_caretPos.y+m_lineHeight + rect.y) - rect.h;
 			if (deltaY > 0)
 			{
@@ -489,7 +495,6 @@ namespace GUI
 		{			
 			Rect client = m_parent->GetClientRect(true, false);
 			int linesPerPage = client.h / m_lineHeight;
-			std::cout << "Lines per page: " << linesPerPage << std::endl;
 
 			MoveCursorRel(0, deltaY * linesPerPage);
 		}
@@ -572,8 +577,8 @@ namespace GUI
 					Delete();
 					break;
 				case SDLK_RETURN:
-					MovePage(1);
 					Return();
+					break;
 				case SDLK_PAGEDOWN:
 					MovePage(1);
 					break;
