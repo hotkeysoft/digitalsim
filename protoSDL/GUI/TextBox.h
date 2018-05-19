@@ -74,14 +74,17 @@ namespace GUI
 		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
 		int FindStringPos(const std::string & in, int pos, int len, int fraction);
+		int GetLineWidth(); // Single line mode
 
 		void ScrollCursorIntoView();
+		void ScrollX(int fieldWidth, int16_t offset);
 
 		bool m_fill;
 		TextLines m_lines;
 		int m_lineHeight;
 		int m_charWidth;
 		Rect m_textRect;
+		int m_xOffset;
 
 		Point m_currentPos;
 		Point m_caretPos;

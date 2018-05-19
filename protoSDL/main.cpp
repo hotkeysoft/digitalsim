@@ -144,7 +144,7 @@ int main(int argc, char ** argv)
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 650, 400 })->SetText("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 200, 400 })->SetText("edit.2");
+		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
@@ -169,7 +169,7 @@ int main(int argc, char ** argv)
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
-		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(200, 50, 80, 70), "A Big Button"));
+		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(225, 30, 90, 70), "A Big Button"));
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 		
 		{
@@ -182,7 +182,11 @@ int main(int argc, char ** argv)
 			e2->AddControl(box);
 		}
 		{
-			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 24), "");
+			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 50), "This is a very long text");
+			box->SetPadding(10);
+			box->SetMargin(0);
+			box->SetBorderWidth(2);
+			box->SetBorder(true);
 			e2->AddControl(box);
 		}
 

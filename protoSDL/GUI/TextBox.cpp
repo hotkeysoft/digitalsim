@@ -7,13 +7,14 @@
 #include "TextBox.h"
 #include <algorithm>
 #include <sstream>
+#include <cassert>
 
 namespace GUI
 {
 	Uint32 TextBox::m_blinkTimerID = (Uint32)-1;
 
 	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text, bool fill) :
-		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill)
+		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill), m_xOffset(0)
 	{
 		m_backgroundColor = Color::C_WHITE;
 		m_borderColor = Color::C_BLACK;
@@ -97,9 +98,9 @@ namespace GUI
 		{
 			for (int i = 0; i < m_borderWidth; ++i)
 			{
-				DrawRect(&drawRect, m_borderColor);
-			}
-			drawRect.Deflate(m_borderWidth);
+				DrawRect(&drawRect, m_borderColor); 
+				drawRect = drawRect.Deflate(1);
+			}			
 		}
 
 		if (m_padding)
@@ -111,6 +112,7 @@ namespace GUI
 		{
 			DrawCursor(&drawRect);
 		}
+
 		DrawText(&drawRect);
 	}
 
@@ -132,7 +134,7 @@ namespace GUI
 
 		if (m_blink && (WINMGR().GetActive() == m_parent))
 		{
-			int xPos = rect->x + m_caretPos.x;
+			int xPos = rect->x + m_caretPos.x - m_xOffset;
 			SetDrawColor(Color::C_DARK_GREY);
 			SDL_RenderDrawLine(m_renderer, xPos, yPos, xPos, yPos + m_lineHeight);
 			SDL_RenderDrawLine(m_renderer, xPos+1, yPos, xPos+1, yPos + m_lineHeight);
@@ -147,13 +149,15 @@ namespace GUI
 
 			Rect target = { rect->x, rect->y + ((int)i*m_lineHeight), line.rect.w, line.rect.h };
 
+			Rect source = line.rect;
 			if (!m_fill)
 			{
-				target.w = std::min(rect->w, target.w);
-				line.rect.w = target.w;
+				target.w = std::min(rect->w, source.w);
+				source.x += m_xOffset;
+				source.w = target.w;
 			}
 
-			SDL_RenderCopy(m_renderer, line.texture.get(), &line.rect, &target);
+			SDL_RenderCopy(m_renderer, line.texture.get(), &source, &target);
 		}
 	}
 
@@ -356,10 +360,11 @@ namespace GUI
 	}
 
 	void TextBox::ScrollCursorIntoView()
-	{
-		WindowRef parentWnd  = GetParentWnd();
-		if (m_fill && parentWnd)
+	{	
+		if (m_fill)
 		{
+			WindowRef parentWnd = GetParentWnd();
+			assert(parentWnd); // TODO update for widget in widget
 			Rect rect = m_parent->GetClientRect(true, true).Deflate(GetShrinkFactor());
 
 			int deltaX = m_caretPos.x + rect.x;
@@ -387,6 +392,51 @@ namespace GUI
 				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY));
 			}
 		}
+		else
+		{
+			Rect rect = GetClientRect(true, false).Deflate(GetShrinkFactor());
+			int deltaX = m_caretPos.x - m_xOffset;
+			if (deltaX < 0)
+			{		
+				ScrollX(rect.w, deltaX);
+			}
+
+			// TODO: m_charWidth not set for proportional fonts
+			deltaX = (m_caretPos.x + m_charWidth - m_xOffset) - rect.w;
+			if (deltaX > 0)
+			{
+				ScrollX(rect.w, deltaX);
+			}
+		}
+	}
+
+	// Single line mode
+	int TextBox::GetLineWidth()
+	{
+		if (m_lines.size())
+		{
+			return m_lines[0].rect.w;
+		}
+
+		return 0;
+	}
+
+	void TextBox::ScrollX(int fieldWidth, int16_t offset)
+	{
+		if (offset > 0)
+		{
+			m_xOffset += offset;
+
+			int lineWidth = GetLineWidth();
+			if (m_xOffset + fieldWidth > lineWidth)
+			{
+				m_xOffset = lineWidth - fieldWidth;
+			}
+		}
+		else if (offset < 0)
+		{
+			m_xOffset = std::min(0, m_xOffset - offset);
+		}
 	}
 
 	Point TextBox::CursorAt(PointRef pt)
@@ -403,7 +453,7 @@ namespace GUI
 			client = GetRect(false, true);
 		}
 				
-		Point rel(pt->x - client.x, pt->y - client.y);
+		Point rel(pt->x + m_xOffset - client.x, pt->y - client.y);
 
 		cursorPos.y = (rel.y / m_lineHeight);
 		if (cursorPos.y > m_lines.size() - 1)
