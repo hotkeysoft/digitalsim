@@ -25,9 +25,25 @@ namespace GUI
 		m_borderColor(Color::C_BLACK),
 		m_padding(0),
 		m_margin(0),
-		m_borderWidth(4)
+		m_borderWidth(4),
+		m_focused(false)
 	{
 		SetFont(font);
+	}
+
+	void Widget::SetFocus(WidgetRef focus, WidgetRef parent)
+	{
+		std::cout << "SetFocus: " << focus->GetId() << "(parent = " << (parent ? parent->GetId() : std::string("null")) << std::endl;
+		if (parent == nullptr)
+		{
+			m_focused = true;
+		}
+
+		if (m_parent)
+		{
+			// Bubble up until we hit a window
+			m_parent->SetFocus(focus, this);
+		}
 	}
 
 	void Widget::SetFont(FontRef font)

@@ -107,7 +107,10 @@ namespace GUI
 			drawRect = drawRect.Deflate(m_padding);
 		}
 
-		DrawCursor(&drawRect);
+		if (IsFocused())
+		{
+			DrawCursor(&drawRect);
+		}
 		DrawText(&drawRect);
 	}
 
@@ -465,11 +468,11 @@ namespace GUI
 		{
 		case SDL_USEREVENT:
 		{
-			if (e->user.code == m_blinkTimerID)
+			if (e->user.code == m_blinkTimerID && IsFocused())
 			{
 				m_blink = !m_blink;
 			}
-			return true;
+			return false;
 		}
 		case SDL_MOUSEMOTION:	
 			if (hit)
@@ -478,41 +481,55 @@ namespace GUI
 			}
 			break;
 		case SDL_TEXTINPUT:
-			Insert(e->text.text);
+			if (IsFocused())
+			{
+				Insert(e->text.text);
+			}
+			else
+			{
+				return false;
+			}
 			break;
 		case SDL_KEYDOWN:
 		{
-			bool ctrl = SDL_GetModState() & KMOD_CTRL;
-			switch (e->key.keysym.sym)
+			if (IsFocused())
 			{
-			case SDLK_LEFT:
-				MoveCursorRel(-1, 0);
-				break;
-			case SDLK_RIGHT:
-				MoveCursorRel(1, 0);
-				break;
-			case SDLK_UP:
-				MoveCursorRel(0, -1);
-				break;
-			case SDLK_DOWN:
-				MoveCursorRel(0, 1);
-				break;
-			case SDLK_HOME:
-				MoveCursorRel(INT16_MIN, ctrl ? INT16_MIN : 0);
-				break;
-			case SDLK_END:
-				MoveCursorRel(INT16_MAX, ctrl ? INT16_MAX : 0);
-				break;
-			case SDLK_BACKSPACE:
-				Backspace();
-				break;
-			case SDLK_DELETE:
-				Delete();
-				break;
-			case SDLK_RETURN:
-				Return();
-				break;
-			default:
+				bool ctrl = SDL_GetModState() & KMOD_CTRL;
+				switch (e->key.keysym.sym)
+				{
+				case SDLK_LEFT:
+					MoveCursorRel(-1, 0);
+					break;
+				case SDLK_RIGHT:
+					MoveCursorRel(1, 0);
+					break;
+				case SDLK_UP:
+					MoveCursorRel(0, -1);
+					break;
+				case SDLK_DOWN:
+					MoveCursorRel(0, 1);
+					break;
+				case SDLK_HOME:
+					MoveCursorRel(INT16_MIN, ctrl ? INT16_MIN : 0);
+					break;
+				case SDLK_END:
+					MoveCursorRel(INT16_MAX, ctrl ? INT16_MAX : 0);
+					break;
+				case SDLK_BACKSPACE:
+					Backspace();
+					break;
+				case SDLK_DELETE:
+					Delete();
+					break;
+				case SDLK_RETURN:
+					Return();
+					break;
+				default:
+					return false;
+				}
+			}
+			else
+			{
 				return false;
 			}
 			break;
@@ -520,6 +537,8 @@ namespace GUI
 		case SDL_MOUSEBUTTONDOWN:
 		{
 			Point cursor = CursorAt(&pt);
+			SetActive();
+			SetFocus(this);
 			return cursor.x >= 0;
 		}
 		default:

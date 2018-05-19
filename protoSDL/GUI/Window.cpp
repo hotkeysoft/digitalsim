@@ -17,7 +17,7 @@ namespace GUI
 	}
 
 	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags) :
-		Widget(id, renderer, parent, rect, nullptr, nullptr, font), 
+		Widget(id, renderer, parent, rect, nullptr, nullptr, font),
 		m_showState(WindowState::WS_VISIBLE), m_flags(flags), m_pushedState(HIT_NOTHING)
 	{
 		if (m_renderer == nullptr)
@@ -47,6 +47,23 @@ namespace GUI
 		return std::static_pointer_cast<Window>(ptr);
 	}
 
+	void Window::SetActive()
+	{
+		WINMGR().SetActive(this);
+	}
+
+	void Window::SetFocus(WidgetRef focus, WidgetRef parent)
+	{
+		// Remove focus from other controls
+		for (auto & control : m_controls)
+		{
+			if (control.second.get() != parent)
+			{
+				control.second->ClearFocus();
+			}
+		}
+	}
+	
 	void Window::SetText(const char * title)
 	{
 		Widget::SetText(title);

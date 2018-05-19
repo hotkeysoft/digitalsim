@@ -39,16 +39,17 @@ namespace GUI
 		case SDL_MOUSEBUTTONDOWN:
 			if (hit.target == this)
 			{
+				SetActive();
 				m_pushed = true;
 				WINMGR().StartCapture(hit, &pt);
 				return true;
 			}
 		case SDL_MOUSEBUTTONUP:
 			m_pushed = false;
-			if (capture && capture.Target.target == this && hit.target == this)
+			if (capture && capture.Target.target == this)
 			{
 				WINMGR().ReleaseCapture();
-				if (m_onClickHandler)
+				if (hit.target == this && m_onClickHandler)
 				{
 					m_onClickHandler(this);
 				}

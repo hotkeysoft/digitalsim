@@ -27,6 +27,9 @@ namespace GUI
 		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
 		void SetText(const char * text) override;
 
+		void SetActive() override;
+		void SetFocus(WidgetRef focus, WidgetRef parent = nullptr) override;
+
 		WindowManager::WindowList GetChildWindows();
 
 		void AddControl(WidgetPtr);

@@ -181,6 +181,11 @@ int main(int argc, char ** argv)
 			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt", ren.get(), Rect(50, 90, 155, 24), "Text");
 			e2->AddControl(box);
 		}
+		{
+			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 24), "");
+			e2->AddControl(box);
+		}
+
 
 		std::static_pointer_cast<Button>(e2->FindControl("b1"))->SetOnClickHandler(OnClick);
 		std::static_pointer_cast<Button>(e2->FindControl("b2"))->SetOnClickHandler(OnClick);
@@ -292,8 +297,10 @@ int main(int argc, char ** argv)
 					{
 						Point pt(e.button.x, e.button.y);
 						HitResult hit = WINMGR().HitTest(&pt);
-						if (hit && hit.target->HandleEvent(&e))
-						{						
+						if (hit)
+						{	
+							hit.target->SetActive();
+							hit.target->HandleEvent(&e);
 							Render(ren);
 						}
 					}
@@ -328,11 +335,9 @@ int main(int argc, char ** argv)
 				}
 				else // Pass to active window
 				{
-					if (WINMGR().GetActive()->HandleEvent(&e))
-					{
-						Render(ren);
-					}
-				}
+					WINMGR().GetActive()->HandleEvent(&e);
+					Render(ren);
+				}	
 			}
 			SDL_WaitEvent(nullptr);
 //			SDL_Delay(2);

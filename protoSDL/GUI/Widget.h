@@ -38,6 +38,12 @@ namespace GUI
 
 		virtual void Init() {};
 
+		// Activation
+		virtual void SetActive() { if (m_parent) m_parent->SetActive(); }
+		virtual void SetFocus(WidgetRef focus, WidgetRef parent= nullptr);
+		virtual void ClearFocus() { m_focused = false; std::cout << "ClearFocus, this = " << this->GetId() << std::endl; }
+		bool IsFocused() { return m_focused; }
+
 		virtual std::string GetText() const { return m_text; }
 		virtual void SetText(const char *text) { m_text = text ? text : ""; }
 
@@ -112,6 +118,7 @@ namespace GUI
 		Rect m_rect;
 		FontRef m_font;
 		Point m_scrollPos;
+		bool m_focused;
 
 		// Borders
 		bool m_showBorder;
