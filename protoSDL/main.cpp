@@ -182,7 +182,7 @@ int main(int argc, char ** argv)
 			e2->AddControl(box);
 		}
 		{
-			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 50), "This is a very long text");
+			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 40), "123456789012345");
 			box->SetPadding(10);
 			box->SetMargin(0);
 			box->SetBorderWidth(2);

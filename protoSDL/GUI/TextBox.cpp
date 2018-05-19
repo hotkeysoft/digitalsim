@@ -14,7 +14,7 @@ namespace GUI
 	Uint32 TextBox::m_blinkTimerID = (Uint32)-1;
 
 	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text, bool fill) :
-		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill), m_xOffset(0)
+		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill), m_xOffset(0), m_lineWidth(-1)
 	{
 		m_backgroundColor = Color::C_WHITE;
 		m_borderColor = Color::C_BLACK;
@@ -150,6 +150,7 @@ namespace GUI
 			Rect target = { rect->x, rect->y + ((int)i*m_lineHeight), line.rect.w, line.rect.h };
 
 			Rect source = line.rect;
+			
 			if (!m_fill)
 			{
 				target.w = std::min(rect->w, source.w);
@@ -238,6 +239,24 @@ namespace GUI
 			{
 				m_rect = newRect;
 				GetParentWnd()->GetScrollBars()->RefreshScrollBarStatus();
+			}
+		}
+		else // Single line mode
+		{
+			if (m_lineWidth == -1)
+			{
+				m_lineWidth = maxWidth;
+				m_xOffset = 0;
+			}
+			else
+			{
+				int delta =  maxWidth - m_lineWidth;
+				if (delta < 0)
+				{
+					m_xOffset = std::max(0, m_xOffset + delta);
+				}
+
+				m_lineWidth = maxWidth;
 			}
 		}
 	}
@@ -413,12 +432,7 @@ namespace GUI
 	// Single line mode
 	int TextBox::GetLineWidth()
 	{
-		if (m_lines.size())
-		{
-			return m_lines[0].rect.w;
-		}
-
-		return 0;
+		return m_lineWidth;
 	}
 
 	void TextBox::ScrollX(int fieldWidth, int16_t offset)
@@ -430,12 +444,12 @@ namespace GUI
 			int lineWidth = GetLineWidth();
 			if (m_xOffset + fieldWidth > lineWidth)
 			{
-				m_xOffset = lineWidth - fieldWidth;
+				m_xOffset = std::max(0, lineWidth - fieldWidth);
 			}
 		}
 		else if (offset < 0)
 		{
-			m_xOffset = std::min(0, m_xOffset - offset);
+			m_xOffset = std::max(0, m_xOffset + offset);
 		}
 	}
 
@@ -496,7 +510,7 @@ namespace GUI
 			return;
 
 		// Wrap line
-		if (m_currentPos.x == 0)
+		if (m_fill && m_currentPos.x == 0)
 		{
 			TextLine &prevLine = m_lines[m_currentPos.y - 1];
 			TextLine &currLine = m_lines[m_currentPos.y];
@@ -504,15 +518,16 @@ namespace GUI
 
 			prevLine = prevLine.text + currLine.text;
 			DeleteLine(m_currentPos.y);
+			RenderLines();
 			MoveCursor((int)prevX, m_currentPos.y - 1);
 		}
 		else // Normal case
 		{
 			m_lines[m_currentPos.y].text.erase(m_currentPos.x-1, 1);
 			m_lines[m_currentPos.y].texture = nullptr;
+			RenderLines();
 			MoveCursorRel(-1, 0);
-		}
-		RenderLines();
+		}		
 	}
 
 	void TextBox::Delete()
@@ -557,7 +572,7 @@ namespace GUI
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}
-		else if (m_rect.Offset(&parent.Origin()).PointInRect(pt))
+		else if (!m_fill && m_rect.Offset(&parent.Origin()).PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}

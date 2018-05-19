@@ -84,7 +84,10 @@ namespace GUI
 		int m_lineHeight;
 		int m_charWidth;
 		Rect m_textRect;
+
+		// Single line mode
 		int m_xOffset;
+		int m_lineWidth;
 
 		Point m_currentPos;
 		Point m_caretPos;
