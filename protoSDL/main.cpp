@@ -45,17 +45,6 @@ void Render(RendererPtr & ren)
 	SDL_RenderPresent(ren.get());
 }
 
-SDL_Texture* SurfaceToTexture(RendererPtr & ren, SDL_Surface* surf)
-{
-	SDL_Texture* text;
-
-	text = SDL_CreateTextureFromSurface(ren.get(), surf);
-
-	SDL_FreeSurface(surf);
-
-	return text;
-}
-
 void OnClick(WidgetRef widget)
 {
 	int pos = 0;
@@ -135,6 +124,17 @@ int main(int argc, char ** argv)
 			sampleText = buffer.str();
 		}
 
+		RES().LoadCursor("edit.ibeam", SDL_SYSTEM_CURSOR_IBEAM);
+
+		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
+		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
+		CursorRef sizeWECursor = RES().LoadCursor("size.WE", SDL_SYSTEM_CURSOR_SIZEWE);
+		CursorRef sizeNSCursor = RES().LoadCursor("size.NS", SDL_SYSTEM_CURSOR_SIZENS);
+
+		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
+		SDL_SetCursor(normalCursor);
+
+
 		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
 		mainWnd->SetText("DIGI-SIM");
 		mainWnd->SetImage(image);
@@ -166,16 +166,6 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
 		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::Create("text", ren.get(), Rect(), sampleText.c_str()));
 
-		RES().LoadCursor("edit.ibeam", SDL_SYSTEM_CURSOR_IBEAM);
-
-		CursorRef sizeNWSECursor = RES().LoadCursor("size.NWSE", SDL_SYSTEM_CURSOR_SIZENWSE);
-		CursorRef sizeNESWCursor = RES().LoadCursor("size.NESW", SDL_SYSTEM_CURSOR_SIZENESW);
-		CursorRef sizeWECursor = RES().LoadCursor("size.WE", SDL_SYSTEM_CURSOR_SIZEWE);
-		CursorRef sizeNSCursor = RES().LoadCursor("size.NS", SDL_SYSTEM_CURSOR_SIZENS);
-
-		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
-		SDL_SetCursor(normalCursor);
-
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
@@ -188,7 +178,6 @@ int main(int argc, char ** argv)
 		std::static_pointer_cast<Button>(e2->FindControl("b2"))->SetOnClickHandler(OnClick);
 		std::static_pointer_cast<Button>(e2->FindControl("b3"))->SetOnClickHandler(OnClick);
 		std::static_pointer_cast<Button>(e2->FindControl("b4"))->SetOnClickHandler(OnClick);
-
 
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
@@ -262,13 +251,15 @@ int main(int argc, char ** argv)
 
 		Render(ren);
 
-
 		SDL_StartTextInput();
 		SDL_Event e;
 		bool quit = false;
-		while (!quit) {
-			while (SDL_PollEvent(&e)) {
-				if (e.type == SDL_QUIT) {
+		while (!quit) 
+		{
+			while (SDL_PollEvent(&e)) 
+			{
+				if (e.type == SDL_QUIT) 
+				{
 					quit = true;
 				}
 				else if (e.type == SDL_MOUSEMOTION)
@@ -282,37 +273,9 @@ int main(int argc, char ** argv)
 					{
 						Point pt(e.button.x, e.button.y);
 						HitResult hit = WINMGR().HitTest(&pt);
-						if (hit)
+						if (hit && hit.target->HandleEvent(&e))
 						{
-							if (hit.target->HandleEvent(&e))
-							{
-								Render(ren);
-							}
-							else
-							{
-								switch ((HitZone)hit)
-								{
-								case HIT_BORDER_TOP:
-								case HIT_BORDER_BOTTOM:
-									SDL_SetCursor(sizeNSCursor);
-									break;
-								case HIT_BORDER_LEFT:
-								case HIT_BORDER_RIGHT:
-									SDL_SetCursor(sizeWECursor);
-									break;
-								case HIT_CORNER_TOPLEFT:
-								case HIT_CORNER_BOTTOMRIGHT:
-									SDL_SetCursor(sizeNWSECursor);
-									break;
-								case HIT_CORNER_TOPRIGHT:
-								case HIT_CORNER_BOTTOMLEFT:
-									SDL_SetCursor(sizeNESWCursor);
-									break;
-								default:
-									SDL_SetCursor(normalCursor);
-								}
-								Render(ren);
-							}
+							Render(ren);
 						}
 					}
 				}
@@ -321,11 +284,10 @@ int main(int argc, char ** argv)
 					{
 						Point pt(e.button.x, e.button.y);
 						HitResult hit = WINMGR().HitTest(&pt);
-						if (hit)
-						{
-							hit.target->HandleEvent(&e);
+						if (hit && hit.target->HandleEvent(&e))
+						{						
+							Render(ren);
 						}
-						Render(ren);
 					}
 				}
 				else if (e.type == SDL_MOUSEBUTTONUP) 
@@ -335,11 +297,13 @@ int main(int argc, char ** argv)
 						Render(ren);
 					}
 				}
-				else if (e.type == SDL_KEYDOWN) {
+				else if (e.type == SDL_KEYDOWN) 
+				{
 					// Pass to active window first
 					if (!WINMGR().GetActive()->HandleEvent(&e))
 					{
-						switch (e.key.keysym.sym) {
+						switch (e.key.keysym.sym) 
+						{
 						case SDLK_RETURN:
 							if (SDL_GetModState() & KMOD_ALT)
 							{
@@ -347,7 +311,6 @@ int main(int argc, char ** argv)
 								Render(ren);
 							}
 							break;
-						case SDLK_q: quit = true; break;
 						}
 					}
 					else
@@ -363,7 +326,8 @@ int main(int argc, char ** argv)
 					}
 				}
 			}
-			SDL_Delay(2);
+			SDL_WaitEvent(nullptr);
+//			SDL_Delay(2);
 		}
 	}
 

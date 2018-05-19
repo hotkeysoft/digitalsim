@@ -403,7 +403,7 @@ namespace GUI
 			}
 			return true;
 		}
-		case SDL_MOUSEMOTION:
+		case SDL_MOUSEMOTION:			
 			SDL_SetCursor(RES().FindCursor("edit.ibeam"));
 			break;
 		case SDL_TEXTINPUT:

@@ -741,55 +741,103 @@ namespace GUI
 				return true;
 			}
 		}
+		else if (e->type == SDL_MOUSEWHEEL)
+		{
+			int y = e->wheel.y;
+			if (SDL_MOUSEWHEEL_FLIPPED)
+			{
+				y = -y;
+			}
+
+			if (GetScrollBars())
+			{
+				GetScrollBars()->ScrollRel(&Point(0, y * 10));
+			}
+		}
 		else if (e->type == SDL_MOUSEMOTION)
 		{
-			const CaptureInfo & capture = WINMGR().GetCapture();
-			Point newPos = pt;
-			newPos.x += capture.Delta.x;
-			newPos.y += capture.Delta.y;
-			Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
-
-			bool handled = true;
-			switch ((HitZone)capture.Target)
+			if (WINMGR().GetCapture())
 			{
-			case HIT_TITLEBAR:
-				MovePos(&newPos);
-				break;
-			case HIT_BORDER_LEFT:
-				MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h));
-				break;
-			case HIT_BORDER_RIGHT:
-				Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h));
-				break;
-			case HIT_BORDER_TOP:
-				MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w, capture.Origin.h + delta.y));
-				break;
-			case HIT_BORDER_BOTTOM:
-				Resize(&Point(capture.Origin.w, capture.Origin.h - delta.y));
-				break;
-			case HIT_CORNER_TOPLEFT:
-				MoveRect(&Rect(newPos.x, newPos.y, capture.Origin.w + delta.x, capture.Origin.h + delta.y));
-				break;
-			case HIT_CORNER_TOPRIGHT:
-				MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w - delta.x, capture.Origin.h + delta.y));
-				break;
-			case HIT_CORNER_BOTTOMLEFT:
-				MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h - delta.y));
-				break;
-			case HIT_CORNER_BOTTOMRIGHT:
-				Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h - delta.y));
-				break;
-			case HIT_SYSMENU:
-			case HIT_MAXBUTTON:
-			case HIT_MINBUTTON:
-				ToggleButtonState(capture.Target, capture.Target.target->HitTest(&pt) == capture.Target);
-				break;
-			default:
-				handled = false;
+				const CaptureInfo & capture = WINMGR().GetCapture();
+				Point newPos = pt;
+				newPos.x += capture.Delta.x;
+				newPos.y += capture.Delta.y;
+				Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
+
+				bool handled = true;
+				switch ((HitZone)capture.Target)
+				{
+				case HIT_TITLEBAR:
+					MovePos(&newPos);
+					break;
+				case HIT_BORDER_LEFT:
+					MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h));
+					break;
+				case HIT_BORDER_RIGHT:
+					Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h));
+					break;
+				case HIT_BORDER_TOP:
+					MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w, capture.Origin.h + delta.y));
+					break;
+				case HIT_BORDER_BOTTOM:
+					Resize(&Point(capture.Origin.w, capture.Origin.h - delta.y));
+					break;
+				case HIT_CORNER_TOPLEFT:
+					MoveRect(&Rect(newPos.x, newPos.y, capture.Origin.w + delta.x, capture.Origin.h + delta.y));
+					break;
+				case HIT_CORNER_TOPRIGHT:
+					MoveRect(&Rect(capture.Origin.x, newPos.y, capture.Origin.w - delta.x, capture.Origin.h + delta.y));
+					break;
+				case HIT_CORNER_BOTTOMLEFT:
+					MoveRect(&Rect(newPos.x, capture.Origin.y, capture.Origin.w + delta.x, capture.Origin.h - delta.y));
+					break;
+				case HIT_CORNER_BOTTOMRIGHT:
+					Resize(&Point(capture.Origin.w - delta.x, capture.Origin.h - delta.y));
+					break;
+				case HIT_SYSMENU:
+				case HIT_MAXBUTTON:
+				case HIT_MINBUTTON:
+					ToggleButtonState(capture.Target, capture.Target.target->HitTest(&pt) == capture.Target);
+					break;
+				default:
+					handled = false;
+				}
+				if (handled)
+					return handled;
 			}
-			if (handled)
-				return handled;
-//			return handled;
+			else
+			{
+				bool handled = true;
+				switch ((HitZone)hit)
+				{
+				case HIT_BORDER_TOP:
+				case HIT_BORDER_BOTTOM:
+					SDL_SetCursor(RES().FindCursor("size.NS"));
+					break;
+				case HIT_BORDER_LEFT:
+				case HIT_BORDER_RIGHT:
+					SDL_SetCursor(RES().FindCursor("size.WE"));
+					break;
+				case HIT_CORNER_TOPLEFT:
+				case HIT_CORNER_BOTTOMRIGHT:
+					SDL_SetCursor(RES().FindCursor("size.NWSE"));
+					break;
+				case HIT_CORNER_TOPRIGHT:
+				case HIT_CORNER_BOTTOMLEFT:
+					SDL_SetCursor(RES().FindCursor("size.NESW"));
+					break;
+				case HIT_TITLEBAR:
+					SDL_SetCursor(RES().FindCursor("default"));
+					break;
+				default:
+					handled = false;
+				}
+
+				if (handled)
+				{
+					return handled;
+				}
+			}
 		}
 
 		// Pass to controls

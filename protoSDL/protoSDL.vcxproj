@@ -132,6 +132,7 @@ xcopy /d /Y "$(SDLTTFLib32)\*.dll" "$(OutDir)"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Message>Copying SDL dlls to output dir</Message>
@@ -154,6 +155,7 @@ xcopy /d /Y "$(SDLTTFLib32)\*.dll" "$(OutDir)"</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /Y "$(SDLLib64)\*.dll" "$(OutDir)"

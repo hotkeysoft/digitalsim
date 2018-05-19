@@ -330,25 +330,36 @@ namespace GUI
 		}
 		else if (e->type == SDL_MOUSEMOTION)
 		{
-			const CaptureInfo & capture = WINMGR().GetCapture();
-			Point newPos = pt;
-			newPos.x += capture.Delta.x;
-			newPos.y += capture.Delta.y;
-			Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
-
-			bool handled = true;
-			switch ((HitZone)capture.Target)
+			if (WINMGR().GetCapture())
 			{
-			case HIT_HSCROLL_SLIDER:
-				ClickHScrollBar(&pt);
-				break;
-			case HIT_VSCROLL_SLIDER:
-				ClickVScrollBar(&pt);
-				break;
-			default:
-				handled = false;
+				const CaptureInfo & capture = WINMGR().GetCapture();
+				Point newPos = pt;
+				newPos.x += capture.Delta.x;
+				newPos.y += capture.Delta.y;
+				Point delta = { (capture.Origin.x - newPos.x) , (capture.Origin.y - newPos.y) };
+
+				bool handled = true;
+				switch ((HitZone)capture.Target)
+				{
+				case HIT_HSCROLL_SLIDER:
+					ClickHScrollBar(&pt);
+					break;
+				case HIT_VSCROLL_SLIDER:
+					ClickVScrollBar(&pt);
+					break;
+				default:
+					handled = false;
+				}
+				return handled;
 			}
-			return handled;
+			else
+			{
+				if ((HitZone)hit & (HIT_BUTTON_ANY | HIT_VSCROLL_ANY | HIT_HSCROLL_ANY))
+				{
+					SDL_SetCursor(RES().FindCursor("default"));
+					return true;
+				}
+			}
 		}
 
 		return false;
