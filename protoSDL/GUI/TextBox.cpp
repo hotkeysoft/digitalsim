@@ -567,7 +567,7 @@ namespace GUI
 
 	HitResult TextBox::HitTest(const PointRef pt)
 	{
-		Rect parent = m_parent->GetClientRect(false, true);
+		Rect parent = m_parent->GetClientRect(false, false);
 		if (m_fill && parent.PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);

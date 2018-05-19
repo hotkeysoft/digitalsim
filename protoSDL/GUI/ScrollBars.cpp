@@ -44,19 +44,19 @@ namespace GUI
 		DrawButton(&m_scrollState.leftButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.left"), !m_parent->GetPushedState(HIT_HSCROLL_LEFT));
 		DrawButton(&m_scrollState.rightButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.right"), !m_parent->GetPushedState(HIT_HSCROLL_RIGHT));
 
-		double sliderHeight = (1.0 - ((double)m_scrollState.hMax / (double)pos->w)) * (double)scrollAreaWidth + 1;
-		if (sliderHeight < (m_borderWidth * 2))
+		double sliderWidth = (1.0 - ((double)m_scrollState.hMax / (double)pos->w)) * (double)scrollAreaWidth + 1;
+		if (sliderWidth < (m_borderWidth * 2))
 		{
-			sliderHeight = m_borderWidth * 2;
+			sliderWidth = m_borderWidth * 2;
 		}
 
-		int currPos = m_parent->m_scrollPos.x * scrollAreaWidth / pos->w;
-		if (currPos + sliderHeight > scrollAreaWidth)
+		int currPos = m_parent->m_scrollPos.x * scrollAreaWidth / m_scrollState.hMax;
+		if (currPos + sliderWidth > scrollAreaWidth)
 		{
-			currPos = scrollAreaWidth - (int)sliderHeight + 1;
+			currPos = scrollAreaWidth - (int)sliderWidth + 1;
 		}
 
-		m_scrollState.hSlider = { pos->x + m_scrollBarSize + currPos, pos->y, (int)sliderHeight, m_scrollBarSize };
+		m_scrollState.hSlider = { pos->x + m_scrollBarSize + currPos, pos->y, (int)sliderWidth, m_scrollBarSize };
 
 		DrawButton(&m_scrollState.hSlider, Color::C_LIGHT_GREY, nullptr, !m_parent->GetPushedState(HIT_HSCROLL_SLIDER));
 	}
@@ -79,7 +79,7 @@ namespace GUI
 			sliderHeight = m_borderWidth * 2;
 		}
 
-		int currPos = m_parent->m_scrollPos.y * scrollAreaHeight / pos->h;
+		int currPos = m_parent->m_scrollPos.y * scrollAreaHeight / m_scrollState.vMax;
 		if (currPos + sliderHeight > scrollAreaHeight)
 		{
 			currPos = scrollAreaHeight - (int)sliderHeight + 1;
@@ -313,6 +313,7 @@ namespace GUI
 			const CaptureInfo & capture = WINMGR().GetCapture();
 			if (capture && capture.Target.target == this)
 			{
+				m_parent->ToggleButtonState(capture.Target, false);
 				switch (HitZone(hit))
 				{
 				case HIT_HSCROLL_LEFT:
@@ -321,7 +322,6 @@ namespace GUI
 				case HIT_VSCROLL_DOWN:
 				case HIT_HSCROLL_SLIDER:
 				case HIT_VSCROLL_SLIDER:
-					m_parent->ToggleButtonState(hit, false);
 					if (hit == capture.Target)
 					{
 						m_parent->ButtonPushed(capture.Target);
@@ -349,6 +349,12 @@ namespace GUI
 					break;
 				case HIT_VSCROLL_SLIDER:
 					ClickVScrollBar(&pt);
+					break;
+				case HIT_HSCROLL_LEFT:
+				case HIT_HSCROLL_RIGHT:
+				case HIT_VSCROLL_UP:
+				case HIT_VSCROLL_DOWN:
+					m_parent->ToggleButtonState(capture.Target, capture.Target.target->HitTest(&pt) == capture.Target);
 					break;
 				default:
 					handled = false;

@@ -743,12 +743,12 @@ namespace GUI
 			const CaptureInfo & capture = WINMGR().GetCapture();
 			if (capture && capture.Target.target == this)
 			{
+				ToggleButtonState(capture.Target, false);
 				switch (HitZone(hit))
 				{
 				case HIT_SYSMENU:
 				case HIT_MAXBUTTON:
-				case HIT_MINBUTTON:
-					ToggleButtonState(hit, false);
+				case HIT_MINBUTTON:					
 					if (hit == capture.Target)
 					{
 						ButtonPushed(capture.Target);
