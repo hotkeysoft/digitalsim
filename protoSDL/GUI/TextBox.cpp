@@ -98,8 +98,8 @@ namespace GUI
 			for (int i = 0; i < m_borderWidth; ++i)
 			{
 				DrawRect(&drawRect, m_borderColor);
-				drawRect = drawRect.Deflate(1);
 			}
+			drawRect.Deflate(m_borderWidth);
 		}
 
 		if (m_padding)
@@ -114,13 +114,18 @@ namespace GUI
 		DrawText(&drawRect);
 	}
 
+	int TextBox::GetShrinkFactor()
+	{
+		return m_padding + m_margin + (m_showBorder ? m_borderWidth : 0);
+	}
+
 	void TextBox::DrawCursor(RectRef rect)
 	{
 		int yPos = rect->y + m_caretPos.y;
 	
 		if (m_fill)
 		{
-			int width = std::max(rect->w, m_rect.w + m_padding + m_borderWidth + m_margin);
+			int width = std::max(rect->w, m_rect.w + GetShrinkFactor());
 			Rect outlineBox = { rect->x, yPos, width, m_lineHeight };
 			DrawRect(&outlineBox, Color::C_VLIGHT_GREY);
 		}
@@ -130,6 +135,7 @@ namespace GUI
 			int xPos = rect->x + m_caretPos.x;
 			SetDrawColor(Color::C_DARK_GREY);
 			SDL_RenderDrawLine(m_renderer, xPos, yPos, xPos, yPos + m_lineHeight);
+			SDL_RenderDrawLine(m_renderer, xPos+1, yPos, xPos+1, yPos + m_lineHeight);
 		}
 	}
 
@@ -293,6 +299,8 @@ namespace GUI
 			std::string subStr = m_lines[m_currentPos.y].text.substr(0, m_currentPos.x);
 			TTF_SizeText(m_font, subStr.c_str(), &m_caretPos.x, nullptr);
 		}
+
+		ScrollCursorIntoView();
 	}
 
 	void TextBox::MoveCursorRel(int16_t deltaX, int16_t deltaY)
@@ -340,9 +348,39 @@ namespace GUI
 			len += (fraction+1) / 2;
 			return FindStringPos(in, pos, len, (fraction+1)/2);
 		}
+	}
 
-		return 0;
+	void TextBox::ScrollCursorIntoView()
+	{
+		WindowRef parentWnd  = GetParentWnd();
+		if (m_fill && parentWnd)
+		{
+			Rect rect = m_parent->GetClientRect(true, true).Deflate(GetShrinkFactor());
 
+			int deltaX = m_caretPos.x + rect.x;
+			if (deltaX < 0)
+			{				
+				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX - GetShrinkFactor(), 0));
+			}
+
+			deltaX = (m_caretPos.x + rect.x) - rect.w;
+			if (deltaX > 0)
+			{
+				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX, 0));
+			}
+
+			int deltaY = m_caretPos.y + rect.y;
+			if (deltaY < 0)
+			{
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor()));
+			}
+
+			deltaY = (m_caretPos.y+m_lineHeight + rect.y) - rect.h;
+			if (deltaY > 0)
+			{
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY));
+			}
+		}
 	}
 
 	Point TextBox::CursorAt(PointRef pt)
@@ -352,7 +390,7 @@ namespace GUI
 		Rect client;
 		if (m_fill)
 		{
-			client = m_parent->GetClientRect(false, true).Deflate(m_margin + m_borderWidth + m_padding);
+			client = m_parent->GetClientRect(false, true).Deflate(GetShrinkFactor());
 		}
 		else
 		{
@@ -445,6 +483,18 @@ namespace GUI
 		RenderLines();
 	}
 	
+	void TextBox::MovePage(int16_t deltaY)
+	{
+		if (m_fill)
+		{			
+			Rect client = m_parent->GetClientRect(true, false);
+			int linesPerPage = client.h / m_lineHeight;
+			std::cout << "Lines per page: " << linesPerPage << std::endl;
+
+			MoveCursorRel(0, deltaY * linesPerPage);
+		}
+	}
+
 	HitResult TextBox::HitTest(const PointRef pt)
 	{
 		Rect parent = m_parent->GetClientRect(false, true);
@@ -522,7 +572,13 @@ namespace GUI
 					Delete();
 					break;
 				case SDLK_RETURN:
+					MovePage(1);
 					Return();
+				case SDLK_PAGEDOWN:
+					MovePage(1);
+					break;
+				case SDLK_PAGEUP:
+					MovePage(-1);
 					break;
 				default:
 					return false;

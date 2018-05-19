@@ -43,6 +43,7 @@ namespace GUI
 		void Backspace();
 		void Delete();
 		void Return();
+		void MovePage(int16_t deltaY);
 
 		Point CursorAt(PointRef);
 
@@ -68,9 +69,13 @@ namespace GUI
 		void RenderLines();
 		void DrawText(RectRef rect);
 		void DrawBackground(const GUI::RectRef &rect);
-		void DrawCursor(RectRef rect);	
+		void DrawCursor(RectRef rect);
+		int GetShrinkFactor();
+		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
 		int FindStringPos(const std::string & in, int pos, int len, int fraction);
+
+		void ScrollCursorIntoView();
 
 		bool m_fill;
 		TextLines m_lines;
