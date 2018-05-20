@@ -65,8 +65,8 @@ namespace GUI
 			throw std::invalid_argument("image id already loaded: " + std::string(id));
 		}
 
-		ImagePtr image = Image::Create(m_renderer);
-		if (image != nullptr && image->LoadFromFile(fileName))
+		ImagePtr image = Image::FromFile(m_renderer, fileName);
+		if (image != nullptr)
 		{			
 			m_images[id] = image;
 		}

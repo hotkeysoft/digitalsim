@@ -9,8 +9,8 @@
 
 namespace GUI
 {
-	TreeNode::TreeNode(const char* label, ImagePtr image, TreeNodeRef parent, TreeRef tree) : 
-		m_image(image), m_label(label), m_parent(parent), m_tree(tree), m_depth(0), m_open(true)
+	TreeNode::TreeNode(RendererRef renderer, const char* label, ImageRef opened, ImageRef closed, TreeNodeRef parent, TreeRef tree) :
+		m_renderer(renderer), m_label(label), m_openedImage(opened), m_closedImage(closed), m_parent(parent), m_tree(tree), m_depth(0), m_open(true)
 	{
 		TreeNodeRef curr = parent;
 		while (curr) 
@@ -35,16 +35,18 @@ namespace GUI
 
 	void TreeNode::Render()
 	{
-		if (!m_texture && !m_label.empty())
+		if (!m_labelImage && !m_label.empty())
 		{
 			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_label.c_str(), m_tree->GetForegroundColor());
-			m_texture = WINMGR().SurfaceToTexture(surface);
-			SDL_QueryTexture(m_texture.get(), NULL, NULL, &m_rect.w, &m_rect.h);
+
+			m_labelImage = Image::FromTexture(m_renderer, WINMGR().SurfaceToTexture(surface));
 		}
 	}
 
-	Tree::Tree(const char * id, RendererRef renderer, FontRef font, bool fill) :
-		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, font), m_fill(fill), m_lineHeight(20), m_charWidth(0)
+	Tree::Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font) :
+		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, font), m_fill(fill), 
+		m_lineHeight(clip(lineHeight, 8, 255)), 
+		m_indent(clip(lineHeight, 0, 255))
 	{
 		m_backgroundColor = Color::C_WHITE;
 		m_margin = 5;
@@ -52,22 +54,17 @@ namespace GUI
 
 	void Tree::Init()
 	{
-		m_lineHeight = TTF_FontLineSkip(m_font);
-		if (TTF_FontFaceIsFixedWidth(m_font))
+		if (m_lineHeight < 10)
 		{
-			TTF_SizeText(m_font, "X", &m_charWidth, nullptr);
-		}
-		else
-		{
-			m_charWidth = 0;
+			throw std::invalid_argument("line height too small");
 		}
 
 		RenderNodes();
 	}
 
-	TreePtr Tree::Create(const char * id, RendererRef renderer, FontRef font)
+	TreePtr Tree::Create(const char * id, RendererRef renderer, int lineHeight, FontRef font)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, font, true);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, true, lineHeight, font);
 		return std::static_pointer_cast<Tree>(ptr);
 	}
 	
@@ -150,20 +147,26 @@ namespace GUI
 	
 	void Tree::DrawNode(const RectRef &rect, int line, TreeNodeRef node)
 	{
-		Rect source = node->m_rect;
+		Rect target = *rect;
+		target.x += (m_indent * node->m_depth);
+		target.y += (line * m_lineHeight);
+		target.w = node->m_labelImage->GetRect().w;
+		target.h = m_lineHeight;
 
-		Rect& target = node->m_drawRect;
-		target = { rect->x, rect->y + (line*m_lineHeight), node->m_rect.w, node->m_rect.h };
-				
-		SetDrawColor(Color::C_DARK_GREY);
-		for (int i=0; i<node->m_depth; ++i)
+		ImageRef image = (node->m_open && NodeHasChildren(node)) ? node->m_openedImage : node->m_closedImage;
+
+		if (image)
 		{
-			int x = target.x + (m_lineHeight * i) + (m_lineHeight / 2);
-			SDL_RenderDrawLine(m_renderer, x, target.y, x, target.y + m_lineHeight);
+			Rect imageRect(target.x, target.y, m_lineHeight, m_lineHeight);
+			image->Draw(&imageRect, Image::IMG_H_CENTER | Image::IMG_V_CENTER);
+			target.x += m_lineHeight;
 		}
-		target.x += (m_lineHeight * node->m_depth);
 
-		SDL_RenderCopy(m_renderer, node->m_texture.get(), &source, &target);	
+		if (node->m_labelImage)
+		{
+			node->m_drawRect = target;
+			node->m_labelImage->Draw(&target, Image::IMG_V_CENTER);
+		}
 	}
 
 	void Tree::RenderNodes()
@@ -174,22 +177,20 @@ namespace GUI
 			node->Render();
 
 			// TODO: Include everything that will be rendered (image, lines, widgets, etc.)
-			int width = node->m_rect.w + (m_lineHeight * node->m_depth);
-			maxWidth = std::max(width, maxWidth);
-
-			std::cout << "Node: [" << node->GetLabel() << "], hasChild,PrevSib,NextSib:"
-				<< NodeHasChildren(node)
-				<< NodeHasPreviousSibling(node)
-				<< NodeHasNextSibling(node) << std::endl;
-
+			if (node->IsVisible())
+			{
+				int width = node->m_labelImage->GetRect().w + (m_indent * node->m_depth + (node->m_openedImage ? m_lineHeight : 0));
+				maxWidth = std::max(width, maxWidth);
+			}
 		}
 
 		if (m_fill)
 		{
 			Rect newRect = { 0, 0, 
 				maxWidth + (2 * GetShrinkFactor()), 
-				GetVisibleLineCount() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor()) };
+				GetVisibleLineCount() * m_lineHeight + (2 * GetShrinkFactor()) };
 
+			std::cout << "Newrect " << newRect << std::endl;
 			if (!newRect.IsEqual(&m_rect))
 			{
 				m_rect = newRect;
@@ -264,19 +265,29 @@ namespace GUI
 		RenderNodes();
 	}
 
-	TreeNodeRef Tree::AddRootNode(const char * label, ImagePtr image)
+	TreeNodeRef Tree::AddRootNode(const char * label, ImageRef opened, ImageRef closed)
 	{
 		if (!m_nodes.empty())
 		{
 			throw std::invalid_argument("tree already has node");
 		}
 
-		TreeNodeRef root = new TreeNode(label, image, nullptr, this);
+		TreeNodeRef root = new TreeNode(m_renderer, label, opened, closed, nullptr, this);
 		m_nodes.push_back(root);
 		return root;
 	}
 
-	TreeNodeRef Tree::AddNode(const char * label, ImagePtr image, TreeNodeRef parent)
+	TreeNodeRef Tree::AddNode(const char * label, TreeNodeRef parent)
+	{
+		return AddNode(label, nullptr, nullptr, parent);
+	}
+
+	TreeNodeRef Tree::AddNode(const char * label, ImageRef image, TreeNodeRef parent)
+	{
+		return AddNode(label, image, image, parent);
+	}
+
+	TreeNodeRef Tree::AddNode(const char * label, ImageRef opened, ImageRef closed, TreeNodeRef parent)
 	{
 		if (label == nullptr)
 		{
@@ -285,7 +296,7 @@ namespace GUI
 
 		if (parent == nullptr)
 		{
-			return AddRootNode(label, image);
+			return AddRootNode(label, opened, closed);
 		}
 
 		auto iter = FindNode(parent);
@@ -295,7 +306,7 @@ namespace GUI
 		}
 		while (++iter != m_nodes.end() && (*iter)->GetParent() == parent);
 
-		TreeNodeRef node = new TreeNode(label, image, parent, this);
+		TreeNodeRef node = new TreeNode(m_renderer, label, opened, closed, parent, this);
 		m_nodes.insert(iter, node);
 		return node;
 	}

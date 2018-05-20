@@ -16,9 +16,6 @@ namespace GUI
 		std::string GetLabel() const { return m_label; }
 		void SetLabel(const char * label) { m_label = label ? label : ""; Render(); }
 
-		ImagePtr GetImage() const { return m_image; }
-		void SetImage(ImagePtr image) { m_image = image; }
-
 		TreeNodeRef GetParent() const { return m_parent; }
 
 		bool IsOpen() const { return m_open; } // True is node is open to show children		
@@ -27,20 +24,21 @@ namespace GUI
 	private:
 		bool m_open;
 
-		TreeNode(const char* label, ImagePtr image, TreeNodeRef parent, TreeRef tree);
+		TreeNode(RendererRef renderer, const char* label, ImageRef opened, ImageRef closed, TreeNodeRef parent, TreeRef tree);
 		void Render();
 
-		ImagePtr m_image;
-		std::string m_label;
+		ImageRef m_openedImage;
+		ImageRef m_closedImage;
+		
 		TreeNodeRef m_parent;
 
-		TexturePtr m_texture;
-		Rect m_rect; // Node dimensions, from rendering
-
+		std::string m_label;
+		ImagePtr m_labelImage;
 		Rect m_drawRect; // Node position on screen
 
 		TreeRef m_tree;
 		int m_depth;
+		RendererRef m_renderer;
 
 		friend class Tree;
 	};
@@ -56,8 +54,11 @@ namespace GUI
 
 		void Init() override;
 
+		void SetIndent(int indent) { m_indent = clip(indent, 0, 255); }
+		int GetIndent() const { return m_indent; }
+
 		// Creates a tree that fills the whole parent window
-		static TreePtr Create(const char* id, RendererRef renderer, FontRef font = nullptr);
+		static TreePtr Create(const char* id, RendererRef renderer, int lineHeight = 20, FontRef font = nullptr);
 
 		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
@@ -68,7 +69,9 @@ namespace GUI
 		HitResult HitTest(const PointRef) override;
 		void Draw() override;
 
-		TreeNodeRef AddNode(const char * label, ImagePtr image = ImagePtr(), TreeNodeRef parent = nullptr);
+		TreeNodeRef AddNode(const char * label, TreeNodeRef parent = nullptr);
+		TreeNodeRef AddNode(const char * label, ImageRef image, TreeNodeRef parent = nullptr);
+		TreeNodeRef AddNode(const char * label, ImageRef opened, ImageRef closed, TreeNodeRef parent = nullptr);
 
 		void OpenNode(TreeNodeRef node, bool open = true);
 
@@ -77,7 +80,7 @@ namespace GUI
 		bool NodeHasPreviousSibling(TreeNodeRef node);
 	
 	protected:
-		Tree(const char* id, RendererRef renderer, FontRef font, bool fill);
+		Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font);
 
 		void RenderNodes();
 		int GetVisibleLineCount();
@@ -86,13 +89,13 @@ namespace GUI
 		void DrawTree(const GUI::RectRef &rect);
 		void DrawNode(const GUI::RectRef &rect, int line, TreeNodeRef node);
 		TreeNodeList::const_iterator FindNode(TreeNodeRef) const;
-		TreeNodeRef AddRootNode(const char * label, ImagePtr image = ImagePtr());
+		TreeNodeRef AddRootNode(const char * label, ImageRef opened, ImageRef closed);
 
 		bool m_fill;
 		TreeNodeList m_nodes;
 
 		int m_lineHeight;
-		int m_charWidth;
+		int m_indent;
 
 		struct shared_enabler;
 	};
