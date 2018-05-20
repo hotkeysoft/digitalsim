@@ -53,7 +53,8 @@ namespace GUI
 		m_indent(clip(lineHeight, 0, 255))
 	{
 		m_backgroundColor = Color::C_WHITE;
-		m_margin = 25;
+		m_margin = 20;
+		m_padding = 5;
 		m_showBorder = true;
 	}
 
@@ -85,6 +86,37 @@ namespace GUI
 		return GetRect(relative, scrolled);
 	}
 
+	void Tree::DrawFrame(const RectRef &rect)
+	{
+		Rect frameRect = *rect;
+
+		if (m_fill)
+		{
+			DrawBackground(&m_parent->GetClientRect(false, false));
+		}
+
+		if (m_margin)
+		{
+			frameRect = frameRect.Deflate(m_margin);
+		}
+
+		if (!m_fill && !m_backgroundColor.IsTransparent())
+		{
+			DrawFilledRect(&frameRect, m_backgroundColor);
+		}
+
+		if (m_showBorder)
+		{
+			for (int i = 0; i < m_borderWidth; ++i)
+			{
+				DrawRect(&frameRect, m_borderColor);
+				frameRect = frameRect.Deflate(1);
+			}
+		}
+
+		SDL_RenderSetClipRect(m_renderer, &frameRect);
+	}
+
 	void Tree::Draw()
 	{
 		if (m_parent == nullptr)
@@ -93,39 +125,17 @@ namespace GUI
 		Rect drawRect;
 		if (m_fill)
 		{
-			DrawBackground(&m_parent->GetClientRect(false, false));
+			DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
 		}
 		else
 		{
 			drawRect = GetRect(false, true);
+			
+			DrawFrame(&drawRect);
 		}
 
-		if (m_margin)
-		{
-			drawRect = drawRect.Deflate(m_margin);
-		}
-
-		if (!m_fill && !m_backgroundColor.IsTransparent())
-		{
-			DrawFilledRect(&drawRect, m_backgroundColor);
-		}
-
-		if (m_showBorder)
-		{
-			for (int i = 0; i < m_borderWidth; ++i)
-			{
-				DrawRect(&drawRect, m_borderColor);
-				drawRect = drawRect.Deflate(1);
-			}
-		}
-
-		if (m_padding)
-		{
-			drawRect = drawRect.Deflate(m_padding);
-		}
-
-		SDL_RenderSetClipRect(m_renderer, &drawRect);
+		drawRect = drawRect.Deflate(GetShrinkFactor());
 
 		DrawTree(&drawRect);
 	}
@@ -196,8 +206,8 @@ namespace GUI
 		if (m_fill)
 		{
 			Rect newRect = { 0, 0, 
-				maxWidth + (2 * GetShrinkFactor()), 
-				GetVisibleLineCount() * m_lineHeight + (2 * GetShrinkFactor()) };
+				maxWidth + (2 * GetShrinkFactor().w), 
+				GetVisibleLineCount() * m_lineHeight + (2 * GetShrinkFactor().h) };
 
 			if (!newRect.IsEqual(&m_rect))
 			{
@@ -522,7 +532,7 @@ namespace GUI
 			int deltaY = selected->m_labelRect.y - rectAbs.y + scrollPos->y;
 			if (deltaY < 0)
 			{
-				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor()));
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor().h));
 			}
 
 			deltaY = (selected->m_labelRect.y + m_lineHeight - rectAbs.y) - rectAbs.h + scrollPos->y;

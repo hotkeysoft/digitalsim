@@ -28,7 +28,7 @@ namespace GUI
 
 		Dimension operator+(const Dimension& rhs) const { return Dimension(w + rhs.w, h + rhs.h); }
 
-		operator bool() const { return w || h; }
+		explicit operator bool() const { return w || h; }
 
 		uint8_t w;
 		uint8_t h;

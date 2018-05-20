@@ -50,7 +50,7 @@ namespace GUI
 			sliderWidth = m_borderWidth * 2;
 		}
 
-		int currPos = m_parent->m_scrollPos.x * scrollAreaWidth / m_scrollState.hMax;
+		int currPos = m_scrollState.hMax ? m_parent->m_scrollPos.x * scrollAreaWidth / m_scrollState.hMax : 0;
 		if (currPos + sliderWidth > scrollAreaWidth)
 		{
 			currPos = scrollAreaWidth - (int)sliderWidth + 1;
@@ -79,7 +79,7 @@ namespace GUI
 			sliderHeight = m_borderWidth * 2;
 		}
 
-		int currPos = m_parent->m_scrollPos.y * scrollAreaHeight / m_scrollState.vMax;
+		int currPos = m_scrollState.vMax ? m_parent->m_scrollPos.y * scrollAreaHeight / m_scrollState.vMax : 0;
 		if (currPos + sliderHeight > scrollAreaHeight)
 		{
 			currPos = scrollAreaHeight - (int)sliderHeight + 1;
@@ -103,7 +103,7 @@ namespace GUI
 
 		if ((thisRect->y + thisRect->h) > parentRect.h)
 		{
-			showV = true;
+			showV = true;		
 			int vMax = ((thisRect->y + thisRect->h) - parentRect.h);
 			m_scrollState.vMax = std::max(m_scrollState.vMax, vMax);
 		}

@@ -229,7 +229,7 @@ namespace GUI
 		
 		if (m_fill)
 		{
-			Rect newRect = { 0, 0, maxWidth + (2 * GetShrinkFactor()), (int)m_lines.size() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor()) };
+			Rect newRect = { 0, 0, maxWidth + (2 * GetShrinkFactor().w), (int)m_lines.size() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor().h) };
 			if (!newRect.IsEqual(&m_rect))
 			{
 				m_rect = newRect;
@@ -384,7 +384,7 @@ namespace GUI
 			int deltaX = m_caretPos.x + rect.x;
 			if (deltaX < 0)
 			{				
-				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX - GetShrinkFactor(), 0));
+				parentWnd->GetScrollBars()->ScrollRel(&Point(deltaX - GetShrinkFactor().w, 0));
 			}
 
 			// TODO: m_charWidth not set for proportional fonts
@@ -397,7 +397,7 @@ namespace GUI
 			int deltaY = m_caretPos.y + rect.y;
 			if (deltaY < 0)
 			{
-				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor()));
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor().h));
 			}
 			
 			deltaY = (m_caretPos.y+m_lineHeight + rect.y) - rect.h;
