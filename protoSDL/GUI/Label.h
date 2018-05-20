@@ -42,6 +42,8 @@ namespace GUI
 		// Auto-size
 		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT);
 
+		void SetForegroundColor(Color color) override;
+
 		Rect GetRect(bool relative = true, bool scrolled = true) const override;
 
 		void Draw() override;

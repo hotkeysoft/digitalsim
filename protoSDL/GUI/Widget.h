@@ -84,8 +84,11 @@ namespace GUI
 		virtual Color GetBackgroundColor() { return m_backgroundColor; }
 		virtual void SetBackgroundColor(Color color) { m_backgroundColor = std::move(color); }
 
-		virtual Color GetSelectedColor() { return m_selectedColor; }
-		virtual void SetSelectedColor(Color color) { m_selectedColor = std::move(color); }
+		virtual Color GetSelectedFgColor() { return m_selectedFgColor; }
+		virtual void SetSelectedFgColor(Color color) { m_selectedFgColor = std::move(color); }
+
+		virtual Color GetSelectedBgColor() { return m_selectedBgColor; }
+		virtual void SetSelectedBgColor(Color color) { m_selectedBgColor = std::move(color); }
 
 		// Parent
 		virtual bool HasParent() const { return m_parent != nullptr; }
@@ -133,7 +136,8 @@ namespace GUI
 		// Colors
 		Color m_backgroundColor;
 		Color m_foregroundColor;
-		Color m_selectedColor;
+		Color m_selectedFgColor;
+		Color m_selectedBgColor;
 
 		Dimension m_padding;
 		Dimension m_margin;

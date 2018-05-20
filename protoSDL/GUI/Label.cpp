@@ -23,6 +23,17 @@ namespace GUI
 		RenderLabel();
 	}
 
+	void Label::SetForegroundColor(Color color)
+	{
+		bool colorChanged = (color != m_foregroundColor);
+		Widget::SetForegroundColor(color);
+
+		if (colorChanged)
+		{
+			RenderLabel();
+		}
+	}
+
 	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align)
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, false, false);
@@ -149,7 +160,7 @@ namespace GUI
 
 	void Label::RenderLabel()
 	{
-		SDL_Surface* label = TTF_RenderText_Blended(m_font, m_text.c_str(), Color::C_BLACK);
+		SDL_Surface* label = TTF_RenderText_Blended(m_font, m_text.c_str(), m_foregroundColor);
 		m_labelText = SurfaceToTexture(label);
 
 		SDL_QueryTexture(m_labelText.get(), NULL, NULL, &m_labelRect.w, &m_labelRect.h);

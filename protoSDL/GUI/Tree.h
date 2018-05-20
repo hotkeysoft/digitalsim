@@ -77,7 +77,7 @@ namespace GUI
 		TreeNodeRef AddNode(const char * label, TreeNodeRef parent = nullptr);
 		TreeNodeRef AddNode(const char * label, ImageRef image, TreeNodeRef parent = nullptr);
 		TreeNodeRef AddNode(const char * label, ImageRef opened, ImageRef closed, TreeNodeRef parent = nullptr);
-
+		
 		void OpenNode(TreeNodeRef node, bool open = true);
 
 		bool NodeHasChildren(TreeNodeRef node);
@@ -85,6 +85,12 @@ namespace GUI
 		bool NodeHasPreviousSibling(TreeNodeRef node);
 	
 		void SelectNode(TreeNodeRef node);
+		TreeNodeRef GetSelectedNode() const;
+
+		void MoveSelectionRel(int16_t deltaY);
+		void MoveSelectionPage(int16_t deltaY);
+		void OpenSelection();
+		void CloseSelection();
 
 	protected:
 		Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font);
@@ -96,9 +102,11 @@ namespace GUI
 		void DrawTree(const GUI::RectRef &rect);
 		void DrawNode(const GUI::RectRef &rect, int line, TreeNodeRef node);
 		TreeNodeList::const_iterator FindNode(TreeNodeRef) const;
+		TreeNodeList::const_iterator FindSelectedNode() const;
 		TreeNodeRef AddRootNode(const char * label, ImageRef opened, ImageRef closed);
-
 		TreeNodeRef NodeAt(PointRef pt);
+
+		void ScrollSelectionIntoView();
 
 		bool m_fill;
 		TreeNodeList m_nodes;

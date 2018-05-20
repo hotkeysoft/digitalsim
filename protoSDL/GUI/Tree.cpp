@@ -7,6 +7,7 @@
 #include "ResourceManager.h"
 #include "Tree.h"
 #include <algorithm>
+#include <cassert>
 
 namespace GUI
 {
@@ -52,7 +53,8 @@ namespace GUI
 		m_indent(clip(lineHeight, 0, 255))
 	{
 		m_backgroundColor = Color::C_WHITE;
-		m_margin = 5;
+		m_margin = 25;
+		m_showBorder = true;
 	}
 
 	void Tree::Init()
@@ -123,6 +125,8 @@ namespace GUI
 			drawRect = drawRect.Deflate(m_padding);
 		}
 
+		SDL_RenderSetClipRect(m_renderer, &drawRect);
+
 		DrawTree(&drawRect);
 	}
 
@@ -167,7 +171,8 @@ namespace GUI
 
 		if (node->m_label)
 		{
-			node->m_label->SetBackgroundColor(node->IsSelected() ? m_selectedColor : m_backgroundColor);
+			node->m_label->SetBackgroundColor(node->IsSelected() ? m_selectedBgColor : m_backgroundColor);
+			node->m_label->SetForegroundColor(node->IsSelected() ? m_selectedFgColor : m_foregroundColor);
 			node->m_label->Draw(&target);
 			node->m_labelRect = target;
 		}
@@ -194,7 +199,6 @@ namespace GUI
 				maxWidth + (2 * GetShrinkFactor()), 
 				GetVisibleLineCount() * m_lineHeight + (2 * GetShrinkFactor()) };
 
-			std::cout << "Newrect " << newRect << std::endl;
 			if (!newRect.IsEqual(&m_rect))
 			{
 				m_rect = newRect;
@@ -225,7 +229,44 @@ namespace GUI
 			break;
 		case SDL_KEYDOWN:
 		{
-			return false;
+			if (IsFocused())
+			{
+				//bool ctrl = SDL_GetModState() & KMOD_CTRL;
+				switch (e->key.keysym.sym)
+				{
+				case SDLK_LEFT:
+					CloseSelection();
+					break;
+				case SDLK_RIGHT:
+					OpenSelection();
+					break;
+				case SDLK_UP:
+					MoveSelectionRel(-1);
+					break;
+				case SDLK_DOWN:
+					MoveSelectionRel(1);
+					break;
+				case SDLK_HOME:
+					MoveSelectionRel(INT16_MIN);
+					break;
+				case SDLK_END:
+					MoveSelectionRel(INT16_MAX);
+					break;
+				case SDLK_PAGEDOWN:
+					MoveSelectionPage(1);
+					break;
+				case SDLK_PAGEUP:
+					MoveSelectionPage(-1);
+					break;
+				default:
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+			break;
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
@@ -392,6 +433,103 @@ namespace GUI
 		if (node)
 		{
 			node->m_selected = true;
+		}
+	}
+
+	TreeNodeList::const_iterator Tree::FindSelectedNode() const
+	{
+		return std::find_if(m_nodes.begin(), m_nodes.end(), [](TreeNodeRef node) { return node->IsSelected(); });
+	}
+
+	TreeNodeRef Tree::GetSelectedNode() const
+	{
+		auto it = FindSelectedNode();
+		if (it != m_nodes.end())
+		{
+			return *it;
+		}
+
+		return nullptr;
+	}
+
+	void Tree::MoveSelectionRel(int16_t deltaY)
+	{
+		auto it = FindSelectedNode();
+
+		if (deltaY < 0 && it != m_nodes.begin())
+		{
+			while (deltaY < 0)
+			{
+				if (--it == m_nodes.begin())
+					break;
+
+				if ((*it)->IsVisible())
+				{
+					++deltaY;
+				}
+			}
+		}
+		else if (deltaY > 0 && it != m_nodes.end())
+		{
+			TreeNodeList::const_iterator lastVisible = m_nodes.end();
+			while (deltaY > 0)
+			{
+				if (++it == m_nodes.end())
+					break;
+
+				if ((*it)->IsVisible())
+				{
+					lastVisible = it;
+					--deltaY;
+				}
+			}
+
+			it = lastVisible;
+		}
+		
+		if (it != m_nodes.end())
+		{
+			SelectNode(*it);
+			ScrollSelectionIntoView();
+		}
+	}
+	void Tree::MoveSelectionPage(int16_t deltaY)
+	{
+
+	}
+
+	void Tree::OpenSelection()
+	{
+		OpenNode(GetSelectedNode(), true);
+	}
+
+	void Tree::CloseSelection()
+	{
+		OpenNode(GetSelectedNode(), false);
+	}
+
+	void Tree::ScrollSelectionIntoView()
+	{
+		WindowRef parentWnd = GetParentWnd();
+		assert(parentWnd); // TODO update for widget in widget
+
+		Rect rectAbs = m_parent->GetClientRect(false, false).Deflate(GetShrinkFactor());
+		PointRef scrollPos = parentWnd->GetScrollBars()->GetScrollPos();
+
+		TreeNodeRef selected = GetSelectedNode();
+		if (selected)
+		{
+			int deltaY = selected->m_labelRect.y - rectAbs.y + scrollPos->y;
+			if (deltaY < 0)
+			{
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY - GetShrinkFactor()));
+			}
+
+			deltaY = (selected->m_labelRect.y + m_lineHeight - rectAbs.y) - rectAbs.h + scrollPos->y;
+			if (deltaY > 0)
+			{
+				parentWnd->GetScrollBars()->ScrollRel(&Point(0, deltaY));
+			}
 		}
 	}
 
