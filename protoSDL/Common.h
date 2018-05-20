@@ -85,6 +85,13 @@ namespace GUI
 	using TextBoxPtr = std::shared_ptr<TextBox>;
 	using TextBoxRef = TextBox * ;
 
+	class TreeNode;
+	using TreeNodeRef = TreeNode * ;
+
+	class Tree;
+	using TreePtr = std::shared_ptr<Tree>;
+	using TreeRef = Tree * ;
+
 	class Label;
 	using LabelPtr = std::shared_ptr<Label>;
 	using LabelRef = Label * ;
@@ -123,11 +130,11 @@ namespace GUI
 
 	struct sdl_deleter
 	{
-		void operator()(MainWindowRef p) const { SDL_DestroyWindow(p); std::cout << "DestroyWindow" << std::endl; }
-		void operator()(RendererRef p) const { SDL_DestroyRenderer(p); std::cout << "DestroyRenderer" << std::endl; }
+		void operator()(MainWindowRef p) const { SDL_DestroyWindow(p); /*std::cout << "DestroyWindow" << std::endl;*/ }
+		void operator()(RendererRef p) const { SDL_DestroyRenderer(p); /*std::cout << "DestroyRenderer" << std::endl;*/ }
 		void operator()(TextureRef p) const { SDL_DestroyTexture(p); /*std::cout << "DestroyTexture " << std::endl;*/ }
-		void operator()(FontRef p) const { TTF_CloseFont(p); std::cout << "CloseFont" << std::endl; }
-		void operator()(CursorRef p) const { SDL_FreeCursor(p); std::cout << "FreeCursor" << std::endl; }
+		void operator()(FontRef p) const { TTF_CloseFont(p); /*std::cout << "CloseFont" << std::endl;*/ }
+		void operator()(CursorRef p) const { SDL_FreeCursor(p); /*std::cout << "FreeCursor" << std::endl;*/ }
 	};
 
 	using MainWindowPtr = std::unique_ptr<SDL_Window, sdl_deleter>;

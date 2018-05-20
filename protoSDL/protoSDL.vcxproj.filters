@@ -57,6 +57,9 @@
     <ClCompile Include="GUI\TextBox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\Tree.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI\Window.h">
@@ -96,6 +99,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\TextBox.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Tree.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>

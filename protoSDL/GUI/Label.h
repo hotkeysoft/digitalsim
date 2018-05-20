@@ -25,7 +25,7 @@ namespace GUI
 		};
 
 		virtual ~Label() = default;
-		Label(const Button&) = delete;
+		Label(const Label&) = delete;
 		Label& operator=(const Label&) = delete;
 		Label(Label&&) = delete;
 		Label& operator=(Label&&) = delete;

@@ -8,6 +8,7 @@
 #include "GUI\Button.h"
 #include "GUI\Label.h"
 #include "GUI\TextBox.h"
+#include "GUI\Tree.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -59,11 +60,7 @@ void OnClick(WidgetRef widget)
 		pos = 9999;
 		col = 9999;
 	}
-	//std::ostringstream os;
-	//os << "Insert from " << widget->GetId() << " at line " << pos;
-	//std::static_pointer_cast<TextBox>(WINMGR().FindWindow("parts")->FindControl("text"))->InsertLine(os.str().c_str(), pos);
-	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("parts")->FindControl("text"))->InsertAt("#", pos, col);
-
+	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("sim")->FindControl("text"))->InsertAt("#", pos, col);
 }
 
 int main(int argc, char ** argv)
@@ -161,11 +158,27 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
-		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), "Another text box Another text box Another text box Another text box Another text box Another text box "));
+		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
-		WINMGR().AddWindow("parts", mainWnd, { 200, 100, 400, 400 })->SetText("TextBox");
-		WINMGR().FindWindow("parts")->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
+		WINMGR().AddWindow("parts", mainWnd, { client.w-300, 0, 300, client.h})->SetText("Parts");
 
+		{
+			TreePtr tree = GUI::Tree::Create("tree", ren.get());
+
+			TreeNodeRef root = tree->AddNode("Root", nullptr, nullptr);
+			
+			TreeNodeRef l1a = tree->AddNode("Level 1 a", nullptr, root);
+			TreeNodeRef l1b = tree->AddNode("Level 1 b", nullptr, root);
+			TreeNodeRef l1c = tree->AddNode("Level 1 c", nullptr, root);
+
+			TreeNodeRef l2b1 = tree->AddNode("SubItem b.1", nullptr, l1b);
+			TreeNodeRef l2b2 = tree->AddNode("SubItem b.2", nullptr, l1b);
+
+			TreeNodeRef l3b1 = tree->AddNode("Level 3", nullptr, l2b2);
+
+			WINMGR().FindWindow("parts")->AddControl(tree);
+		}	
+		
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
