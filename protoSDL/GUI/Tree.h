@@ -13,16 +13,20 @@ namespace GUI
 	class TreeNode
 	{
 	public:
-		std::string GetLabel() const { return m_label; }
-		void SetLabel(const char * label) { m_label = label ? label : ""; Render(); }
+		std::string GetText() const { return m_text; }
+		void SetText(const char * text) { m_text = text ? text : ""; Render(); }
 
 		TreeNodeRef GetParent() const { return m_parent; }
 
-		bool IsOpen() const { return m_open; } // True is node is open to show children		
+		bool IsOpen() const { return m_opened; } // True if node is open to show children		
+		bool IsSelected() const { return m_selected; } // True if node is selected
 		bool IsVisible() const; // False is any of parent nodes is closed
 
+		bool Hit(PointRef pt) { return m_labelRect.PointInRect(pt); }
+
 	private:
-		bool m_open;
+		bool m_opened;
+		bool m_selected;
 
 		TreeNode(RendererRef renderer, const char* label, ImageRef opened, ImageRef closed, TreeNodeRef parent, TreeRef tree);
 		void Render();
@@ -32,12 +36,13 @@ namespace GUI
 		
 		TreeNodeRef m_parent;
 
-		std::string m_label;
-		ImagePtr m_labelImage;
-		Rect m_drawRect; // Node position on screen
+		std::string m_text;
+		LabelPtr m_label;
+		Rect m_labelRect;
 
 		TreeRef m_tree;
 		int m_depth;
+
 		RendererRef m_renderer;
 
 		friend class Tree;
@@ -79,6 +84,8 @@ namespace GUI
 		bool NodeHasNextSibling(TreeNodeRef node);
 		bool NodeHasPreviousSibling(TreeNodeRef node);
 	
+		void SelectNode(TreeNodeRef node);
+
 	protected:
 		Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font);
 
@@ -90,6 +97,8 @@ namespace GUI
 		void DrawNode(const GUI::RectRef &rect, int line, TreeNodeRef node);
 		TreeNodeList::const_iterator FindNode(TreeNodeRef) const;
 		TreeNodeRef AddRootNode(const char * label, ImageRef opened, ImageRef closed);
+
+		TreeNodeRef NodeAt(PointRef pt);
 
 		bool m_fill;
 		TreeNodeList m_nodes;

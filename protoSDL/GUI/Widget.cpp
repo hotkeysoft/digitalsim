@@ -11,7 +11,7 @@ namespace GUI
 	{
 	}
 
-	Widget::Widget(const char* id, RendererRef renderer, WidgetRef parent, 
+	Widget::Widget(const char* id, RendererRef renderer, WidgetRef parent,
 		Rect rect, const char* text, ImageRef image, FontRef font) :
 		m_id(id ? id : ""),
 		m_renderer(renderer),
@@ -23,6 +23,7 @@ namespace GUI
 		m_foregroundColor(Color::C_BLACK),
 		m_backgroundColor(Color::C_LIGHT_GREY),
 		m_borderColor(Color::C_BLACK),
+		m_selectedColor(Color(90, 128, 128)),
 		m_padding(0),
 		m_margin(0),
 		m_borderWidth(4),

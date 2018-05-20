@@ -22,6 +22,7 @@ namespace GUI
 
 			TEXT_FILL_DEFAULT = TEXT_H_CENTER | TEXT_V_CENTER,
 			TEXT_SINGLE_DEFAULT = TEXT_H_LEFT | TEXT_V_TOP,
+			TEXT_AUTOSIZE_DEFAULT = TEXT_H_LEFT | TEXT_V_TOP,
 		};
 
 		virtual ~Label() = default;
@@ -38,7 +39,13 @@ namespace GUI
 		// Fills whole parent window
 		static LabelPtr CreateFill(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_FILL_DEFAULT);
 
+		// Auto-size
+		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT);
+
+		Rect GetRect(bool relative = true, bool scrolled = true) const override;
+
 		void Draw() override;
+		void Draw(const RectRef rect);
 
 		void SetText(const char *) override;
 
@@ -46,7 +53,7 @@ namespace GUI
 		uint8_t GetAlign() { return m_labelAlign;  }
 
 	protected:
-		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align);
+		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, bool fill, bool autoSize);
 
 		void RenderLabel();
 		void DrawLabel(RectRef rect);
@@ -54,6 +61,9 @@ namespace GUI
 		TexturePtr m_labelText;
 		Rect m_labelRect;
 		TextAlign m_labelAlign;
+
+		bool m_fill;
+		bool m_autoSize;
 
 		struct shared_enabler;
 	};

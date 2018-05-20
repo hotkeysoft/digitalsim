@@ -111,6 +111,7 @@ namespace GUI
 	void Button::CreateLabel()
 	{
 		m_label = Label::CreateFill("label", m_renderer, m_text.c_str(), m_font);
+		m_label->SetMargin(0);
 		m_label->SetParent(this);
 		m_label->Init();
 	}

@@ -6,6 +6,34 @@
 
 namespace GUI
 {
+	struct Dimension
+	{
+		enum Dim
+		{
+			DIM_W = 1,
+			DIM_H = 2,
+			DIM_ALL = DIM_W | DIM_H
+		};
+
+		Dimension(uint8_t all = 0) : w(all), h(all) {}
+		Dimension(uint8_t w, uint8_t h) : w(w), h(h) {}
+
+		void Set(uint8_t dim, Dim set = DIM_ALL)
+		{
+			if (set & DIM_W)
+				w = dim;
+			if (set & DIM_H)
+				h = dim;
+		}
+
+		Dimension operator+(const Dimension& rhs) const { return Dimension(w + rhs.w, h + rhs.h); }
+
+		operator bool() const { return w || h; }
+
+		uint8_t w;
+		uint8_t h;
+	};
+
 	class Rect : public SDL_Rect
 	{
 	public:
@@ -25,6 +53,7 @@ namespace GUI
 		Rect OffsetNeg(const PointRef pt) const { return Rect(x - pt->x, y - pt->y, w, h); }
 
 		Rect Deflate(int size) const { return Rect(x + size, y + size, w - (2 * size), h - (2 * size)); }
+		Rect Deflate(Dimension dim) const { return Rect(x + dim.w, y + dim.h, w - (2 * dim.w), h - (2 * dim.h)); }
 
 		Rect CenterInTarget(const RectRef, bool hCenter = true, bool vCenter = true);
 

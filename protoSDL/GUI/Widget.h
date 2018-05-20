@@ -55,18 +55,18 @@ namespace GUI
 		virtual void SetRect(RectRef rect) { m_rect = rect?(*rect):Rect(); }
 
 		// Margins & Padding
-		virtual uint8_t GetMargin() { return m_margin; }
-		virtual void SetMargin(uint8_t margin) { m_margin = margin; }
+		virtual Dimension GetMargin() { return m_margin; }
+		virtual void SetMargin(Dimension margin) { m_margin = margin; }
 
-		virtual uint8_t GetPadding() { return m_padding; }
-		virtual void SetPadding(uint8_t padding) { m_padding = padding; }
+		virtual Dimension GetPadding() { return m_padding; }
+		virtual void SetPadding(Dimension padding) { m_padding = padding; }
 
 		// Font
 		virtual const FontRef GetFont() const { return m_font; }
 		virtual void SetFont(FontRef font);
 
 		// Borders
-		virtual int GetShrinkFactor() { return m_padding + m_margin + (m_showBorder ? m_borderWidth : 0); }
+		virtual Dimension GetShrinkFactor() const { return m_padding + m_margin + Dimension(m_showBorder ? m_borderWidth : 0); }
 
 		virtual void SetBorder(bool show) { m_showBorder = show; }
 		virtual bool GetBorder() { return m_showBorder; }
@@ -84,11 +84,15 @@ namespace GUI
 		virtual Color GetBackgroundColor() { return m_backgroundColor; }
 		virtual void SetBackgroundColor(Color color) { m_backgroundColor = std::move(color); }
 
+		virtual Color GetSelectedColor() { return m_selectedColor; }
+		virtual void SetSelectedColor(Color color) { m_selectedColor = std::move(color); }
+
+		// Parent
 		virtual bool HasParent() const { return m_parent != nullptr; }
 		virtual const WidgetRef GetParent() const { return m_parent; }
 		virtual void SetParent(WidgetRef parent) { m_parent = parent; }
 
-		//Events
+		// Events
 		virtual bool HandleEvent(SDL_Event *) { return false; }
 		virtual HitResult HitTest(const PointRef) { return HitZone::HIT_NOTHING; }
 
@@ -129,9 +133,10 @@ namespace GUI
 		// Colors
 		Color m_backgroundColor;
 		Color m_foregroundColor;
+		Color m_selectedColor;
 
-		uint8_t m_padding;
-		uint8_t m_margin;
+		Dimension m_padding;
+		Dimension m_margin;
 		uint8_t m_borderWidth;
 
 		static uint8_t constexpr m_buttonSize = 24;

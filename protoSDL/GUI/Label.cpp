@@ -9,11 +9,13 @@
 
 namespace GUI
 {
-	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align) :
-		Widget(id, renderer, nullptr, rect, label, nullptr, font), m_labelAlign(align)
+	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, bool fill, bool autoSize) :
+		Widget(id, renderer, nullptr, rect, label, nullptr, font), m_labelAlign(align), m_fill(fill), m_autoSize(autoSize)
 	{
 		m_backgroundColor = Color::C_TRANSPARENT;
 		m_borderWidth = 1;
+
+		m_margin = m_fill ? 5 : 0;
 	}
 
 	void Label::Init()
@@ -23,23 +25,37 @@ namespace GUI
 
 	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, false, false);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
 	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, true, false);
 		return std::static_pointer_cast<Label>(ptr);
 	}
-	
+
+	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align)
+	{
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, false, true);
+		return std::static_pointer_cast<Label>(ptr);
+	}
+
+	Rect Label::GetRect(bool relative, bool scrolled) const
+	{
+		if (!m_autoSize)
+			return m_rect;
+
+		return Rect(m_rect.x, m_rect.y, m_labelRect.w+(GetShrinkFactor().w*2), m_labelRect.h+(GetShrinkFactor().h*2));
+	}
+
 	void Label::Draw()
 	{
 		if (m_parent == nullptr)
 			return;
 
 		Rect drawRect;
-		if (m_rect.IsEmpty())
+		if (m_fill)
 		{
 			drawRect = m_parent->GetClientRect(false, true);
 		}
@@ -47,6 +63,12 @@ namespace GUI
 		{
 			drawRect = m_rect.Offset(&m_parent->GetClientRect(false, true).Origin());
 		}
+		Draw(&drawRect);
+	}
+
+	void Label::Draw(const RectRef rect)
+	{
+		Rect drawRect = *rect;
 
 		if (m_margin)
 		{
@@ -133,6 +155,12 @@ namespace GUI
 		SDL_QueryTexture(m_labelText.get(), NULL, NULL, &m_labelRect.w, &m_labelRect.h);
 		m_labelRect.x = 0;
 		m_labelRect.y = 0;
+		
+		if (m_autoSize)
+		{
+			m_rect.w = m_labelRect.w;
+			m_rect.h = m_labelRect.h;
+		}
 	}
 
 	void Label::SetAlign(uint8_t align)

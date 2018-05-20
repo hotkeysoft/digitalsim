@@ -8,7 +8,7 @@
 
 namespace GUI
 {
-	const Color Window::m_activeTitleBarColor = { 90, 128, 128, 255 };
+	const Color Window::m_activeTitleBarColor = Color(90, 128, 128);
 
 	Window Window::m_nullWnd;
 

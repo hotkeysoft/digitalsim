@@ -2,6 +2,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "Image.h"
+#include "Label.h"
 #include "Window.h"
 #include "ResourceManager.h"
 #include "Tree.h"
@@ -9,8 +10,8 @@
 
 namespace GUI
 {
-	TreeNode::TreeNode(RendererRef renderer, const char* label, ImageRef opened, ImageRef closed, TreeNodeRef parent, TreeRef tree) :
-		m_renderer(renderer), m_label(label), m_openedImage(opened), m_closedImage(closed), m_parent(parent), m_tree(tree), m_depth(0), m_open(true)
+	TreeNode::TreeNode(RendererRef renderer, const char* text, ImageRef opened, ImageRef closed, TreeNodeRef parent, TreeRef tree) :
+		m_renderer(renderer), m_text(text), m_openedImage(opened), m_closedImage(closed), m_parent(parent), m_tree(tree), m_depth(0), m_opened(true)
 	{
 		TreeNodeRef curr = parent;
 		while (curr) 
@@ -35,11 +36,13 @@ namespace GUI
 
 	void TreeNode::Render()
 	{
-		if (!m_labelImage && !m_label.empty())
+		if (!m_label && !m_text.empty())
 		{
-			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_label.c_str(), m_tree->GetForegroundColor());
+			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_text.c_str(), m_tree->GetForegroundColor());
 
-			m_labelImage = Image::FromTexture(m_renderer, WINMGR().SurfaceToTexture(surface));
+			m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
+			m_label->SetPadding(Dimension(5, 0));
+			m_label->Init();
 		}
 	}
 
@@ -54,7 +57,7 @@ namespace GUI
 
 	void Tree::Init()
 	{
-		if (m_lineHeight < 10)
+		if (m_lineHeight < 8)
 		{
 			throw std::invalid_argument("line height too small");
 		}
@@ -150,10 +153,10 @@ namespace GUI
 		Rect target = *rect;
 		target.x += (m_indent * node->m_depth);
 		target.y += (line * m_lineHeight);
-		target.w = node->m_labelImage->GetRect().w;
+		target.w = node->m_label->GetRect().w;
 		target.h = m_lineHeight;
 
-		ImageRef image = (node->m_open && NodeHasChildren(node)) ? node->m_openedImage : node->m_closedImage;
+		ImageRef image = (node->m_opened && NodeHasChildren(node)) ? node->m_openedImage : node->m_closedImage;
 
 		if (image)
 		{
@@ -162,10 +165,11 @@ namespace GUI
 			target.x += m_lineHeight;
 		}
 
-		if (node->m_labelImage)
+		if (node->m_label)
 		{
-			node->m_drawRect = target;
-			node->m_labelImage->Draw(&target, Image::IMG_V_CENTER);
+			node->m_label->SetBackgroundColor(node->IsSelected() ? m_selectedColor : m_backgroundColor);
+			node->m_label->Draw(&target);
+			node->m_labelRect = target;
 		}
 	}
 
@@ -179,7 +183,7 @@ namespace GUI
 			// TODO: Include everything that will be rendered (image, lines, widgets, etc.)
 			if (node->IsVisible())
 			{
-				int width = node->m_labelImage->GetRect().w + (m_indent * node->m_depth + (node->m_openedImage ? m_lineHeight : 0));
+				int width = node->m_label->GetRect().w + (m_indent * node->m_depth + (node->m_openedImage ? m_lineHeight : 0));
 				maxWidth = std::max(width, maxWidth);
 			}
 		}
@@ -225,11 +229,17 @@ namespace GUI
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
-//			Point cursor = CursorAt(&pt);
+			TreeNodeRef node = NodeAt(&pt);
+
 			SetActive();
 			SetFocus(this);
-//			return cursor.x >= 0;
-			return true;
+
+			if (node)
+			{
+				SelectNode(node);
+			}
+
+			return node != nullptr;
 		}
 		default:
 			return false;
@@ -252,6 +262,17 @@ namespace GUI
 
 		return HitZone::HIT_NOTHING;
 	}
+
+	TreeNodeRef Tree::NodeAt(PointRef pt)
+	{
+		auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [pt](TreeNodeRef node) { return node->Hit(pt); });
+		if (it != m_nodes.end())
+		{
+			return *it;
+		}
+
+		return nullptr;
+	}
 	
 	void Tree::OpenNode(TreeNodeRef node, bool open)
 	{
@@ -261,7 +282,7 @@ namespace GUI
 		}
 
 		// For efficiency, assume that node belongs to m_nodes...
-		node->m_open = open;
+		node->m_opened = open;
 		RenderNodes();
 	}
 
@@ -359,6 +380,19 @@ namespace GUI
 				return true;
 		}
 		return false;
+	}
+
+	void Tree::SelectNode(TreeNodeRef node)
+	{
+		for (auto node : m_nodes)
+		{
+			node->m_selected = false;
+		}
+
+		if (node)
+		{
+			node->m_selected = true;
+		}
 	}
 
 	struct Tree::shared_enabler : public Tree
