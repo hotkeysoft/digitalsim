@@ -170,9 +170,11 @@ int main(int argc, char ** argv)
 			TreeNodeRef l1 = tree->AddNode("1", nullptr, root);
 			TreeNodeRef l2 = tree->AddNode("2", nullptr, root);
 			TreeNodeRef l3 = tree->AddNode("3", nullptr, root);
+			tree->OpenNode(l3, false);
 
 			TreeNodeRef l21 = tree->AddNode("2.1", nullptr, l2);
 			TreeNodeRef l22 = tree->AddNode("2.2", nullptr, l2);
+			tree->OpenNode(l22, false);
 
 			TreeNodeRef l221 = tree->AddNode("2.2.1", nullptr, l22);
 
@@ -182,9 +184,7 @@ int main(int argc, char ** argv)
 			TreeNodeRef l312 = tree->AddNode("3.1.2", nullptr, l31);
 			TreeNodeRef l313 = tree->AddNode("3.1.3", nullptr, l31);
 			TreeNodeRef l3123 = tree->AddNode("3.1.2.3", nullptr, l312);
-
-
-
+			
 			WINMGR().FindWindow("parts")->AddControl(tree);
 		}	
 		

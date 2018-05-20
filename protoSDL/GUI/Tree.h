@@ -12,6 +12,7 @@ namespace GUI
 
 	class TreeNode
 	{
+	public:
 		std::string GetLabel() const { return m_label; }
 		void SetLabel(const char * label) { m_label = label ? label : ""; Render(); }
 
@@ -20,7 +21,12 @@ namespace GUI
 
 		TreeNodeRef GetParent() const { return m_parent; }
 
+		bool IsOpen() const { return m_open; } // True is node is open to show children		
+		bool IsVisible() const; // False is any of parent nodes is closed
+
 	private:
+		bool m_open;
+
 		TreeNode(const char* label, ImagePtr image, TreeNodeRef parent, TreeRef tree);
 		void Render();
 
@@ -29,7 +35,10 @@ namespace GUI
 		TreeNodeRef m_parent;
 
 		TexturePtr m_texture;
-		Rect m_rect;
+		Rect m_rect; // Node dimensions, from rendering
+
+		Rect m_drawRect; // Node position on screen
+
 		TreeRef m_tree;
 		int m_depth;
 
@@ -61,17 +70,22 @@ namespace GUI
 
 		TreeNodeRef AddNode(const char * label, ImagePtr image = ImagePtr(), TreeNodeRef parent = nullptr);
 
+		void OpenNode(TreeNodeRef node, bool open = true);
+
+		bool NodeHasChildren(TreeNodeRef node);
+		bool NodeHasNextSibling(TreeNodeRef node);
+		bool NodeHasPreviousSibling(TreeNodeRef node);
+	
 	protected:
 		Tree(const char* id, RendererRef renderer, FontRef font, bool fill);
 
 		void RenderNodes();
+		int GetVisibleLineCount();
 
 		void DrawBackground(const GUI::RectRef &rect);
 		void DrawTree(const GUI::RectRef &rect);
 		void DrawNode(const GUI::RectRef &rect, int line, TreeNodeRef node);
 		TreeNodeList::const_iterator FindNode(TreeNodeRef) const;
-//		TreeNodeList::const_iterator FindFirstChild(TreeNodeRef) const;
-//		TreeNodeList::const_iterator FindLastChild(TreeNodeRef) const;
 		TreeNodeRef AddRootNode(const char * label, ImagePtr image = ImagePtr());
 
 		bool m_fill;

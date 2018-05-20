@@ -9,7 +9,8 @@
 
 namespace GUI
 {
-	TreeNode::TreeNode(const char* label, ImagePtr image, TreeNodeRef parent, TreeRef tree) : m_image(image), m_label(label), m_parent(parent), m_tree(tree), m_depth(0)
+	TreeNode::TreeNode(const char* label, ImagePtr image, TreeNodeRef parent, TreeRef tree) : 
+		m_image(image), m_label(label), m_parent(parent), m_tree(tree), m_depth(0), m_open(true)
 	{
 		TreeNodeRef curr = parent;
 		while (curr) 
@@ -17,6 +18,19 @@ namespace GUI
 			++m_depth;
 			curr = curr->m_parent;
 		}
+	}
+
+	bool GUI::TreeNode::IsVisible() const
+	{
+		bool visible = true;
+		TreeNodeRef parent = m_parent;
+		while (parent)
+		{
+			if (!parent->IsOpen())
+				return false;
+			parent = parent->m_parent;
+		}
+		return true;
 	}
 
 	void TreeNode::Render()
@@ -126,15 +140,20 @@ namespace GUI
 		int line = 0;
 		for (auto node : m_nodes)
 		{
-			DrawNode(rect, line, node);
-			++line;
+			if (node->IsVisible())
+			{
+				DrawNode(rect, line, node);
+				++line;
+			}
 		}
 	}
 	
 	void Tree::DrawNode(const RectRef &rect, int line, TreeNodeRef node)
 	{
 		Rect source = node->m_rect;
-		Rect target = { rect->x, rect->y + (line*m_lineHeight), node->m_rect.w, node->m_rect.h };
+
+		Rect& target = node->m_drawRect;
+		target = { rect->x, rect->y + (line*m_lineHeight), node->m_rect.w, node->m_rect.h };
 				
 		SetDrawColor(Color::C_DARK_GREY);
 		for (int i=0; i<node->m_depth; ++i)
@@ -144,7 +163,6 @@ namespace GUI
 		}
 		target.x += (m_lineHeight * node->m_depth);
 
-		//std::cout << "Node :" << node->GetLabel() << ", \tdepth = " << node->m_depth << std::endl;
 		SDL_RenderCopy(m_renderer, node->m_texture.get(), &source, &target);	
 	}
 
@@ -158,29 +176,94 @@ namespace GUI
 			// TODO: Include everything that will be rendered (image, lines, widgets, etc.)
 			int width = node->m_rect.w + (m_lineHeight * node->m_depth);
 			maxWidth = std::max(width, maxWidth);
+
+			std::cout << "Node: [" << node->GetLabel() << "], hasChild,PrevSib,NextSib:"
+				<< NodeHasChildren(node)
+				<< NodeHasPreviousSibling(node)
+				<< NodeHasNextSibling(node) << std::endl;
+
 		}
 
 		if (m_fill)
 		{
-			Rect newRect = { 0, 0, maxWidth + (2 * GetShrinkFactor()), (int)m_nodes.size() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor()) };
+			Rect newRect = { 0, 0, 
+				maxWidth + (2 * GetShrinkFactor()), 
+				GetVisibleLineCount() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor()) };
+
 			if (!newRect.IsEqual(&m_rect))
 			{
 				m_rect = newRect;
-				GetParentWnd()->GetScrollBars()->RefreshScrollBarStatus();
+				if (m_parent)
+				{
+					GetParentWnd()->GetScrollBars()->RefreshScrollBarStatus();
+				}
 			}
 		}
 	}
 
+	int Tree::GetVisibleLineCount()
+	{
+		return (int)std::count_if(m_nodes.begin(), m_nodes.end(), [](TreeNodeRef node) {return node->IsVisible(); });
+	}
+
 	bool Tree::HandleEvent(SDL_Event * e)
 	{
-		return false;
+		Point pt(e->button.x, e->button.y);
+		HitResult hit = HitTest(&pt);
+		switch (e->type)
+		{
+		case SDL_MOUSEMOTION:
+			if (hit)
+			{
+				SDL_SetCursor(RES().FindCursor("default"));
+			}
+			break;
+		case SDL_KEYDOWN:
+		{
+			return false;
+		}
+		case SDL_MOUSEBUTTONDOWN:
+		{
+//			Point cursor = CursorAt(&pt);
+			SetActive();
+			SetFocus(this);
+//			return cursor.x >= 0;
+			return true;
+		}
+		default:
+			return false;
+		}
+
+		return true;
 	}
 
 	HitResult Tree::HitTest(const PointRef pt)
 	{
-		return HIT_NOTHING;
+		Rect parent = m_parent->GetClientRect(false, false);
+		if (m_fill && parent.PointInRect(pt))
+		{
+			return HitResult(HitZone::HIT_CONTROL, this);
+		}
+		else if (!m_fill && m_rect.Offset(&parent.Origin()).PointInRect(pt))
+		{
+			return HitResult(HitZone::HIT_CONTROL, this);
+		}
+
+		return HitZone::HIT_NOTHING;
 	}
 	
+	void Tree::OpenNode(TreeNodeRef node, bool open)
+	{
+		if (node == nullptr)
+		{
+			throw std::invalid_argument("Node is null");
+		}
+
+		// For efficiency, assume that node belongs to m_nodes...
+		node->m_open = open;
+		RenderNodes();
+	}
+
 	TreeNodeRef Tree::AddRootNode(const char * label, ImagePtr image)
 	{
 		if (!m_nodes.empty())
@@ -220,6 +303,51 @@ namespace GUI
 	TreeNodeList::const_iterator GUI::Tree::FindNode(TreeNodeRef toFind) const
 	{
 		return std::find_if(m_nodes.begin(), m_nodes.end(), [toFind](TreeNodeRef node) {return toFind == node; });
+	}
+
+	bool GUI::Tree::NodeHasChildren(TreeNodeRef node)
+	{
+		auto it = FindNode(node);
+		if (it == m_nodes.end())
+		{
+			throw std::invalid_argument("node not found");
+		}
+
+		++it;
+		return (it != m_nodes.end() && (*it)->m_parent == node);
+	}
+
+	bool Tree::NodeHasNextSibling(TreeNodeRef node)
+	{
+		auto it = FindNode(node);
+		if (it == m_nodes.end())
+		{
+			throw std::invalid_argument("node not found");
+		}
+
+		while (++it != m_nodes.end())
+		{
+			if ((*it)->m_parent == node->m_parent)
+				return true;
+		}
+		return false;
+	}
+
+	bool Tree::NodeHasPreviousSibling(TreeNodeRef node)
+	{
+		auto it = FindNode(node);
+		if (it == m_nodes.end())
+		{
+			throw std::invalid_argument("node not found");
+		}
+		
+		while (it != m_nodes.begin())
+		{
+			--it;
+			if ((*it)->m_parent == node->m_parent)
+				return true;
+		}
+		return false;
 	}
 
 	struct Tree::shared_enabler : public Tree
