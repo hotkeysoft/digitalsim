@@ -186,4 +186,13 @@ namespace GUI
 		}
 		RaiseChildren(win);
 	}
+
+	TexturePtr WindowManager::SurfaceToTexture(SDL_Surface* surf)
+	{
+		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), sdl_deleter());
+
+		SDL_FreeSurface(surf);
+
+		return std::move(texture);
+	}
 }

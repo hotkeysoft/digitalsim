@@ -56,6 +56,8 @@ namespace GUI
 		Uint32 AddTimer(Uint32 interval);
 		void DeleteTimer(Uint32 timerID);
 
+		TexturePtr SurfaceToTexture(SDL_Surface* surf);
+
 	protected:
 		void RaiseSingleWindow(WindowRef);
 		void RaiseChildren(WindowRef);

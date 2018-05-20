@@ -167,14 +167,23 @@ int main(int argc, char ** argv)
 
 			TreeNodeRef root = tree->AddNode("Root", nullptr, nullptr);
 			
-			TreeNodeRef l1a = tree->AddNode("Level 1 a", nullptr, root);
-			TreeNodeRef l1b = tree->AddNode("Level 1 b", nullptr, root);
-			TreeNodeRef l1c = tree->AddNode("Level 1 c", nullptr, root);
+			TreeNodeRef l1 = tree->AddNode("1", nullptr, root);
+			TreeNodeRef l2 = tree->AddNode("2", nullptr, root);
+			TreeNodeRef l3 = tree->AddNode("3", nullptr, root);
 
-			TreeNodeRef l2b1 = tree->AddNode("SubItem b.1", nullptr, l1b);
-			TreeNodeRef l2b2 = tree->AddNode("SubItem b.2", nullptr, l1b);
+			TreeNodeRef l21 = tree->AddNode("2.1", nullptr, l2);
+			TreeNodeRef l22 = tree->AddNode("2.2", nullptr, l2);
 
-			TreeNodeRef l3b1 = tree->AddNode("Level 3", nullptr, l2b2);
+			TreeNodeRef l221 = tree->AddNode("2.2.1", nullptr, l22);
+
+			TreeNodeRef l31 = tree->AddNode("3.1", nullptr, l3);
+			TreeNodeRef l32 = tree->AddNode("3.2", nullptr, l3);
+			TreeNodeRef l311 = tree->AddNode("3.1.1", nullptr, l31);
+			TreeNodeRef l312 = tree->AddNode("3.1.2", nullptr, l31);
+			TreeNodeRef l313 = tree->AddNode("3.1.3", nullptr, l31);
+			TreeNodeRef l3123 = tree->AddNode("3.1.2.3", nullptr, l312);
+
+
 
 			WINMGR().FindWindow("parts")->AddControl(tree);
 		}	

@@ -116,11 +116,6 @@ namespace GUI
 		DrawText(&drawRect);
 	}
 
-	int TextBox::GetShrinkFactor()
-	{
-		return m_padding + m_margin + (m_showBorder ? m_borderWidth : 0);
-	}
-
 	void TextBox::DrawCursor(RectRef rect)
 	{
 		int yPos = rect->y + m_caretPos.y;

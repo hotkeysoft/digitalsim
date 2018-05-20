@@ -66,6 +66,8 @@ namespace GUI
 		virtual void SetFont(FontRef font);
 
 		// Borders
+		virtual int GetShrinkFactor() { return m_padding + m_margin + (m_showBorder ? m_borderWidth : 0); }
+
 		virtual void SetBorder(bool show) { m_showBorder = show; }
 		virtual bool GetBorder() { return m_showBorder; }
 		

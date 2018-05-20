@@ -63,6 +63,7 @@ namespace GUI
 		using TextLines = std::vector<TextLine>;
 
 		TextBox(const char* id, RendererRef renderer, Rect rect, const char* text, bool fill);
+		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
 		void RenderText();
 		void SplitLines();
@@ -70,8 +71,6 @@ namespace GUI
 		void DrawText(RectRef rect);
 		void DrawBackground(const GUI::RectRef &rect);
 		void DrawCursor(RectRef rect);
-		int GetShrinkFactor();
-		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
 		int FindStringPos(const std::string & in, int pos, int len, int fraction);
 		int GetLineWidth(); // Single line mode

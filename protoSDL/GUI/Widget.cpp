@@ -136,5 +136,4 @@ namespace GUI
 
 		return std::move(texture);
 	}
-
 }
