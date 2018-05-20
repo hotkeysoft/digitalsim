@@ -53,9 +53,7 @@ namespace GUI
 		m_indent(clip(lineHeight, 0, 255))
 	{
 		m_backgroundColor = Color::C_WHITE;
-		m_margin = 20;
 		m_padding = 5;
-		m_showBorder = true;
 	}
 
 	void Tree::Init()

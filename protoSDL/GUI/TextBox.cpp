@@ -54,8 +54,7 @@ namespace GUI
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), text, true);
 		return std::static_pointer_cast<TextBox>(ptr);
 	}
-
-
+	
 	Rect TextBox::GetRect(bool relative, bool scrolled) const
 	{
 		Rect parent = m_parent->GetClientRect(relative, scrolled);
@@ -68,6 +67,37 @@ namespace GUI
 		return GetRect(relative, scrolled);
 	}
 
+	void TextBox::DrawFrame(const RectRef &rect)
+	{
+		Rect frameRect = *rect;
+
+		if (m_fill)
+		{
+			DrawBackground(&m_parent->GetClientRect(false, false));
+		}
+
+		if (m_margin)
+		{
+			frameRect = frameRect.Deflate(m_margin);
+		}
+
+		if (!m_fill && !m_backgroundColor.IsTransparent())
+		{
+			DrawFilledRect(&frameRect, m_backgroundColor);
+		}
+
+		if (m_showBorder)
+		{
+			for (int i = 0; i < m_borderWidth; ++i)
+			{
+				DrawRect(&frameRect, m_borderColor);
+				frameRect = frameRect.Deflate(1);
+			}
+		}
+
+		SDL_RenderSetClipRect(m_renderer, &frameRect);
+	}
+
 	void TextBox::Draw()
 	{
 		if (m_parent == nullptr)
@@ -76,37 +106,17 @@ namespace GUI
 		Rect drawRect;
 		if (m_fill)
 		{
-			DrawBackground(&m_parent->GetClientRect(false, false));
+			DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
 		}
 		else
-		{			
+		{
 			drawRect = GetRect(false, true);
+
+			DrawFrame(&drawRect);
 		}
 
-		if (m_margin)
-		{
-			drawRect = drawRect.Deflate(m_margin);
-		}
-
-		if (!m_fill && !m_backgroundColor.IsTransparent())
-		{
-			DrawFilledRect(&drawRect, m_backgroundColor);
-		}
-
-		if (m_showBorder)
-		{
-			for (int i = 0; i < m_borderWidth; ++i)
-			{
-				DrawRect(&drawRect, m_borderColor); 
-				drawRect = drawRect.Deflate(1);
-			}			
-		}
-
-		if (m_padding)
-		{
-			drawRect = drawRect.Deflate(m_padding);
-		}
+		drawRect = drawRect.Deflate(GetShrinkFactor());
 
 		if (IsFocused())
 		{
