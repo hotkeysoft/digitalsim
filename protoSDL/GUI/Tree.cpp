@@ -136,8 +136,14 @@ namespace GUI
 		Rect source = node->m_rect;
 		Rect target = { rect->x, rect->y + (line*m_lineHeight), node->m_rect.w, node->m_rect.h };
 				
+		SetDrawColor(Color::C_DARK_GREY);
+		for (int i=0; i<node->m_depth; ++i)
+		{
+			int x = target.x + (m_lineHeight * i) + (m_lineHeight / 2);
+			SDL_RenderDrawLine(m_renderer, x, target.y, x, target.y + m_lineHeight);
+		}
 		target.x += (m_lineHeight * node->m_depth);
-		
+
 		//std::cout << "Node :" << node->GetLabel() << ", \tdepth = " << node->m_depth << std::endl;
 		SDL_RenderCopy(m_renderer, node->m_texture.get(), &source, &target);	
 	}
