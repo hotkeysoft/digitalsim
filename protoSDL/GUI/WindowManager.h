@@ -14,7 +14,7 @@ namespace GUI
 	{
 		CaptureInfo() : Captured(false) {}
 		void Reset() { Captured = false; Target = HIT_NOTHING; Delta = Point(); Origin = Rect(); }
-		operator bool() const { return Captured; }
+		explicit operator bool() const { return Captured; }
 		bool Captured;
 		HitResult Target;
 		Point Delta;

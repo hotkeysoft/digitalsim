@@ -17,7 +17,7 @@ namespace GUI
 		bool operator==(const HitResult& rhs) const { return zone == rhs.zone && target == rhs.target; }
 		bool operator==(const HitZone& rhs) const { return zone == rhs; }
 		operator HitZone() const { return zone; }
-		operator bool() const { return zone != HIT_NOTHING; }
+		explicit operator bool() const { return zone != HIT_NOTHING; }
 
 		HitZone zone;
 		WidgetRef target;

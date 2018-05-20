@@ -33,7 +33,7 @@ namespace GUI
 		static ImagePtr FromFile(RendererRef renderer, const char* fileName);
 		static ImagePtr FromTexture(RendererRef renderer, TexturePtr texture);
 
-		operator bool() const { return IsSet(); }
+		explicit operator bool() const { return IsSet(); }
 
 		Rect GetRect(bool relative = true, bool scrolled = true) const override { return m_rect; }
 
