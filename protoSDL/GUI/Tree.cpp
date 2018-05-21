@@ -70,22 +70,10 @@ namespace GUI
 		RenderNodes();
 	}
 
-	TreePtr Tree::Create(const char * id, RendererRef renderer, int lineHeight, FontRef font)
+	TreePtr Tree::CreateFill(const char * id, RendererRef renderer, int lineHeight, FontRef font, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, lineHeight, font, WIN_FILL);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, lineHeight, font, flags | WIN_FILL);
 		return std::static_pointer_cast<Tree>(ptr);
-	}
-	
-	Rect Tree::GetRect(bool relative, bool scrolled) const
-	{
-		Rect parent = m_parent->GetClientRect(relative, scrolled);
-
-		return m_rect.Offset(&parent.Origin());
-	}
-
-	Rect Tree::GetClientRect(bool relative, bool scrolled) const
-	{
-		return GetRect(relative, scrolled);
 	}
 
 	Rect Tree::DrawFrame(const RectRef &rect)
@@ -204,7 +192,7 @@ namespace GUI
 			// TODO: Include everything that will be rendered (image, lines, widgets, etc.)
 			if (node->IsVisible())
 			{
-				int width = node->m_label->GetRect().w + (m_indent * node->m_depth + (node->m_openedImage ? m_lineHeight : 0));
+				int width = node->m_label->GetRect(true, false).w + (m_indent * node->m_depth + (node->m_openedImage ? m_lineHeight : 0));
 				maxWidth = std::max(width, maxWidth);
 			}
 		}

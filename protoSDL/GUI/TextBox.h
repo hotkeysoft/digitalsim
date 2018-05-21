@@ -25,9 +25,6 @@ namespace GUI
 		// Will fill the parent window
 		static TextBoxPtr CreateFill(const char* id, RendererRef renderer, const char* text);
 
-		Rect GetRect(bool relative = true, bool scrolled = true) const override;
-		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
-
 		bool HandleEvent(SDL_Event *) override;
 		HitResult HitTest(const PointRef) override;
 		void Draw() override;

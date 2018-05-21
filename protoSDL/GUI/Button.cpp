@@ -104,13 +104,6 @@ namespace GUI
 		return HitZone::HIT_NOTHING;
 	}
 
-	Rect Button::GetRect(bool relative, bool scrolled) const
-	{
-		Rect parent = m_parent->GetClientRect(relative, scrolled);
-
-		return m_rect.Offset(&parent.Origin());
-	}
-
 	Rect Button::GetClientRect(bool relative, bool scrolled) const
 	{
 		return GetRect(relative, scrolled).Deflate(m_borderWidth);

@@ -57,18 +57,6 @@ namespace GUI
 		return std::static_pointer_cast<TextBox>(ptr);
 	}
 	
-	Rect TextBox::GetRect(bool relative, bool scrolled) const
-	{
-		Rect parent = m_parent->GetClientRect(relative, scrolled);
-
-		return m_rect.Offset(&parent.Origin());
-	}
-
-	Rect TextBox::GetClientRect(bool relative, bool scrolled) const
-	{
-		return GetRect(relative, scrolled);
-	}
-
 	Rect TextBox::DrawFrame(const RectRef &rect)
 	{
 		Rect frameRect = *rect;

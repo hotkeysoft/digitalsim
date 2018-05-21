@@ -166,9 +166,7 @@ int main(int argc, char ** argv)
 			ImageRef opened = RES().FindImage("win.scroll.down");
 			ImageRef closed = RES().FindImage("win.scroll.right");
 
-			TreePtr tree = GUI::Tree::Create("tree", ren.get(), 20);
-			WINMGR().FindWindow("parts")->AddControl(tree);
-
+			TreePtr tree = GUI::Tree::CreateFill("tree", ren.get(), 20);
 			TreeNodeRef root = tree->AddNode("Root");
 			
 			TreeNodeRef l1 = tree->AddNode("1", opened, closed, root);
@@ -188,7 +186,8 @@ int main(int argc, char ** argv)
 			TreeNodeRef l312 = tree->AddNode("3.1.2", opened, closed, l31);
 			TreeNodeRef l313 = tree->AddNode("3.1.3", opened, closed, l31);
 			TreeNodeRef l3123 = tree->AddNode("3.1.2.3", opened, closed, l312);
-			
+
+			WINMGR().FindWindow("parts")->AddControl(tree);
 		}	
 		
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");

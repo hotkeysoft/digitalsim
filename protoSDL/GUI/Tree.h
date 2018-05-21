@@ -10,6 +10,12 @@ namespace GUI
 {
 	using TreeNodeList = std::list<TreeNodeRef>;
 
+	enum TreeCreationFlags : CreationFlags 
+	{
+		TCF_FULLROWSELECT	=  WIN_CUSTOMBASE << 0,
+		TCF_HASLINES		=	WIN_CUSTOMBASE << 1,
+	};
+
 	class TreeNode
 	{
 	public:
@@ -63,12 +69,9 @@ namespace GUI
 		int GetIndent() const { return m_indent; }
 
 		// Creates a tree that fills the whole parent window
-		static TreePtr Create(const char* id, RendererRef renderer, int lineHeight = 20, FontRef font = nullptr);
+		static TreePtr CreateFill(const char* id, RendererRef renderer, int lineHeight = 20, FontRef font = nullptr, CreationFlags flags = WIN_FILL);
 
 		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
-
-		Rect GetRect(bool relative = true, bool scrolled = true) const override;
-		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 
 		bool HandleEvent(SDL_Event *) override;
 		HitResult HitTest(const PointRef) override;

@@ -44,9 +44,6 @@ namespace GUI
 
 		void SetForegroundColor(Color color) override;
 
-		Rect GetRect(bool relative = true, bool scrolled = true) const override;
-		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
-
 		void Draw() override;
 		void Draw(const RectRef rect);
 

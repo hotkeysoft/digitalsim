@@ -142,4 +142,21 @@ namespace GUI
 
 		return std::move(texture);
 	}
+
+	Rect Widget::GetRect(bool relative, bool scrolled) const
+	{
+		if (m_parent == nullptr || (relative && !scrolled))
+		{
+			return m_rect;
+		}
+
+		Rect parent = m_parent->GetClientRect(relative, scrolled);
+		return m_rect.Offset(&parent.Origin());
+	}
+
+	Rect Widget::GetClientRect(bool relative, bool scrolled) const
+	{
+		return GetRect(relative, scrolled);
+	}
+
 }

@@ -22,7 +22,6 @@ namespace GUI
 
 		static ButtonPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image = nullptr, FontRef font = nullptr);
 
-		Rect GetRect(bool relative = true, bool scrolled = true) const override;
 		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 
 		bool HandleEvent(SDL_Event *) override;

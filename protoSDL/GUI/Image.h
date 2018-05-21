@@ -35,8 +35,6 @@ namespace GUI
 
 		explicit operator bool() const { return IsSet(); }
 
-		Rect GetRect(bool relative = true, bool scrolled = true) const override { return m_rect; }
-
 		void Draw() override {}
 		void Draw(const PointRef pos);
 		void Draw(const RectRef rect, uint8_t align = IMG_DEFAULT);

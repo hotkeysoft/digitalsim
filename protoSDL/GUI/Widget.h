@@ -52,8 +52,8 @@ namespace GUI
 		virtual ImageRef GetImage() const { return m_image; }
 		virtual void SetImage(ImageRef image) { m_image = image;  }
 
-		virtual Rect GetClientRect(bool relative = true, bool scrolled = true) const { return m_rect; }
-		virtual Rect GetRect(bool relative = true, bool scrolled = true) const { return m_rect; }
+		virtual Rect GetClientRect(bool relative = true, bool scrolled = true) const;
+		virtual Rect GetRect(bool relative = true, bool scrolled = true) const;
 		virtual void SetRect(RectRef rect) { m_rect = rect?(*rect):Rect(); }
 
 		// Margins & Padding

@@ -53,18 +53,6 @@ namespace GUI
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
-	Rect Label::GetRect(bool relative, bool scrolled) const
-	{
-		Rect parent = m_parent->GetClientRect(relative, scrolled);
-
-		return m_rect.Offset(&parent.Origin());
-	}
-
-	Rect Label::GetClientRect(bool relative, bool scrolled) const
-	{
-		return GetRect(relative, scrolled);
-	}
-
 	void Label::DrawBackground(const GUI::RectRef &rect)
 	{
 		if (m_backgroundColor.IsTransparent())

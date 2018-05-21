@@ -63,7 +63,9 @@ namespace GUI
 		WIN_FILL = 128, // Fill parent
 		WIN_AUTOSIZE = 256, // Window grows & shrinks to accomodate contents
 
-		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE
+		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE,
+
+		WIN_CUSTOMBASE = 65536
 	};
 
 	enum WindowState : uint16_t {
