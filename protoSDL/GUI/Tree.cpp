@@ -42,7 +42,7 @@ namespace GUI
 			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_text.c_str(), m_tree->GetForegroundColor());
 
 			m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
-			m_label->SetPadding(Dimension(5, 0));
+			m_label->SetPadding(Dimension(2, 0));
 			m_label->Init();
 		}
 	}
@@ -277,7 +277,7 @@ namespace GUI
 			break;
 		}
 		case SDL_MOUSEBUTTONDOWN:
-		{
+		{			
 			TreeNodeRef node = NodeAt(&pt);
 
 			SetActive();
@@ -286,6 +286,10 @@ namespace GUI
 			if (node)
 			{
 				SelectNode(node);
+				if (e->button.clicks == 2)
+				{
+					ToggleNode(node);
+				}
 			}
 
 			return node != nullptr;
@@ -332,6 +336,18 @@ namespace GUI
 
 		// For efficiency, assume that node belongs to m_nodes...
 		node->m_opened = open;
+		RenderNodes();
+	}
+
+	void Tree::ToggleNode(TreeNodeRef node)
+	{
+		if (node == nullptr)
+		{
+			throw std::invalid_argument("Node is null");
+		}
+
+		// For efficiency, assume that node belongs to m_nodes...
+		node->m_opened = !node->m_opened;
 		RenderNodes();
 	}
 

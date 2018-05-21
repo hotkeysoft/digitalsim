@@ -79,6 +79,7 @@ namespace GUI
 		TreeNodeRef AddNode(const char * label, ImageRef opened, ImageRef closed, TreeNodeRef parent = nullptr);
 		
 		void OpenNode(TreeNodeRef node, bool open = true);
+		void ToggleNode(TreeNodeRef node);
 
 		bool NodeHasChildren(TreeNodeRef node);
 		bool NodeHasNextSibling(TreeNodeRef node);
