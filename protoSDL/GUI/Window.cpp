@@ -17,9 +17,9 @@ namespace GUI
 	{
 	}
 
-	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags) :
-		Widget(id, renderer, parent, rect, nullptr, nullptr, font),
-		m_showState(WindowState::WS_VISIBLE), m_flags(flags), m_pushedState(HIT_NOTHING)
+	Window::Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags) :
+		Widget(id, renderer, parent, rect, nullptr, nullptr, font, flags),
+		m_showState(WindowState::WS_VISIBLE), m_pushedState(HIT_NOTHING)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -42,7 +42,7 @@ namespace GUI
 		m_backgroundColor = Color::C_LIGHT_GREY;
 	}
 
-	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags)
+	WindowPtr Window::Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags)
 	{
 		auto ptr = std::make_shared<shared_enabler>(id, renderer, parent, font, rect, flags);
 		return std::static_pointer_cast<Window>(ptr);

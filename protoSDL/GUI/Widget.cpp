@@ -12,7 +12,7 @@ namespace GUI
 	}
 
 	Widget::Widget(const char* id, RendererRef renderer, WidgetRef parent,
-		Rect rect, const char* text, ImageRef image, FontRef font) :
+		Rect rect, const char* text, ImageRef image, FontRef font, CreationFlags flags) :
 		m_id(id ? id : ""),
 		m_renderer(renderer),
 		m_parent(parent),
@@ -28,7 +28,8 @@ namespace GUI
 		m_padding(0),
 		m_margin(0),
 		m_borderWidth(4),
-		m_focused(false)
+		m_focused(false),
+		m_flags(flags)
 	{
 		SetFont(font);
 	}

@@ -27,12 +27,12 @@ namespace GUI
 		}
 	}
 
-	WindowPtr WindowManager::AddWindow(const char * id, Rect pos, WindowFlags flags)
+	WindowPtr WindowManager::AddWindow(const char * id, Rect pos, CreationFlags flags)
 	{
 		return AddWindow(id, nullptr, pos, flags);
 	}
 
-	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, Rect pos, WindowFlags flags)
+	WindowPtr WindowManager::AddWindow(const char* id, WindowPtr parent, Rect pos, CreationFlags flags)
 	{
 		if (FindWindow(id) != nullptr)
 		{

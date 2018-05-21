@@ -49,8 +49,8 @@ namespace GUI
 		}
 	}
 
-	Tree::Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font) :
-		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, font), m_fill(fill), 
+	Tree::Tree(const char* id, RendererRef renderer, int lineHeight, FontRef font, CreationFlags flags) :
+		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, font, flags),
 		m_lineHeight(clip(lineHeight, 8, 255)), 
 		m_indent(clip(lineHeight, 0, 255))
 	{
@@ -70,7 +70,7 @@ namespace GUI
 
 	TreePtr Tree::Create(const char * id, RendererRef renderer, int lineHeight, FontRef font)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, true, lineHeight, font);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, lineHeight, font, WIN_FILL);
 		return std::static_pointer_cast<Tree>(ptr);
 	}
 	
@@ -90,7 +90,7 @@ namespace GUI
 	{
 		Rect frameRect = *rect;
 
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			DrawBackground(&m_parent->GetClientRect(false, false));
 		}
@@ -100,7 +100,7 @@ namespace GUI
 			frameRect = frameRect.Deflate(m_margin);
 		}
 
-		if (!m_fill && !m_backgroundColor.IsTransparent())
+		if (!(m_flags & WIN_FILL) && !m_backgroundColor.IsTransparent())
 		{
 			DrawFilledRect(&frameRect, m_backgroundColor);
 		}
@@ -124,7 +124,7 @@ namespace GUI
 
 		Rect drawRect;
 		Rect frameRect;
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
@@ -207,7 +207,7 @@ namespace GUI
 			}
 		}
 
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			Rect newRect = { 0, 0, 
 				maxWidth + (2 * GetShrinkFactor().w), 
@@ -310,11 +310,11 @@ namespace GUI
 	HitResult Tree::HitTest(const PointRef pt)
 	{
 		Rect parent = m_parent->GetClientRect(false, false);
-		if (m_fill && parent.PointInRect(pt))
+		if ((m_flags & WIN_FILL) && parent.PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}
-		else if (!m_fill && m_rect.Offset(&parent.Origin()).PointInRect(pt))
+		else if (!(m_flags & WIN_FILL) && m_rect.Offset(&parent.Origin()).PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}

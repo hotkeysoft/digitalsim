@@ -24,7 +24,7 @@ namespace GUI
 
 		static WindowRef GetNullWnd() { return &m_nullWnd; }
 
-		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
+		static WindowPtr Create(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags);
 		void SetText(const char * text) override;
 
 		void SetActive() override;
@@ -46,7 +46,6 @@ namespace GUI
 
 		WindowState GetShowState() const { return m_showState; }
 
-		WindowFlags GetFlags() { return m_flags; }
 		void ToggleButtonState(HitZone button, bool pushed);
 		void ButtonPushed(HitZone button);
 
@@ -67,7 +66,7 @@ namespace GUI
 		bool GetPushedState(HitZone id) { return m_pushedState & id; }
 
 	protected:
-		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, WindowFlags flags);
+		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags);
 		Window();
 
 		Rect GetTitleBarRect(Rect base) const;
@@ -87,7 +86,6 @@ namespace GUI
 
 		Rect GetClipRect(WindowRef win);
 
-		WindowFlags m_flags;
 		WindowState m_showState;
 		HitZone m_pushedState;
 

@@ -38,6 +38,8 @@ namespace GUI
 
 		virtual void Init() {};
 
+		CreationFlags GetFlags() { return m_flags; }
+
 		// Activation
 		virtual void SetActive() { if (m_parent) m_parent->SetActive(); }
 		virtual void SetFocus(WidgetRef focus, WidgetRef parent= nullptr);
@@ -107,7 +109,7 @@ namespace GUI
 
 	protected:
 		Widget(const char* id, RendererRef renderer, WidgetRef parent, Rect rect,
-			const char* text, ImageRef image = nullptr, FontRef font = nullptr);
+			const char* text, ImageRef image = nullptr, FontRef font = nullptr, CreationFlags flags = 0);
 		Widget(const char* id);
 
 		void SetDrawColor(const GUI::Color & col);
@@ -120,6 +122,7 @@ namespace GUI
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 		std::string m_id;
+		CreationFlags m_flags;
 		RendererRef m_renderer;
 		std::string m_text;
 		ImageRef m_image;

@@ -10,13 +10,13 @@
 
 namespace GUI
 {
-	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, bool fill, bool autoSize) :
-		Widget(id, renderer, nullptr, rect, label, nullptr, font), m_labelAlign(align), m_fill(fill), m_autoSize(autoSize)
+	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, CreationFlags flags) :
+		Widget(id, renderer, nullptr, rect, label, nullptr, font, flags), m_labelAlign(align)
 	{
 		m_backgroundColor = Color::C_TRANSPARENT;
 		m_borderWidth = 1;
 
-		m_margin = m_fill ? 5 : 0;
+		m_margin = (m_flags & WIN_FILL) ? 5 : 0;
 	}
 
 	void Label::Init()
@@ -37,19 +37,19 @@ namespace GUI
 
 	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, false, false);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, 0);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
 	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, true, false);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, WIN_FILL);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
 	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, false, true);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, WIN_AUTOSIZE);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
@@ -81,7 +81,7 @@ namespace GUI
 	{
 		Rect frameRect = *rect;
 
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			DrawBackground(&m_parent->GetClientRect(false, false));
 		}
@@ -91,7 +91,7 @@ namespace GUI
 			frameRect = frameRect.Deflate(m_margin);
 		}
 
-		if (!m_fill && !m_backgroundColor.IsTransparent())
+		if (!(m_flags & WIN_FILL) && !m_backgroundColor.IsTransparent())
 		{
 			DrawFilledRect(&frameRect, m_backgroundColor);
 		}
@@ -115,7 +115,7 @@ namespace GUI
 
 		Rect drawRect;
 		Rect frameRect;
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
@@ -205,7 +205,7 @@ namespace GUI
 		m_labelRect.x = 0;
 		m_labelRect.y = 0;
 		
-		if (m_autoSize)
+		if (m_flags & WIN_AUTOSIZE)
 		{
 			m_rect.w = m_labelRect.w;
 			m_rect.h = m_labelRect.h;

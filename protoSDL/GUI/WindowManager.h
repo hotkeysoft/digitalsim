@@ -38,8 +38,8 @@ namespace GUI
 		void Init(RendererPtr & renderer);
 
 		void Draw();
-		WindowPtr AddWindow(const char* id, Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
-		WindowPtr AddWindow(const char* id, WindowPtr parent, Rect pos, WindowFlags flags = WindowFlags::WIN_DEFAULT);
+		WindowPtr AddWindow(const char* id, Rect pos, CreationFlags flags = WindowFlags::WIN_DEFAULT);
+		WindowPtr AddWindow(const char* id, WindowPtr parent, Rect pos, CreationFlags flags = WindowFlags::WIN_DEFAULT);
 		WindowPtr FindWindow(const char* id);
 		WindowList GetWindowList(WindowRef parent);
 

@@ -62,7 +62,7 @@ namespace GUI
 		};
 		using TextLines = std::vector<TextLine>;
 
-		TextBox(const char* id, RendererRef renderer, Rect rect, const char* text, bool fill);
+		TextBox(const char* id, RendererRef renderer, Rect rect, const char* text, CreationFlags flags);
 		WindowRef GetParentWnd() { return dynamic_cast<WindowRef>(m_parent); }
 
 		void RenderText();
@@ -79,7 +79,6 @@ namespace GUI
 		void ScrollCursorIntoView();
 		void ScrollX(int fieldWidth, int16_t offset);
 
-		bool m_fill;
 		TextLines m_lines;
 		int m_lineHeight;
 		int m_charWidth;

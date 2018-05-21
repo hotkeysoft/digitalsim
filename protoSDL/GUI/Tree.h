@@ -94,7 +94,7 @@ namespace GUI
 		void CloseSelection();
 
 	protected:
-		Tree(const char* id, RendererRef renderer, bool fill, int lineHeight, FontRef font);
+		Tree(const char* id, RendererRef renderer, int lineHeight, FontRef font, CreationFlags flags);
 
 		void RenderNodes();
 		int GetVisibleLineCount();
@@ -110,7 +110,6 @@ namespace GUI
 
 		void ScrollSelectionIntoView();
 
-		bool m_fill;
 		TreeNodeList m_nodes;
 
 		int m_lineHeight;

@@ -56,7 +56,7 @@ namespace GUI
 		uint8_t GetAlign() { return m_labelAlign;  }
 
 	protected:
-		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, bool fill, bool autoSize);
+		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, CreationFlags flags);
 
 		void DrawBackground(const GUI::RectRef &rect);
 		Rect DrawFrame(const GUI::RectRef &rect);
@@ -66,9 +66,6 @@ namespace GUI
 		TexturePtr m_labelText;
 		Rect m_labelRect;
 		TextAlign m_labelAlign;
-
-		bool m_fill;
-		bool m_autoSize;
 
 		struct shared_enabler;
 	};

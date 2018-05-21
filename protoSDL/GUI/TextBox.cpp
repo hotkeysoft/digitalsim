@@ -14,15 +14,16 @@ namespace GUI
 {
 	Uint32 TextBox::m_blinkTimerID = (Uint32)-1;
 
-	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text, bool fill) :
-		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono")), m_blink(true), m_fill(fill), m_xOffset(0), m_lineWidth(-1)
+	TextBox::TextBox(const char * id, RendererRef renderer, Rect rect, const char * text, CreationFlags flags) :
+		Widget(id, renderer, nullptr, rect, text, nullptr, RES().FindFont("mono"), flags), 
+		m_blink(true), m_xOffset(0), m_lineWidth(-1)
 	{
 		m_backgroundColor = Color::C_WHITE;
 		m_borderColor = Color::C_BLACK;
-		m_showBorder = fill ? false : true;
-		m_borderWidth = fill ? 0 : 1;
-		m_margin = m_fill ? 5 : 0;
-		m_padding = m_fill ? 0 : 2;
+		m_showBorder = (m_flags & WIN_FILL)? false : true;
+		m_borderWidth = (m_flags & WIN_FILL) ? 0 : 1;
+		m_margin = (m_flags & WIN_FILL) ? 5 : 0;
+		m_padding = (m_flags & WIN_FILL) ? 0 : 2;
 	}
 
 	void TextBox::Init()
@@ -46,13 +47,13 @@ namespace GUI
 
 	TextBoxPtr TextBox::CreateSingleLine(const char * id, RendererRef renderer, Rect rect, const char * text)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, text, false);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, text, 0);
 		return std::static_pointer_cast<TextBox>(ptr);
 	}
 	
 	TextBoxPtr TextBox::CreateFill(const char * id, RendererRef renderer, const char * text)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), text, true);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), text, WIN_FILL);
 		return std::static_pointer_cast<TextBox>(ptr);
 	}
 	
@@ -72,7 +73,7 @@ namespace GUI
 	{
 		Rect frameRect = *rect;
 
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			DrawBackground(&m_parent->GetClientRect(false, false));
 		}
@@ -82,7 +83,7 @@ namespace GUI
 			frameRect = frameRect.Deflate(m_margin);
 		}
 
-		if (!m_fill && !m_backgroundColor.IsTransparent())
+		if (!(m_flags & WIN_FILL) && !m_backgroundColor.IsTransparent())
 		{
 			DrawFilledRect(&frameRect, m_backgroundColor);
 		}
@@ -106,7 +107,7 @@ namespace GUI
 
 		Rect drawRect;
 		Rect frameRect;
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
@@ -135,7 +136,7 @@ namespace GUI
 	{
 		int yPos = rect->y + m_caretPos.y;
 	
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			int width = std::max(rect->w, m_rect.w);
 			Rect outlineBox = { rect->x, yPos, width, m_lineHeight };
@@ -161,7 +162,7 @@ namespace GUI
 
 			Rect source = line.rect;
 			
-			if (!m_fill)
+			if (!(m_flags & WIN_FILL))
 			{
 				target.w = std::min(rect->w, source.w);
 				source.x += m_xOffset;
@@ -242,7 +243,7 @@ namespace GUI
 			maxWidth = std::max(maxWidth, line.rect.w);
 		}
 		
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			Rect newRect = { 0, 0, maxWidth + (2 * GetShrinkFactor().w), (int)m_lines.size() * TTF_FontLineSkip(m_font) + (2 * GetShrinkFactor().h) };
 			if (!newRect.IsEqual(&m_rect))
@@ -348,7 +349,7 @@ namespace GUI
 
 	void TextBox::Return()	
 	{	
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			const std::string &toSplit = m_lines[m_currentPos.y].text;
 			std::string endPart = toSplit.substr(m_currentPos.x);
@@ -390,7 +391,7 @@ namespace GUI
 
 	void TextBox::ScrollCursorIntoView()
 	{	
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			WindowRef parentWnd = GetParentWnd();
 			assert(parentWnd); // TODO update for widget in widget
@@ -468,7 +469,7 @@ namespace GUI
 		Point cursorPos(-1, -1);
 
 		Rect client;
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{
 			client = m_parent->GetClientRect(false, true).Deflate(GetShrinkFactor());
 		}
@@ -520,7 +521,7 @@ namespace GUI
 			return;
 
 		// Wrap line
-		if (m_fill && m_currentPos.x == 0)
+		if ((m_flags & WIN_FILL) && m_currentPos.x == 0)
 		{
 			TextLine &prevLine = m_lines[m_currentPos.y - 1];
 			TextLine &currLine = m_lines[m_currentPos.y];
@@ -566,7 +567,7 @@ namespace GUI
 	
 	void TextBox::MovePage(int16_t deltaY)
 	{
-		if (m_fill)
+		if (m_flags & WIN_FILL)
 		{			
 			Rect client = m_parent->GetClientRect(true, false);
 			int linesPerPage = client.h / m_lineHeight;
@@ -578,11 +579,11 @@ namespace GUI
 	HitResult TextBox::HitTest(const PointRef pt)
 	{
 		Rect parent = m_parent->GetClientRect(false, false);
-		if (m_fill && parent.PointInRect(pt))
+		if ((m_flags & WIN_FILL) && parent.PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}
-		else if (!m_fill && m_rect.Offset(&parent.Origin()).PointInRect(pt))
+		else if (!(m_flags & WIN_FILL) && m_rect.Offset(&parent.Origin()).PointInRect(pt))
 		{
 			return HitResult(HitZone::HIT_CONTROL, this);
 		}

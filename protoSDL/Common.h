@@ -8,6 +8,8 @@
 
 namespace GUI
 {
+	using CreationFlags = uint32_t;
+
 	enum HitZone : uint32_t {
 		HIT_NOTHING				= 0x0,
 		HIT_TITLEBAR			= 0x1,
@@ -50,7 +52,7 @@ namespace GUI
 	};
 
 	// Creation flags.  These attribute don't change during the lifetime of the window
-	enum class WindowFlags {
+	enum WindowFlags : CreationFlags {
 		WIN_SYSMENU = 1, // Top left button in titlebar (left side)
 		WIN_MINMAX = 2, // Minimize / Maximize buttons in titlebar (right side)
 		WIN_CANMOVE = 4, // Window can be moved
@@ -58,6 +60,8 @@ namespace GUI
 		WIN_ACTIVE = 32, // Always look active, usually for main window
 
 		WIN_NOSCROLL = 64, // No scroll bars
+		WIN_FILL = 128, // Fill parent
+		WIN_AUTOSIZE = 256, // Window grows & shrinks to accomodate contents
 
 		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE
 	};
@@ -67,16 +71,6 @@ namespace GUI
 		WS_MAXIMIZED = 2,
 		WS_MINIMIZED = 4,
 	};
-
-	constexpr enum WindowFlags operator |(const enum WindowFlags selfValue, const enum WindowFlags inValue)
-	{
-		return (enum WindowFlags)(uint32_t(selfValue) | uint32_t(inValue));
-	}
-
-	constexpr bool operator &(const enum WindowFlags selfValue, const enum WindowFlags inValue)
-	{
-		return (uint32_t(selfValue) & uint32_t(inValue));
-	}
 
 	class Widget;
 	using WidgetPtr = std::shared_ptr<Widget>;
