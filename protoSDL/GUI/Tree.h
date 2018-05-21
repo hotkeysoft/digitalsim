@@ -99,7 +99,7 @@ namespace GUI
 		void RenderNodes();
 		int GetVisibleLineCount();
 
-		void DrawFrame(const GUI::RectRef &rect);
+		Rect DrawFrame(const GUI::RectRef &rect);
 		void DrawBackground(const GUI::RectRef &rect);
 		void DrawTree(const GUI::RectRef &rect);
 		void DrawNode(const GUI::RectRef &rect, int line, TreeNodeRef node);

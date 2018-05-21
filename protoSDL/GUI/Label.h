@@ -45,6 +45,7 @@ namespace GUI
 		void SetForegroundColor(Color color) override;
 
 		Rect GetRect(bool relative = true, bool scrolled = true) const override;
+		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 
 		void Draw() override;
 		void Draw(const RectRef rect);
@@ -57,6 +58,8 @@ namespace GUI
 	protected:
 		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, bool fill, bool autoSize);
 
+		void DrawBackground(const GUI::RectRef &rect);
+		Rect DrawFrame(const GUI::RectRef &rect);
 		void RenderLabel();
 		void DrawLabel(RectRef rect);
 

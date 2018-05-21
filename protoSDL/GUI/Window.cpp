@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "Window.h"
+#include "ClipRect.h"
 #include "Point.h"
 #include "Rect.h"
 #include "Image.h"
@@ -379,54 +380,49 @@ namespace GUI
 		if (!(m_showState & WindowState::WS_VISIBLE))
 			return;
 
-		if (m_parent != nullptr)
+		ClipRect clip(m_renderer, m_parent ? &GetClipRect(GetParentWnd()) : nullptr, m_parent);
+		if (clip || m_parent == nullptr)
 		{
-			Rect clip = GetClipRect(GetParentWnd());
-			SDL_RenderSetClipRect(m_renderer, &clip);
-		}
 
-		Rect rect = GetRect(false);
+			Rect rect = GetRect(false);
 
-		bool active = (WINMGR().GetActive() == this || (m_flags & WindowFlags::WIN_ACTIVE));
-		DrawReliefBox(&rect, Color::C_LIGHT_GREY, false);
-		DrawTitleBar(rect, active);
-		DrawTitle(rect, active);
+			bool active = (WINMGR().GetActive() == this || (m_flags & WindowFlags::WIN_ACTIVE));
+			DrawReliefBox(&rect, Color::C_LIGHT_GREY, false);
+			DrawTitleBar(rect, active);
+			DrawTitle(rect, active);
 
-		if (m_flags & WindowFlags::WIN_SYSMENU)
-		{
-			DrawSystemMenuButton(rect, Color::C_LIGHT_GREY);
-		}
-		if (m_flags & WindowFlags::WIN_MINMAX)
-		{
-			DrawMinMaxButtons(rect, Color::C_LIGHT_GREY);
-		}
-
-		if (!(m_showState & WS_MINIMIZED))
-		{
-			if (!m_backgroundColor.IsTransparent())
+			if (m_flags & WindowFlags::WIN_SYSMENU)
 			{
-				DrawFilledRect(&GetClientRect(false, false), m_backgroundColor);
+				DrawSystemMenuButton(rect, Color::C_LIGHT_GREY);
+			}
+			if (m_flags & WindowFlags::WIN_MINMAX)
+			{
+				DrawMinMaxButtons(rect, Color::C_LIGHT_GREY);
 			}
 
-			m_scrollBars->Draw();
+			if (!(m_showState & WS_MINIMIZED))
+			{
+				if (!m_backgroundColor.IsTransparent())
+				{
+					DrawFilledRect(&GetClientRect(false, false), m_backgroundColor);
+				}
 
-			DrawControls(); // Changes clip region so draw last
+				m_scrollBars->Draw();
+
+				DrawControls();
+			}
 		}
-
-		SDL_RenderSetClipRect(m_renderer, nullptr);
 	}
 	
 	void Window::DrawControls()
 	{
-		Rect parent = GetClientRect(false, false);
-
-		Rect oldClipRect;
-		SDL_RenderGetClipRect(m_renderer, &oldClipRect);
-		SDL_RenderSetClipRect(m_renderer, &oldClipRect.IntersectRect(&parent));
-
-		for (auto ctrl : m_controls)
+		ClipRect clip(m_renderer, &GetClientRect(false, false));
+		if (clip)
 		{
-			ctrl.second->Draw();
+			for (auto ctrl : m_controls)
+			{
+				ctrl.second->Draw();
+			}
 		}
 	}
 

@@ -69,7 +69,7 @@ namespace GUI
 		void SplitLines();
 		void RenderLines();
 		void DrawText(RectRef rect);
-		void DrawFrame(const GUI::RectRef &rect);
+		Rect DrawFrame(const GUI::RectRef &rect);
 		void DrawBackground(const GUI::RectRef &rect);
 		void DrawCursor(RectRef rect);
 

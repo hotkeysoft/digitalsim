@@ -188,6 +188,7 @@ xcopy /d /Y "$(SDLTTFLib64)\*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="GUI\Button.h" />
+    <ClInclude Include="GUI\ClipRect.h" />
     <ClInclude Include="GUI\Color.h" />
     <ClInclude Include="GUI\Image.h" />
     <ClInclude Include="GUI\Label.h" />

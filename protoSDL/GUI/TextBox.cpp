@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "Point.h"
+#include "ClipRect.h"
 #include "Rect.h"
 #include "Image.h"
 #include "Window.h"
@@ -67,7 +68,7 @@ namespace GUI
 		return GetRect(relative, scrolled);
 	}
 
-	void TextBox::DrawFrame(const RectRef &rect)
+	Rect TextBox::DrawFrame(const RectRef &rect)
 	{
 		Rect frameRect = *rect;
 
@@ -95,7 +96,7 @@ namespace GUI
 			}
 		}
 
-		SDL_RenderSetClipRect(m_renderer, &frameRect);
+		return frameRect;
 	}
 
 	void TextBox::Draw()
@@ -104,26 +105,30 @@ namespace GUI
 			return;
 
 		Rect drawRect;
+		Rect frameRect;
 		if (m_fill)
 		{
-			DrawFrame(&m_parent->GetClientRect(false, false));
+			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
 		}
 		else
 		{
 			drawRect = GetRect(false, true);
-
-			DrawFrame(&drawRect);
+			frameRect = DrawFrame(&drawRect);
 		}
 
 		drawRect = drawRect.Deflate(GetShrinkFactor());
 
-		if (IsFocused())
+		ClipRect clip(m_renderer, &frameRect);
+		if (clip)
 		{
-			DrawCursor(&drawRect);
-		}
+			if (IsFocused())
+			{
+				DrawCursor(&drawRect);
+			}
 
-		DrawText(&drawRect);
+			DrawText(&drawRect);
+		}
 	}
 
 	void TextBox::DrawCursor(RectRef rect)

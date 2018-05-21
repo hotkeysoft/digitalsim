@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "Point.h"
 #include "Rect.h"
+#include "ClipRect.h"
 #include "Image.h"
 #include "Label.h"
 #include "Window.h"
@@ -42,6 +43,7 @@ namespace GUI
 			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_text.c_str(), m_tree->GetForegroundColor());
 
 			m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
+			m_label->SetParent(m_tree);
 			m_label->SetPadding(Dimension(2, 0));
 			m_label->Init();
 		}
@@ -84,7 +86,7 @@ namespace GUI
 		return GetRect(relative, scrolled);
 	}
 
-	void Tree::DrawFrame(const RectRef &rect)
+	Rect Tree::DrawFrame(const RectRef &rect)
 	{
 		Rect frameRect = *rect;
 
@@ -112,7 +114,7 @@ namespace GUI
 			}
 		}
 
-		SDL_RenderSetClipRect(m_renderer, &frameRect);
+		return frameRect;
 	}
 
 	void Tree::Draw()
@@ -121,21 +123,25 @@ namespace GUI
 			return;
 
 		Rect drawRect;
+		Rect frameRect;
 		if (m_fill)
 		{
-			DrawFrame(&m_parent->GetClientRect(false, false));
+			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
 		}
 		else
 		{
 			drawRect = GetRect(false, true);
-			
-			DrawFrame(&drawRect);
+			frameRect = DrawFrame(&drawRect);
 		}
 
 		drawRect = drawRect.Deflate(GetShrinkFactor());
 
-		DrawTree(&drawRect);
+		ClipRect clip(m_renderer, &frameRect);
+		if (clip)
+		{
+			DrawTree(&drawRect);
+		}
 	}
 
 	void Tree::DrawBackground(const RectRef &rect)

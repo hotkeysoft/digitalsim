@@ -104,5 +104,8 @@
     <ClInclude Include="GUI\Tree.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\ClipRect.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

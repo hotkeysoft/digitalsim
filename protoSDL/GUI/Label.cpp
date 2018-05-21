@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "Point.h"
+#include "ClipRect.h"
 #include "Rect.h"
 #include "Image.h"
 #include "Window.h"
@@ -54,10 +55,57 @@ namespace GUI
 
 	Rect Label::GetRect(bool relative, bool scrolled) const
 	{
-		if (!m_autoSize)
-			return m_rect;
+		Rect parent = m_parent->GetClientRect(relative, scrolled);
 
-		return Rect(m_rect.x, m_rect.y, m_labelRect.w+(GetShrinkFactor().w*2), m_labelRect.h+(GetShrinkFactor().h*2));
+		return m_rect.Offset(&parent.Origin());
+	}
+
+	Rect Label::GetClientRect(bool relative, bool scrolled) const
+	{
+		return GetRect(relative, scrolled);
+	}
+
+	void Label::DrawBackground(const GUI::RectRef &rect)
+	{
+		if (m_backgroundColor.IsTransparent())
+			return;
+
+		Rect fillRect = m_rect;
+		fillRect.h = std::max(rect->h, m_rect.h);
+		fillRect.w = std::max(rect->w, m_rect.w);
+
+		DrawFilledRect(rect, m_backgroundColor);
+	}
+
+	Rect Label::DrawFrame(const RectRef &rect)
+	{
+		Rect frameRect = *rect;
+
+		if (m_fill)
+		{
+			DrawBackground(&m_parent->GetClientRect(false, false));
+		}
+
+		if (m_margin)
+		{
+			frameRect = frameRect.Deflate(m_margin);
+		}
+
+		if (!m_fill && !m_backgroundColor.IsTransparent())
+		{
+			DrawFilledRect(&frameRect, m_backgroundColor);
+		}
+
+		if (m_showBorder)
+		{
+			for (int i = 0; i < m_borderWidth; ++i)
+			{
+				DrawRect(&frameRect, m_borderColor);
+				frameRect = frameRect.Deflate(1);
+			}
+		}
+
+		return std::move(frameRect);
 	}
 
 	void Label::Draw()
@@ -66,46 +114,36 @@ namespace GUI
 			return;
 
 		Rect drawRect;
+		Rect frameRect;
 		if (m_fill)
 		{
+			frameRect = DrawFrame(&m_parent->GetClientRect(false, false));
 			drawRect = m_parent->GetClientRect(false, true);
 		}
 		else
 		{
-			drawRect = m_rect.Offset(&m_parent->GetClientRect(false, true).Origin());
+			drawRect = GetRect(false, true);
+			frameRect = DrawFrame(&drawRect);
 		}
-		Draw(&drawRect);
+
+		drawRect = drawRect.Deflate(GetShrinkFactor());
+
+		ClipRect clip(m_renderer, &frameRect);
+		if (clip)	
+		{
+			DrawLabel(&drawRect);
+		}
 	}
 
 	void Label::Draw(const RectRef rect)
 	{
-		Rect drawRect = *rect;
+		Rect frameRect = DrawFrame(rect);
 
-		if (m_margin)
+		ClipRect clip(m_renderer, &frameRect);
+		if (clip)
 		{
-			drawRect = drawRect.Deflate(m_margin);
+			DrawLabel(rect);
 		}
-
-		if (!m_backgroundColor.IsTransparent())
-		{
-			DrawFilledRect(&drawRect, m_backgroundColor);
-		}
-
-		if (m_showBorder)
-		{
-			for (int i = 0; i < m_borderWidth; ++i)
-			{
-				DrawRect(&drawRect, m_borderColor);
-				drawRect = drawRect.Deflate(1);
-			}
-		}
-
-		if (m_padding)
-		{
-			drawRect = drawRect.Deflate(m_padding);
-		}
-
-		DrawLabel(&drawRect);
 	}
 
 	void Label::DrawLabel(RectRef rect)

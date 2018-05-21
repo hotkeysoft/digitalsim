@@ -167,6 +167,7 @@ int main(int argc, char ** argv)
 			ImageRef closed = RES().FindImage("win.scroll.right");
 
 			TreePtr tree = GUI::Tree::Create("tree", ren.get(), 20);
+			WINMGR().FindWindow("parts")->AddControl(tree);
 
 			TreeNodeRef root = tree->AddNode("Root");
 			
@@ -188,7 +189,6 @@ int main(int argc, char ** argv)
 			TreeNodeRef l313 = tree->AddNode("3.1.3", opened, closed, l31);
 			TreeNodeRef l3123 = tree->AddNode("3.1.2.3", opened, closed, l312);
 			
-			WINMGR().FindWindow("parts")->AddControl(tree);
 		}	
 		
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
@@ -198,7 +198,7 @@ int main(int argc, char ** argv)
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 		
 		{
-			LabelPtr label = GUI::Label::CreateSingle("l1", ren.get(), Rect(100, 8, 55, 24), "A label");
+			LabelPtr label = GUI::Label::CreateSingle("alabel", ren.get(), Rect(100, 8, 55, 24), "A label");
 			e2->AddControl(label);
 		}
 
