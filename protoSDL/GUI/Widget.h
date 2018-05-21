@@ -115,7 +115,7 @@ namespace GUI
 		void SetDrawColor(const GUI::Color & col);
 		void DrawFilledRect(const RectRef pos, const GUI::Color & col);
 		void DrawRect(const RectRef pos, const GUI::Color & col);
-		void DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised);
+		void DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised, int thickness = 1);
 		void Draw3dFrame(const RectRef pos, bool raised);
 		void DrawReliefBox(const RectRef pos, const GUI::Color & col, bool raised);
 

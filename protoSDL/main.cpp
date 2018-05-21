@@ -334,13 +334,9 @@ int main(int argc, char ** argv)
 						}
 					}
 				}
-				else if (e.type == SDL_MOUSEBUTTONUP) 
-				{
-					if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
-					{
-						Render(ren);
-					}
-				}
+				//else if (e.type == SDL_MOUSEBUTTONUP/* || e.type == SDL_KEYUP*/) 
+				//{
+				//}
 				else if (e.type == SDL_KEYDOWN) 
 				{
 					// Pass to active window first
@@ -361,6 +357,10 @@ int main(int argc, char ** argv)
 					{
 						Render(ren);
 					}
+				}
+				else if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
+				{
+					Render(ren);
 				}
 				else // Pass to active window
 				{

@@ -83,7 +83,7 @@ namespace GUI
 
 		if (m_flags & WIN_FILL)
 		{
-			DrawBackground(&m_parent->GetClientRect(false, false));
+			DrawBackground(&m_parent->GetClientRect(false, true));
 		}
 
 		if (m_margin)
@@ -139,7 +139,9 @@ namespace GUI
 	{
 		Rect frameRect = DrawFrame(rect);
 
-		ClipRect clip(m_renderer, &frameRect);
+		Rect drawFrame = rect->Deflate(GetShrinkFactor());
+
+		ClipRect clip(m_renderer, &drawFrame);
 		if (clip)
 		{
 			DrawLabel(rect);
@@ -207,8 +209,8 @@ namespace GUI
 		
 		if (m_flags & WIN_AUTOSIZE)
 		{
-			m_rect.w = m_labelRect.w;
-			m_rect.h = m_labelRect.h;
+			m_rect.w = m_labelRect.w + (2 * GetShrinkFactor().w);
+			m_rect.h = m_labelRect.h + (2 * GetShrinkFactor().h);
 		}
 	}
 

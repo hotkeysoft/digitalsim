@@ -116,15 +116,18 @@ namespace GUI
 		}
 	}
 
-	void Widget::DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised)
+	void Widget::DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised, int thickness)
 	{
 		SetDrawColor(col);
 
 		// Render rect
 		SDL_RenderFillRect(m_renderer, pos);
 
-		Draw3dFrame(pos, raised);
-
+		for (int i = 0; i < thickness; ++i)
+		{
+			Draw3dFrame(&pos->Deflate(i), raised);
+		}
+		
 		if (image && image->IsSet())
 		{
 			image->Draw(&Point(pos->x + 1, pos->y + 1));

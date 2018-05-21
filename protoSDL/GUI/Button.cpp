@@ -13,6 +13,7 @@ namespace GUI
 	Button::Button(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font) :
 		Widget(id, renderer, nullptr, rect, label, image, font), m_pushed(false), m_onClickHandler(nullptr)
 	{
+		m_borderWidth = 2;
 	}
 
 	void Button::Init()
@@ -40,10 +41,12 @@ namespace GUI
 			if (hit.target == this)
 			{
 				SetActive();
+				SetFocus(this);
 				m_pushed = true;
 				WINMGR().StartCapture(hit, &pt);
 				return true;
 			}
+			break;
 		case SDL_MOUSEBUTTONUP:
 			m_pushed = false;
 			if (capture && capture.Target.target == this)
@@ -60,6 +63,32 @@ namespace GUI
 			{
 				m_pushed = (hit.target == this);
 			}
+			break;
+		case SDL_KEYDOWN:
+			if (IsFocused())
+			{
+				bool ctrl = SDL_GetModState() & KMOD_CTRL;
+				switch (e->key.keysym.sym)
+				{
+				case SDLK_SPACE:
+				case SDLK_RETURN:				
+					m_pushed = true;
+					WINMGR().StartCapture(HitResult(HIT_CLIENT, this), &pt);
+					return true;
+				}
+			}
+			break;
+		case SDL_KEYUP:
+			m_pushed = false;
+			if (capture && capture.Target.target == this)
+			{
+				WINMGR().ReleaseCapture();
+				if (this && m_onClickHandler)
+				{
+					m_onClickHandler(this);
+				}
+			}
+			return true;
 		}
 		return false;
 	}
@@ -94,11 +123,12 @@ namespace GUI
 
 		Rect drawRect = GetRect(false, true);
 
-		DrawButton(&drawRect, m_backgroundColor, nullptr, !m_pushed);
+		DrawButton(&drawRect, m_backgroundColor, nullptr, !m_pushed, m_borderWidth);
 
 		if (m_label)
 		{
-			m_label->Draw();
+			m_label->SetBorder(IsFocused());
+			m_label->Draw(&drawRect.Deflate(m_borderWidth));
 		}
 	}
 
@@ -111,7 +141,10 @@ namespace GUI
 	void Button::CreateLabel()
 	{
 		m_label = Label::CreateFill("label", m_renderer, m_text.c_str(), m_font);
-		m_label->SetMargin(0);
+		m_label->SetMargin(1);
+		m_label->SetPadding(0);
+		m_label->SetBorderWidth(1);
+		m_label->SetBorder(true);
 		m_label->SetParent(this);
 		m_label->Init();
 	}

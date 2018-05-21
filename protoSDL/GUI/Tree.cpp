@@ -44,7 +44,9 @@ namespace GUI
 
 			m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
 			m_label->SetParent(m_tree);
-			m_label->SetPadding(Dimension(2, 0));
+			m_label->SetPadding(Dimension(5, 0));
+			m_label->SetBorder(false);
+			m_label->SetMargin(0);
 			m_label->Init();
 		}
 	}
