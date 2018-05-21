@@ -51,6 +51,18 @@ namespace GUI
 		}
 	}
 
+	bool TreeNode::Hit(PointRef pt) 
+	{ 
+		if (m_tree->GetFlags() & TCF_FULLROWSELECT)
+		{
+			return ((unsigned)(pt->y - m_labelRect.y) <= (m_labelRect.h));
+		}
+		else
+		{
+			return m_labelRect.PointInRect(pt);
+		}
+	}
+
 	Tree::Tree(const char* id, RendererRef renderer, int lineHeight, FontRef font, CreationFlags flags) :
 		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, font, flags),
 		m_lineHeight(clip(lineHeight, 8, 255)), 
@@ -163,6 +175,14 @@ namespace GUI
 		target.y += (line * m_lineHeight);
 		target.w = node->m_label->GetRect().w;
 		target.h = m_lineHeight;
+
+		if (node->IsSelected() && (m_flags & TCF_FULLROWSELECT))
+		{
+			Rect sel = *rect;
+			sel.y = target.y;
+			sel.h = m_lineHeight;
+			DrawFilledRect(&sel, m_selectedBgColor);
+		}
 
 		ImageRef image = (node->m_opened && NodeHasChildren(node)) ? node->m_openedImage : node->m_closedImage;
 

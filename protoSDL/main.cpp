@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
 			ImageRef opened = RES().FindImage("win.scroll.down");
 			ImageRef closed = RES().FindImage("win.scroll.right");
 
-			TreePtr tree = GUI::Tree::CreateFill("tree", ren.get(), 20);
+			TreePtr tree = GUI::Tree::CreateFill("tree", ren.get(), 20, nullptr, TCF_FULLROWSELECT);
 			TreeNodeRef root = tree->AddNode("Root");
 			
 			TreeNodeRef l1 = tree->AddNode("1", opened, closed, root);

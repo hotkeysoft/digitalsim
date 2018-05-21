@@ -28,7 +28,7 @@ namespace GUI
 		bool IsSelected() const { return m_selected; } // True if node is selected
 		bool IsVisible() const; // False is any of parent nodes is closed
 
-		bool Hit(PointRef pt) { return m_labelRect.PointInRect(pt); }
+		bool Hit(PointRef pt);
 
 	private:
 		bool m_opened;
