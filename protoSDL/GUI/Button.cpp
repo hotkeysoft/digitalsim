@@ -59,6 +59,11 @@ namespace GUI
 			}
 			return true;
 		case SDL_MOUSEMOTION:
+			if (hit)
+			{
+				SDL_SetCursor(RES().FindCursor("default"));
+			}
+
 			if (capture && capture.Target.target == this)
 			{
 				m_pushed = (hit.target == this);

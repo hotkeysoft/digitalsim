@@ -630,6 +630,11 @@ namespace GUI
 
 	void Window::Minimize()
 	{
+		if (!(m_flags & WindowFlags::WIN_MINMAX))
+		{
+			return;
+		}
+
 		if (m_showState & WindowState::WS_MINIMIZED)
 		{
 			Restore();
@@ -646,6 +651,11 @@ namespace GUI
 
 	void Window::Maximize()
 	{
+		if (!(m_flags & WindowFlags::WIN_MINMAX))
+		{
+			return;
+		}
+
 		if (m_showState & WindowState::WS_MAXIMIZED)
 		{
 			Restore();
@@ -660,6 +670,11 @@ namespace GUI
 
 	void Window::Restore()
 	{
+		if (!(m_flags & WindowFlags::WIN_MINMAX))
+		{
+			return;
+		}
+
 		m_showState = WindowState(m_showState & ~(WindowState::WS_MAXIMIZED | WindowState::WS_MINIMIZED));
 	}
 
@@ -717,8 +732,18 @@ namespace GUI
 				case HIT_SYSMENU:
 				case HIT_MINBUTTON:
 				case HIT_MAXBUTTON:
-				case HIT_TITLEBAR:
 					capture = true;
+					break;
+
+				case HIT_TITLEBAR:
+					if (e->button.clicks == 2)
+					{
+						Maximize();
+					}
+					else
+					{
+						capture = true;
+					}
 					break;
 				}
 

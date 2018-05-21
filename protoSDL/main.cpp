@@ -191,6 +191,8 @@ int main(int argc, char ** argv)
 		}	
 		
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
+//		WINMGR().AddWindow("e22", e2, Rect(10, 10, 100, 100));
+
 		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
 		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
 		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(225, 30, 90, 70), "A Big Button"));
