@@ -194,6 +194,16 @@ namespace GUI
 		return std::move(texture);
 	}
 
+	std::string WindowManager::GetEventName(Uint32 eventId) const
+	{
+		auto found = m_registeredEventsReverse.find(eventId);
+		if (found == m_registeredEventsReverse.end())
+		{
+			return "<null>";
+		}
+		return found->second;
+	}
+
 	Uint32 WindowManager::GetEventType(const char * type)
 	{
 		if (type == nullptr)
@@ -210,6 +220,7 @@ namespace GUI
 				throw std::out_of_range(" too many registered events");
 			}
 			m_registeredEvents[type] = eventId;
+			m_registeredEventsReverse[eventId] = type;
 		}		
 		
 		return eventId;

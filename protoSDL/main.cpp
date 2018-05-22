@@ -87,6 +87,23 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	editWnd->SetMenu(menu);
 }
 
+int EventFilter(void* userdata, SDL_Event* event)
+{
+	static Uint32 timerEvent = WINMGR().GetEventType("timer");
+
+	if (event->type >= SDL_USEREVENT && event->type != timerEvent)
+	{
+		std::cout << WINMGR().GetEventName(event->type) << ":" << event->user.code;
+		if (event->user.data1)
+		{
+			WidgetRef widget = WidgetRef(event->user.data1);
+			std::cout << "\t" << widget->GetId();
+		}
+		std::cout << std::endl;
+	}
+	return 0;
+}
+
 int main(int argc, char ** argv)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -339,6 +356,7 @@ int main(int argc, char ** argv)
 		bool quit = false;
 
 		Uint32 buttonEvent = WINMGR().GetEventType(Button::EventClassName());
+		SDL_AddEventWatch(EventFilter, nullptr);
 
 		while (!quit) 
 		{

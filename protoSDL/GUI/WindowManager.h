@@ -26,6 +26,7 @@ namespace GUI
 	{
 	public:
 		using EventMap = std::map<std::string, Uint32>;
+		using ReverseEventMap = std::map<Uint32, std::string>;
 		using TimerList = std::vector<Uint32>;
 		using WindowList = std::list<WindowPtr>;
 
@@ -46,6 +47,7 @@ namespace GUI
 		WindowList GetWindowList(WindowRef parent);
 
 		Uint32 GetEventType(const char * type);
+		std::string GetEventName(Uint32 eventType) const;
 
 		void MoveToFront(WindowRef);
 
@@ -75,6 +77,7 @@ namespace GUI
 		WindowRef m_activeWindow;
 
 		EventMap m_registeredEvents;
+		ReverseEventMap m_registeredEventsReverse;
 		TimerList m_timers;
 
 		CaptureInfo m_capture;
