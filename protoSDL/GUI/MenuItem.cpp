@@ -20,7 +20,7 @@ namespace GUI
 
 	void MenuItem::Init()
 	{
-		m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
+		m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str(), nullptr, Label::TEXT_AUTOSIZE_DEFAULT, LCF_MENUITEM);
 		m_label->SetPadding(Dimension(8, 0));
 		m_label->Init();
 	}

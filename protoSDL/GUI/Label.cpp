@@ -13,6 +13,11 @@ namespace GUI
 	Label::Label(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, CreationFlags flags) :
 		Widget(id, renderer, nullptr, rect, label, nullptr, font, flags), m_labelAlign(align)
 	{
+		if ((flags & WIN_FILL) && (flags & WIN_AUTOSIZE))
+		{
+			throw std::invalid_argument("Incompatible creation flags");
+		}
+
 		m_backgroundColor = Color::C_TRANSPARENT;
 		m_borderWidth = 1;
 
@@ -35,21 +40,21 @@ namespace GUI
 		}
 	}
 
-	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align)
+	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, 0);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, 0 | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
-	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align)
+	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, WIN_FILL);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, WIN_FILL | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
-	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align)
+	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, WIN_AUTOSIZE);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, WIN_AUTOSIZE | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
@@ -188,6 +193,12 @@ namespace GUI
 
 	void Label::RenderLabel()
 	{
+		size_t underlinePos = -1;
+		if (m_flags & LCF_MENUITEM)
+		{
+			underlinePos = RemoveAmpersands();
+		}
+
 		SDL_Surface* label = TTF_RenderText_Blended(m_font, m_text.c_str(), m_foregroundColor);
 		m_labelText = SurfaceToTexture(label);
 
@@ -195,10 +206,38 @@ namespace GUI
 		m_labelRect.x = 0;
 		m_labelRect.y = 0;
 		
+		if ((m_flags & LCF_MENUITEM) && (underlinePos != -1))
+		{
+			DrawUnderline(underlinePos);
+		}
+
 		if (m_flags & WIN_AUTOSIZE)
 		{
 			m_rect.w = m_labelRect.w + (2 * GetShrinkFactor().w);
 			m_rect.h = m_labelRect.h + (2 * GetShrinkFactor().h);
+		}
+	}
+
+	void Label::DrawUnderline(const size_t &underlinePos)
+	{
+		int xPos = 0;
+		if (underlinePos > 0)
+		{
+			TTF_SizeText(m_font, m_text.substr(0, underlinePos).c_str(), &xPos, nullptr);
+		}
+		int width = 16;
+		TTF_GlyphMetrics(m_font, m_text[underlinePos], nullptr, &width, nullptr, nullptr, nullptr);
+
+		// Texture from fonts are not writable
+		TexturePtr clone = CloneTexture(m_labelText);
+		if (clone && (SDL_SetRenderTarget(m_renderer, clone.get()) == 0))
+		{
+			SetDrawColor(m_foregroundColor);
+			SDL_RenderDrawLine(m_renderer, xPos, m_labelRect.h - 3, xPos + width, m_labelRect.h - 3);
+
+			SDL_SetRenderTarget(m_renderer, nullptr);
+
+			m_labelText = std::move(clone);
 		}
 	}
 
@@ -216,6 +255,19 @@ namespace GUI
 		}
 
 		m_labelAlign = (TextAlign)align;
+	}
+
+	// TODO: Allow escaping, like "This && That"
+	size_t Label::RemoveAmpersands()
+	{
+		size_t index = m_text.find_first_of("&");
+
+		if (index != -1)
+		{
+			m_text.erase(std::remove(m_text.begin(), m_text.end(), '&'), m_text.end());
+		}
+
+		return index;
 	}
 
 	struct Label::shared_enabler : public Label

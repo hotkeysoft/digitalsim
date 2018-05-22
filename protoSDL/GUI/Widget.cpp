@@ -143,14 +143,40 @@ namespace GUI
 		}
 	}
 
-	TexturePtr Widget::SurfaceToTexture(SDL_Surface* surf)
+	TexturePtr Widget::SurfaceToTexture(SDL_Surface* surf, bool writable)
 	{
 		TexturePtr texture = TexturePtr(SDL_CreateTextureFromSurface(m_renderer, surf), sdl_deleter());
 
 		SDL_FreeSurface(surf);
 
-		return std::move(texture);
+		return writable ? std::move(CloneTexture(texture)) : std::move(texture);
 	}
+
+	TexturePtr Widget::CloneTexture(TexturePtr source, Color background)
+	{
+		Uint32 format;
+		Rect rect;
+
+		SDL_QueryTexture(source.get(), &format, NULL, &rect.w, &rect.h);
+		TextureRef clone = SDL_CreateTexture(m_renderer, format, SDL_TEXTUREACCESS_TARGET, rect.w, rect.h);
+		if (clone && (SDL_SetRenderTarget(m_renderer, clone) == 0))
+		{
+			if (background.IsTransparent())
+			{
+				SDL_SetTextureBlendMode(clone, SDL_BLENDMODE_BLEND);				
+			}
+			SetDrawColor(m_backgroundColor);
+
+			if (SDL_SetRenderTarget(m_renderer, clone) == 0)
+			{
+				SDL_RenderClear(m_renderer); // Needed? transparent vs opaque bg
+				SDL_RenderCopy(m_renderer, source.get(), &rect, &rect);
+				SDL_SetRenderTarget(m_renderer, nullptr);
+			}
+		}
+		return std::move(TexturePtr(clone, sdl_deleter()));
+	}
+
 
 	Rect Widget::GetRect(bool relative, bool scrolled) const
 	{

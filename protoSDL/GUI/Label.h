@@ -8,6 +8,11 @@
 
 namespace GUI
 {
+	enum LabelCreationFlags : CreationFlags
+	{
+		LCF_MENUITEM = WIN_CUSTOMBASE << 0, // Will replace '&' with underlined characted
+	};
+
 	class Label : public Widget
 	{
 	public:
@@ -34,13 +39,13 @@ namespace GUI
 		void Init() override;
 
 		// Single line label at position 'rect'
-		static LabelPtr CreateSingle(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_SINGLE_DEFAULT);
+		static LabelPtr CreateSingle(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_SINGLE_DEFAULT, CreationFlags flags = 0);
 
 		// Fills whole parent window
-		static LabelPtr CreateFill(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_FILL_DEFAULT);
+		static LabelPtr CreateFill(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_FILL_DEFAULT, CreationFlags flags = 0);
 
 		// Auto-size
-		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT);
+		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT, CreationFlags flags = 0);
 
 		void SetForegroundColor(Color color) override;
 
@@ -52,13 +57,17 @@ namespace GUI
 		void SetAlign(uint8_t align);
 		uint8_t GetAlign() { return m_labelAlign;  }
 
+
 	protected:
 		Label(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, CreationFlags flags);
 
 		void DrawBackground(const GUI::RectRef &rect);
 		Rect DrawFrame(const GUI::RectRef &rect);
 		void RenderLabel();
+		void DrawUnderline(const size_t &underlinePos);
 		void DrawLabel(RectRef rect);
+
+		size_t RemoveAmpersands(); // Returns position of first ampersand, -1 if not found
 
 		TexturePtr m_labelText;
 		Rect m_labelRect;

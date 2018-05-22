@@ -119,7 +119,8 @@ namespace GUI
 		void Draw3dFrame(const RectRef pos, bool raised);
 		void DrawReliefBox(const RectRef pos, const GUI::Color & col, bool raised);
 
-		TexturePtr SurfaceToTexture(SDL_Surface* surf);
+		TexturePtr SurfaceToTexture(SDL_Surface* surf, bool writable = false);
+		TexturePtr CloneTexture(TexturePtr source, Color background = Color::C_TRANSPARENT);
 
 		std::string m_id;
 		CreationFlags m_flags;

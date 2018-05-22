@@ -169,6 +169,13 @@ int main(int argc, char ** argv)
 		simWnd->SetImage(RES().FindImage("iconSim"));
 		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
+		MenuPtr simMenu = GUI::Menu::Create(ren.get());
+		simMenu->AddMenuItem("sim", "&Simulation");
+		simMenu->AddMenuItem("stop", "S&top");
+		simMenu->AddMenuItem("step", "Ste&p");
+		simMenu->AddMenuItem("view", "&View");
+		simWnd->SetMenu(simMenu);
+
 		WINMGR().AddWindow("parts", mainWnd, { client.w-300, 0, 300, client.h})->SetText("Parts");
 
 		{
