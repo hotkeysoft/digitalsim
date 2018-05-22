@@ -4,6 +4,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "Image.h"
+#include "Menu.h"
 #include "ResourceManager.h"
 #include <algorithm>
 
@@ -159,6 +160,32 @@ namespace GUI
 		return rect;
 	}
 
+	Rect Window::GetRawClientRect(bool relative, bool scrolled) const // Excludes scroll bars and menu
+	{
+		Rect rect = GetRect(relative, true);
+		if (relative)
+		{
+			rect.x = 0;
+			rect.y = 0;
+		}
+		else
+		{
+			rect.x += m_borderWidth + 1;
+			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
+		}
+
+		rect.w -= (2 * (m_borderWidth + 1));
+		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
+
+		if (scrolled)
+		{
+			rect.x -= m_scrollPos.x;
+			rect.y -= m_scrollPos.y;
+		}
+
+		return rect;
+	}
+
 	Rect Window::GetClientRect(bool relative, bool scrolled) const
 	{
 		Rect rect = GetRect(relative, true);
@@ -173,21 +200,27 @@ namespace GUI
 			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
 		}
 
-		if (m_scrollBars)
+		if (m_menu)
 		{
-			ScrollStateRef scroll = m_scrollBars->GetScrollState();
-			auto size = m_scrollBars->GetSize();
-
-			rect.w -= (2 * (m_borderWidth + 1)) + (scroll->showV ? size : 0);
-			rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2) + (scroll->showH ? size : 0);
-
-			if (scrolled)
-			{
-				rect.x -= m_scrollPos.x;
-				rect.y -= m_scrollPos.y;
-			}
+			rect.y += m_menu->GetHeight();
+			rect.h -= m_menu->GetHeight();
 		}
 
+		rect.w -= (2 * (m_borderWidth + 1));
+		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
+
+		ScrollStateRef scroll = m_scrollBars->GetScrollState();
+		auto size = m_scrollBars->GetSize();
+
+		rect.w -= (scroll->showV ? size : 0);
+		rect.h -= (scroll->showH ? size : 0);
+
+		if (scrolled)
+		{
+			rect.x -= m_scrollPos.x;
+			rect.y -= m_scrollPos.y;
+		}
+		
 		return rect;
 	}
 
@@ -383,7 +416,6 @@ namespace GUI
 		ClipRect clip(m_renderer, m_parent ? &GetClipRect(GetParentWnd()) : nullptr, m_parent);
 		if (clip || m_parent == nullptr)
 		{
-
 			Rect rect = GetRect(false);
 
 			bool active = (WINMGR().GetActive() == this || (m_flags & WindowFlags::WIN_ACTIVE));
@@ -402,13 +434,23 @@ namespace GUI
 
 			if (!(m_showState & WS_MINIMIZED))
 			{
+				Rect clientRect = GetRawClientRect(false, false);
+				if (m_menu)
+				{
+					m_menu->Draw(&clientRect);
+
+					int menuHeight = m_menu->GetHeight();
+					clientRect.y += menuHeight;
+					clientRect.h -= menuHeight;
+				}
+				
 				if (!m_backgroundColor.IsTransparent())
 				{
-					DrawFilledRect(&GetClientRect(false, false), m_backgroundColor);
+					DrawFilledRect(&clientRect, m_backgroundColor);
 				}
 
-				m_scrollBars->Draw();
-
+				m_scrollBars->Draw(&clientRect);
+				
 				DrawControls();
 			}
 		}
@@ -909,6 +951,13 @@ namespace GUI
 		}
 
 		return false;
+	}
+
+	void Window::SetMenu(MenuPtr menu)
+	{	
+		m_menu = menu; 
+		m_menu->SetParent(this); 
+		m_menu->Init();
 	}
 
 	struct Window::shared_enabler : public Window

@@ -3,6 +3,7 @@
 #include "Rect.h"
 #include "Image.h"
 #include "Window.h"
+#include "Menu.h"
 #include "ResourceManager.h"
 #include "ScrollBars.h"
 #include <algorithm>
@@ -44,13 +45,14 @@ namespace GUI
 		DrawButton(&m_scrollState.leftButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.left"), !m_parent->GetPushedState(HIT_HSCROLL_LEFT));
 		DrawButton(&m_scrollState.rightButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.right"), !m_parent->GetPushedState(HIT_HSCROLL_RIGHT));
 
-		double sliderWidth = (1.0 - ((double)m_scrollState.hMax / (double)pos->w)) * (double)scrollAreaWidth + 1;
+		int fullWidth = m_scrollState.hMax + pos->w;
+		int sliderWidth = pos->w * scrollAreaWidth / fullWidth;
 		if (sliderWidth < (m_borderWidth * 2))
 		{
 			sliderWidth = m_borderWidth * 2;
 		}
-
-		int currPos = m_scrollState.hMax ? m_parent->m_scrollPos.x * scrollAreaWidth / m_scrollState.hMax : 0;
+		
+		int currPos = m_parent->m_scrollPos.x * scrollAreaWidth / fullWidth;
 		if (currPos + sliderWidth > scrollAreaWidth)
 		{
 			currPos = scrollAreaWidth - (int)sliderWidth + 1;
@@ -73,13 +75,14 @@ namespace GUI
 		DrawButton(&m_scrollState.upButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.up"), !m_parent->GetPushedState(HIT_VSCROLL_UP));
 		DrawButton(&m_scrollState.downButton, Color::C_LIGHT_GREY, RES().FindImage("win.scroll.down"), !m_parent->GetPushedState(HIT_VSCROLL_DOWN));
 		
-		double sliderHeight = (1.0 - ((double)m_scrollState.vMax / (double)pos->h)) * (double)scrollAreaHeight + 1;
+		int fullHeight = m_scrollState.vMax + pos->h;
+		int sliderHeight = pos->h * scrollAreaHeight / fullHeight;
 		if (sliderHeight < (m_borderWidth * 2))
 		{
 			sliderHeight = m_borderWidth * 2;
 		}
 
-		int currPos = m_scrollState.vMax ? m_parent->m_scrollPos.y * scrollAreaHeight / m_scrollState.vMax : 0;
+		int currPos = m_parent->m_scrollPos.y * scrollAreaHeight / fullHeight;
 		if (currPos + sliderHeight > scrollAreaHeight)
 		{
 			currPos = scrollAreaHeight - (int)sliderHeight + 1;
@@ -133,7 +136,7 @@ namespace GUI
 		m_scrollState.showV = showV || m_parent->m_scrollPos.y;
 	}
 
-	void ScrollBars::DrawScrollBars(RectRef pos)
+	void ScrollBars::Draw(RectRef pos)
 	{
 		if (m_parent->GetFlags() & WindowFlags::WIN_NOSCROLL)
 			return;
@@ -143,10 +146,8 @@ namespace GUI
 		if (m_scrollState.showH)
 		{
 			Rect hPos = *pos;
-			hPos.x += m_borderWidth + 1;
-			hPos.w -= (2*m_borderWidth) + 2 + (m_scrollState.showV ? m_scrollBarSize : 0);
-
-			hPos.y += hPos.h - (m_scrollBarSize + m_borderWidth + 1);
+			hPos.y += hPos.h - m_scrollBarSize;
+			hPos.w -= (m_scrollState.showV ? m_scrollBarSize : 0);
 			hPos.h = m_scrollBarSize;
 
 			DrawHScrollBar(&hPos);
@@ -154,25 +155,24 @@ namespace GUI
 
 		if (m_scrollState.showV)
 		{
-			Rect hPos = *pos;
-			hPos.x += hPos.w - (m_scrollBarSize + m_borderWidth + 1);
-			hPos.w = m_scrollBarSize;
+			Rect vPos = *pos;
+			vPos.x += vPos.w - m_scrollBarSize;
+			vPos.w = m_scrollBarSize;
+			vPos.h -= (m_scrollState.showH ? m_scrollBarSize : 0);
 
-			hPos.y += m_borderWidth + m_buttonSize + 2 + 1;
-			hPos.h -= (2 * m_borderWidth) + m_buttonSize + 2 + 2 + (m_scrollState.showH ? m_scrollBarSize : 0);
-
-			DrawVScrollBar(&hPos);
+			DrawVScrollBar(&vPos);
 		}
 
+		// Corner area if both bars are drawn
 		if (m_scrollState.showH && m_scrollState.showV)
 		{
-			Rect hPos = *pos;
-			hPos.x += hPos.w - (m_scrollBarSize + m_borderWidth + 1);
-			hPos.y += hPos.h - (m_scrollBarSize + m_borderWidth + 1);
-			hPos.w = m_scrollBarSize;
-			hPos.h = m_scrollBarSize;
+			Rect hvPos = *pos;
+			hvPos.x += hvPos.w - m_scrollBarSize;
+			hvPos.y += hvPos.h - m_scrollBarSize;
+			hvPos.w = m_scrollBarSize;
+			hvPos.h = m_scrollBarSize;
 
-			Draw3dFrame(&hPos, true);
+			Draw3dFrame(&hvPos, true);
 		}
 	}
 
@@ -217,16 +217,6 @@ namespace GUI
 			}
 		}
 		return HitResult(HIT_NOTHING, this);
-	}
-
-	void ScrollBars::Draw()
-	{
-		Rect rect = m_parent->GetRect(false);
-
-		if (!(m_parent->GetShowState() & WS_MINIMIZED))
-		{
-			DrawScrollBars(&rect);
-		}
 	}
 
 	void ScrollBars::ScrollRel(PointRef pt)

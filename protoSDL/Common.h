@@ -85,6 +85,14 @@ namespace GUI
 	class TreeNode;
 	using TreeNodeRef = TreeNode * ;
 
+	class Menu;
+	using MenuPtr = std::shared_ptr<Menu>;
+	using MenuRef = Menu * ;
+
+	class MenuItem;
+	using MenuItemPtr = std::shared_ptr<MenuItem>;
+	using MenuItemRef = MenuItem * ;
+
 	class Tree;
 	using TreePtr = std::shared_ptr<Tree>;
 	using TreeRef = Tree * ;

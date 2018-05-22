@@ -38,6 +38,7 @@ namespace GUI
 
 		WindowRef GetParentWnd() const { return static_cast<WindowRef>(m_parent); }
 
+		Rect GetRawClientRect(bool relative = true, bool scrolled = true) const; // Excludes scroll bars and menu
 		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 		Rect GetRect(bool relative = true, bool scrolled = true) const override;
 
@@ -64,6 +65,9 @@ namespace GUI
 		ScrollBarsRef GetScrollBars() { return m_scrollBars.get(); }
 
 		bool GetPushedState(HitZone id) { return m_pushedState & id; }
+
+		void SetMenu(MenuPtr menu);
+		MenuPtr GetMenu() { return m_menu; }
 
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags);
@@ -101,6 +105,8 @@ namespace GUI
 		static Window m_nullWnd;			
 
 		ControlList m_controls;
+
+		MenuPtr m_menu;
 
 		struct shared_enabler;
 

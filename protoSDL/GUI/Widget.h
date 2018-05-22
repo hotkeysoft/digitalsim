@@ -95,7 +95,7 @@ namespace GUI
 		// Parent
 		virtual bool HasParent() const { return m_parent != nullptr; }
 		virtual const WidgetRef GetParent() const { return m_parent; }
-		virtual void SetParent(WidgetRef parent) { m_parent = parent; }
+		virtual void SetParent(WidgetRef parent);
 
 		// Events
 		virtual bool HandleEvent(SDL_Event *) { return false; }

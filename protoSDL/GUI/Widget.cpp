@@ -34,6 +34,15 @@ namespace GUI
 		SetFont(font);
 	}
 
+	void Widget::SetParent(WidgetRef parent)
+	{
+		if (m_parent)
+		{
+			throw std::invalid_argument("widget already has parent");
+		}
+		m_parent = parent;
+	}
+
 	void Widget::SetFocus(WidgetRef focus, WidgetRef parent)
 	{
 		std::cout << "SetFocus: " << focus->GetId() << "(parent = " << (parent ? parent->GetId() : std::string("null")) << std::endl;

@@ -34,7 +34,8 @@ namespace GUI
 
 		HitResult HitTest(const PointRef) override;
 		bool HandleEvent(SDL_Event *) override;
-		void Draw() override;
+		void Draw() override {};
+		void Draw(RectRef pos);
 
 		void RefreshScrollBarStatus();
 		void ScrollRel(PointRef pt);
@@ -50,7 +51,7 @@ namespace GUI
 
 		void CheckChildScrollStatus(WidgetRef child, RectRef rect, bool &showH, bool &showV);
 
-		void DrawScrollBars(RectRef pos);
+		
 		void DrawHScrollBar(RectRef pos);
 		void DrawVScrollBar(RectRef pos);
 

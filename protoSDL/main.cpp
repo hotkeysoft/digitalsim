@@ -9,6 +9,8 @@
 #include "GUI\Label.h"
 #include "GUI\TextBox.h"
 #include "GUI\Tree.h"
+#include "GUI\Menu.h"
+#include "GUI\MenuItem.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -142,6 +144,13 @@ int main(int argc, char ** argv)
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 650, 400 })->SetText("edit.1");
 		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
+
+		MenuPtr menu = GUI::Menu::Create(ren.get());
+		menu->AddMenuItem("&File");
+		menu->AddMenuItem("&Edit");
+		menu->AddMenuItem("&View");
+		menu->AddMenuItem("&Help");
+		editWnd->SetMenu(menu);
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
