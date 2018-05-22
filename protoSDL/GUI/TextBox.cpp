@@ -581,11 +581,12 @@ namespace GUI
 
 	bool TextBox::HandleEvent(SDL_Event *e)
 	{
+		const static Uint32 timerEventID = WINMGR().GetEventType("timer");
+
 		Point pt(e->button.x, e->button.y);
 		HitResult hit = HitTest(&pt);
-		switch (e->type)
-		{
-		case SDL_USEREVENT:
+
+		if (e->type == timerEventID)
 		{
 			if (e->user.code == m_blinkTimerID && IsFocused())
 			{
@@ -593,6 +594,8 @@ namespace GUI
 			}
 			return false;
 		}
+		switch (e->type)
+		{
 		case SDL_MOUSEMOTION:	
 			if (hit)
 			{

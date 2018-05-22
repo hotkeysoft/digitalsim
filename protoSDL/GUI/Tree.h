@@ -57,6 +57,8 @@ namespace GUI
 	class Tree : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Tree)
+
 		virtual ~Tree() = default;
 		Tree(const Tree&) = delete;
 		Tree& operator=(const Tree&) = delete;

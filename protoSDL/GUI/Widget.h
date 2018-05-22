@@ -7,6 +7,11 @@
 #include <string>
 #include <ostream>
 
+#define STRINGIZE( a ) #a
+#define DECLARE_EVENT_CLASS_NAME(className)			\
+    static const char* EventClassName() { return STRINGIZE(className); }	\
+    virtual const char* GetClassName() { return EventClassName(); }
+
 namespace GUI
 {
 	struct HitResult
@@ -26,7 +31,7 @@ namespace GUI
 	class Widget
 	{
 	public:
-		using EventHandler = void(*)(WidgetRef source);
+		DECLARE_EVENT_CLASS_NAME(Widget)
 
 		virtual ~Widget() = default;
 		Widget(const Widget&) = delete;
@@ -37,13 +42,13 @@ namespace GUI
 		virtual const std::string &GetId() const { return m_id; }
 
 		virtual void Init() {};
-
+				
 		CreationFlags GetFlags() { return m_flags; }
 
 		// Activation
 		virtual void SetActive() { if (m_parent) m_parent->SetActive(); }
 		virtual void SetFocus(WidgetRef focus, WidgetRef parent= nullptr);
-		virtual void ClearFocus() { m_focused = false; std::cout << "ClearFocus, this = " << this->GetId() << std::endl; }
+		virtual void ClearFocus() { m_focused = false; }
 		bool IsFocused() { return m_focused; }
 
 		virtual std::string GetText() const { return m_text; }
@@ -111,6 +116,10 @@ namespace GUI
 		Widget(const char* id, RendererRef renderer, WidgetRef parent, Rect rect,
 			const char* text, ImageRef image = nullptr, FontRef font = nullptr, CreationFlags flags = 0);
 		Widget(const char* id);
+
+		Uint32 GetEventClassId();
+
+		void PostEvent(EventCode code, void * data2 = nullptr);
 
 		void SetDrawColor(const GUI::Color & col);
 		void DrawFilledRect(const RectRef pos, const GUI::Color & col);

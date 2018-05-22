@@ -3,6 +3,7 @@
 #include "Rect.h"
 #include "Image.h"
 #include "Widget.h"
+#include "WindowManager.h"
 
 namespace GUI
 {
@@ -45,7 +46,6 @@ namespace GUI
 
 	void Widget::SetFocus(WidgetRef focus, WidgetRef parent)
 	{
-		std::cout << "SetFocus: " << focus->GetId() << "(parent = " << (parent ? parent->GetId() : std::string("null")) << std::endl;
 		if (parent == nullptr)
 		{
 			m_focused = true;
@@ -194,4 +194,27 @@ namespace GUI
 		return GetRect(relative, scrolled);
 	}
 
+	Uint32 Widget::GetEventClassId()
+	{
+		static Uint32 eventID = WINMGR().GetEventType(GetClassName());
+		return eventID;
+	}
+
+	void Widget::PostEvent(EventCode code, void * data2)
+	{
+		SDL_Event toPost;
+		SDL_zero(toPost);
+
+		toPost.type = GetEventClassId();
+		if (toPost.type == (Uint32)-1)
+		{
+			throw std::invalid_argument("class not registered");
+		}
+
+		toPost.user.code = code;
+		toPost.user.data1 = this;
+		toPost.user.data2 = data2;
+		
+		SDL_PushEvent(&toPost);
+	}
 }

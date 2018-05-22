@@ -10,6 +10,8 @@ namespace GUI
 	class Image : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Image)
+
 		enum ImageAlign : uint8_t {
 			IMG_H_LEFT = 1,
 			IMG_H_RIGHT = 2,

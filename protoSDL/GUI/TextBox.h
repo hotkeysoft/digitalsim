@@ -11,6 +11,8 @@ namespace GUI
 	class TextBox : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(TextBox)
+
 		virtual ~TextBox() = default;
 		TextBox(const TextBox&) = delete;
 		TextBox& operator=(const TextBox&) = delete;

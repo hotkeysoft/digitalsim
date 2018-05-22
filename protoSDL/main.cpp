@@ -249,12 +249,6 @@ int main(int argc, char ** argv)
 			e2->AddControl(box);
 		}
 
-
-		std::static_pointer_cast<Button>(e2->FindControl("b1"))->SetOnClickHandler(OnClick);
-		std::static_pointer_cast<Button>(e2->FindControl("b2"))->SetOnClickHandler(OnClick);
-		std::static_pointer_cast<Button>(e2->FindControl("b3"))->SetOnClickHandler(OnClick);
-		std::static_pointer_cast<Button>(e2->FindControl("b4"))->SetOnClickHandler(OnClick);
-
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
 		LabelPtr l1 = GUI::Label::CreateFill("l1", ren.get(), "HLeft, VTop, b0m5");
@@ -343,6 +337,9 @@ int main(int argc, char ** argv)
 		SDL_StartTextInput();
 		SDL_Event e;
 		bool quit = false;
+
+		Uint32 buttonEvent = WINMGR().GetEventType(Button::EventClassName());
+
 		while (!quit) 
 		{
 			while (SDL_PollEvent(&e)) 
@@ -350,6 +347,10 @@ int main(int argc, char ** argv)
 				if (e.type == SDL_QUIT) 
 				{
 					quit = true;
+				}
+				else if (e.type == buttonEvent)
+				{
+					OnClick((WidgetRef)e.user.data1);
 				}
 				else if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
 				{

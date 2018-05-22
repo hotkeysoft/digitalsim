@@ -11,6 +11,8 @@ namespace GUI
 	class Menu : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Menu)
+
 		using MenuItems = std::vector<MenuItemPtr>;
 
 		virtual ~Menu() = default;

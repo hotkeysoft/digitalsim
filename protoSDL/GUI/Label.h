@@ -16,6 +16,8 @@ namespace GUI
 	class Label : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Label)
+
 		enum TextAlign : uint8_t {
 			TEXT_H_LEFT = 1,
 			TEXT_H_RIGHT = 2,

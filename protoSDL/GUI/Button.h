@@ -12,6 +12,13 @@ namespace GUI
 	class Button : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Button)
+
+		enum ButtonEvents : EventCode
+		{
+			EVENT_BUTTON_CLICK
+		};
+
 		virtual ~Button() = default;
 		Button(const Button&) = delete;
 		Button& operator=(const Button&) = delete;
@@ -30,15 +37,12 @@ namespace GUI
 
 		void SetText(const char *) override;
 
-		void SetOnClickHandler(Widget::EventHandler f) { m_onClickHandler = f; }
-
 	protected:
 		Button(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image, FontRef font);
 
 		void CreateLabel();
 		LabelPtr m_label;
 		bool m_pushed;
-		EventHandler m_onClickHandler;
 
 		struct shared_enabler;
 	};

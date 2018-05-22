@@ -13,6 +13,8 @@ namespace GUI
 	class Window : public Widget
 	{
 	public:
+		DECLARE_EVENT_CLASS_NAME(Window)
+
 		using MinWindowList = std::vector<WindowRef>;
 		using ControlList = std::map<std::string, WidgetPtr>;
 

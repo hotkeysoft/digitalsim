@@ -11,7 +11,7 @@
 namespace GUI
 {
 	Button::Button(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font) :
-		Widget(id, renderer, nullptr, rect, label, image, font), m_pushed(false), m_onClickHandler(nullptr)
+		Widget(id, renderer, nullptr, rect, label, image, font), m_pushed(false)
 	{
 		m_borderWidth = 2;
 	}
@@ -52,9 +52,9 @@ namespace GUI
 			if (capture && capture.Target.target == this)
 			{
 				WINMGR().ReleaseCapture();
-				if (hit.target == this && m_onClickHandler)
+				if (hit.target == this)
 				{
-					m_onClickHandler(this);
+					PostEvent(EVENT_BUTTON_CLICK);
 				}
 			}
 			return true;
@@ -88,10 +88,7 @@ namespace GUI
 			if (capture && capture.Target.target == this)
 			{
 				WINMGR().ReleaseCapture();
-				if (this && m_onClickHandler)
-				{
-					m_onClickHandler(this);
-				}
+				PostEvent(EVENT_BUTTON_CLICK);
 			}
 			return true;
 		}

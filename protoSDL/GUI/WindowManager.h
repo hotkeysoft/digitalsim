@@ -6,6 +6,7 @@
 #include "Widget.h"
 #include <string>
 #include <list>
+#include <vector>
 #include <functional>
 
 namespace GUI
@@ -24,7 +25,8 @@ namespace GUI
 	class WindowManager
 	{
 	public:
-		using TimerMap = std::map<Uint32, SDL_TimerID>;
+		using EventMap = std::map<std::string, Uint32>;
+		using TimerList = std::vector<Uint32>;
 		using WindowList = std::list<WindowPtr>;
 
 		virtual ~WindowManager() = default;
@@ -43,6 +45,8 @@ namespace GUI
 		WindowPtr FindWindow(const char* id);
 		WindowList GetWindowList(WindowRef parent);
 
+		Uint32 GetEventType(const char * type);
+
 		void MoveToFront(WindowRef);
 
 		HitResult HitTest(PointRef);
@@ -59,6 +63,8 @@ namespace GUI
 		TexturePtr SurfaceToTexture(SDL_Surface* surf);
 
 	protected:
+		Uint32 FindEventType(const char * type) const;
+
 		void RaiseSingleWindow(WindowRef);
 		void RaiseChildren(WindowRef);
 
@@ -68,9 +74,10 @@ namespace GUI
 		WindowList m_windows;
 		WindowRef m_activeWindow;
 
-		CaptureInfo m_capture;
+		EventMap m_registeredEvents;
+		TimerList m_timers;
 
-		TimerMap m_timers;
+		CaptureInfo m_capture;
 	};
 
 	constexpr auto WINMGR = &WindowManager::Get;

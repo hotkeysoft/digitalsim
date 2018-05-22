@@ -17,6 +17,7 @@ namespace GUI
 	void WindowManager::Init(RendererPtr & renderer)
 	{
 		m_renderer = renderer.get();
+		GetEventType("timer");
 	}
 
 	void WindowManager::Draw()
@@ -119,46 +120,37 @@ namespace GUI
 
 	Uint32 timerCallbackFunc(Uint32 interval, void *param)
 	{
-		SDL_Event event;
-		SDL_UserEvent userevent;
+		const static Uint32 timerEventID = WINMGR().GetEventType("timer");
+		if (timerEventID == -1)
+			return -1;
 
-		userevent.type = SDL_USEREVENT;
-		userevent.code = PtrToUlong(param);
-		userevent.data1 = NULL;
-		userevent.data2 = NULL;
+		SDL_Event timerEvent;
+		SDL_zero(timerEvent);
 
-		event.type = SDL_USEREVENT;
-		event.user = userevent;
+		timerEvent.type = timerEventID;
+		timerEvent.user.code = PtrToUlong(param);
 
-		SDL_PushEvent(&event);
+		SDL_PushEvent(&timerEvent);
 		return(interval);
 	}
 
 	Uint32 WindowManager::AddTimer(Uint32 interval)
 	{
-		Uint32 eventID = SDL_RegisterEvents(1);
-		if (eventID == ((Uint32)-1))
-		{
-			throw std::exception("Unable to allocate timer");
-		}
-		
-		SDL_TimerID timerID = SDL_AddTimer(interval, timerCallbackFunc, LongToPtr(eventID));
-		m_timers[eventID] = timerID;
-		return eventID;
+		Uint32 extTimerID = (Uint32)m_timers.size();
+
+		m_timers.push_back(SDL_AddTimer(interval, timerCallbackFunc, LongToPtr(extTimerID)));
+		return extTimerID;
 	}
 
 	void WindowManager::DeleteTimer(Uint32 timerID)
 	{
-		const auto & it = m_timers.find(timerID);
-		if (it == m_timers.end())
+		if (timerID > m_timers.size() - 1)
 		{
-			throw std::invalid_argument("timer not found");
+			throw std::invalid_argument("invalid timer id");
 		}
 
-		if (SDL_RemoveTimer(it->second))
-		{
-			m_timers.erase(timerID);
-		}
+		SDL_RemoveTimer(m_timers[timerID]);
+		m_timers[timerID] = 0;
 	}
 
 	void WindowManager::RaiseSingleWindow(WindowRef win)
@@ -200,5 +192,36 @@ namespace GUI
 		SDL_FreeSurface(surf);
 
 		return std::move(texture);
+	}
+
+	Uint32 WindowManager::GetEventType(const char * type)
+	{
+		if (type == nullptr)
+		{
+			throw std::invalid_argument("event type is null");
+		}
+
+		Uint32 eventId = FindEventType(type);
+		if (eventId == (Uint32)-1)
+		{			
+			eventId = SDL_RegisterEvents(1);
+			if (eventId == (Uint32)-1)
+			{
+				throw std::out_of_range(" too many registered events");
+			}
+			m_registeredEvents[type] = eventId;
+		}		
+		
+		return eventId;
+	}
+
+	Uint32 WindowManager::FindEventType(const char * type) const
+	{
+		auto it = m_registeredEvents.find(type);
+		if (it != m_registeredEvents.end())
+		{
+			return it->second;
+		}
+		return (Uint32)-1;
 	}
 }

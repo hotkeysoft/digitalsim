@@ -9,6 +9,7 @@
 namespace GUI
 {
 	using CreationFlags = uint32_t;
+	using EventCode = Sint32;
 
 	enum HitZone : uint32_t {
 		HIT_NOTHING				= 0x0,
