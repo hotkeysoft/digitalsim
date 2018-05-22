@@ -27,7 +27,7 @@ namespace GUI
 		bool Hit(PointRef pt);
 
 		void Draw() override {}
-		void Draw(const RectRef rect);
+		void Draw(const PointRef pt);
 
 		bool IsOpened() { return m_opened; }
 		LabelRef GetLabel() { return m_label.get(); }
@@ -35,10 +35,15 @@ namespace GUI
 	protected:
 		MenuItem(RendererRef renderer, const char * id, const char * name);
 
+		void Render();
+		Rect DrawFrame(const RectRef &rect);
+
 		bool m_opened;
 		LabelPtr m_label;
 		Rect m_labelRect;
 		MenuItems m_items;
+		TexturePtr m_renderedMenu;
+		Rect m_renderedMenuRect;
 
 		struct shared_enabler;
 

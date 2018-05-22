@@ -267,6 +267,7 @@ xcopy /d /Y "$(SDLTTFLib64)\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="GUI\MenuItem.h" />
     <ClInclude Include="GUI\Point.h" />
     <ClInclude Include="GUI\Rect.h" />
+    <ClInclude Include="GUI\RenderTarget.h" />
     <ClInclude Include="GUI\ResourceManager.h" />
     <ClInclude Include="GUI\ScrollBars.h" />
     <ClInclude Include="GUI\TextBox.h" />

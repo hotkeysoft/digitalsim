@@ -65,6 +65,27 @@ void OnClick(WidgetRef widget)
 	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("sim")->FindControl("text"))->InsertAt("#", pos, col);
 }
 
+
+void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
+{
+	MenuPtr menu = GUI::Menu::Create(ren.get(), "editMenu");
+	MenuItemPtr fileMenu = menu->AddMenuItem("file", "&File");
+	MenuItemPtr editMenu = menu->AddMenuItem("edit", "&Edit");
+	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View");
+	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help");
+
+	fileMenu->AddMenuItem("open", "&Open");
+	fileMenu->AddMenuItem("quit", "&Exit");
+
+	editMenu->AddMenuItem("cut", "Cut");
+	editMenu->AddMenuItem("copy", "Copy");
+	editMenu->AddMenuItem("paste", "Paste");
+
+	helpMenu->AddMenuItem("about", "About...");
+
+	editWnd->SetMenu(menu);
+}
+
 int main(int argc, char ** argv)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -145,12 +166,7 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 650, 400 })->SetText("edit.1");
 		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
 
-		MenuPtr menu = GUI::Menu::Create(ren.get());
-		menu->AddMenuItem("file", "&File");
-		menu->AddMenuItem("edit", "&Edit");
-		menu->AddMenuItem("view", "&View");
-		menu->AddMenuItem("help", "&Help");
-		editWnd->SetMenu(menu);
+		CreateMainMenu(ren, editWnd);
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
@@ -169,7 +185,7 @@ int main(int argc, char ** argv)
 		simWnd->SetImage(RES().FindImage("iconSim"));
 		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
-		MenuPtr simMenu = GUI::Menu::Create(ren.get());
+		MenuPtr simMenu = GUI::Menu::Create(ren.get(), "simMenu");
 		simMenu->AddMenuItem("sim", "&Simulation");
 		simMenu->AddMenuItem("stop", "S&top");
 		simMenu->AddMenuItem("step", "Ste&p");

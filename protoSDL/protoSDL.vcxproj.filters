@@ -119,5 +119,8 @@
     <ClInclude Include="GUI\MenuItem.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\RenderTarget.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

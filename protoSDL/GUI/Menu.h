@@ -21,7 +21,7 @@ namespace GUI
 
 		void Init() override;
 
-		static MenuPtr Create(RendererRef renderer);
+		static MenuPtr Create(RendererRef renderer, const char * id);
 
 		MenuItemPtr AddMenuItem(const char * id, const char * name);
 
@@ -37,7 +37,7 @@ namespace GUI
 		int GetHeight() { return m_lineHeight + (2 * GetShrinkFactor().h); }
 
 	protected:
-		Menu(RendererRef renderer);
+		Menu(RendererRef renderer, const char * id);
 
 		MenuItemPtr ItemAt(PointRef pt);
 

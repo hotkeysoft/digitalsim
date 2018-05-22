@@ -50,7 +50,7 @@ namespace GUI
 		void SetForegroundColor(Color color) override;
 
 		void Draw() override;
-		void Draw(const RectRef rect);
+		void Draw(const RectRef rect, bool noClip = false);
 
 		void SetText(const char *) override;
 

@@ -6,7 +6,7 @@
 
 namespace GUI
 {
-	Menu::Menu(RendererRef renderer) : Widget("Menu", renderer, nullptr, Rect(), nullptr)
+	Menu::Menu(RendererRef renderer, const char * id) : Widget(id, renderer, nullptr, Rect(), nullptr)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -17,9 +17,9 @@ namespace GUI
 		m_margin = 0;
 	}
 
-	MenuPtr Menu::Create(RendererRef renderer)
+	MenuPtr Menu::Create(RendererRef renderer, const char * id)
 	{
-		auto ptr = std::make_shared<shared_enabler>(renderer);
+		auto ptr = std::make_shared<shared_enabler>(renderer, id);
 		return std::static_pointer_cast<Menu>(ptr);
 	}
 
@@ -50,17 +50,11 @@ namespace GUI
 				if (item->IsOpened())
 				{
 					Draw3dFrame(&drawRect, false);
-					Rect rect(drawRect);
-					rect.y += (labelRect.h);
-					rect.w = 200;
-					rect.h = 200;
-					DrawFilledRect(&rect, m_backgroundColor);
-					Draw3dFrame(&rect, true);
+					Point menuPos(drawRect.Origin());
+					menuPos.y += (labelRect.h);
 
-					rect.h = labelRect.h;
-					DrawButton(&rect, m_backgroundColor, nullptr, true, 1);
-					rect.y += labelRect.h;
-					DrawButton(&rect, m_backgroundColor, nullptr, true, 1);
+					// Menu is on top of everything so no need for bounding rect
+					item->Draw(&menuPos);
 				}
 
 				item->m_label->Draw(&drawRect);
@@ -79,6 +73,7 @@ namespace GUI
 		}
 
 		MenuItemPtr item = MenuItem::Create(m_renderer, id, name);
+		item->SetParent(this);
 		item->Init();
 
 		m_items.push_back(item);

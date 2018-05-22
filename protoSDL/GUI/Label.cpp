@@ -5,6 +5,7 @@
 #include "Image.h"
 #include "Window.h"
 #include "ResourceManager.h"
+#include "RenderTarget.h"
 #include "Label.h"
 #include <algorithm>
 
@@ -128,16 +129,23 @@ namespace GUI
 		}
 	}
 
-	void Label::Draw(const RectRef rect)
+	void Label::Draw(const RectRef rect, bool noClip)
 	{
 		Rect frameRect = DrawFrame(rect);
 
 		Rect drawFrame = rect->Deflate(GetShrinkFactor());
 
-		ClipRect clip(m_renderer, &drawFrame);
-		if (clip)
+		if (noClip)
 		{
 			DrawLabel(rect);
+		}
+		else
+		{
+			ClipRect clip(m_renderer, &drawFrame);
+			if (clip)
+			{
+				DrawLabel(rect);
+			}
 		}
 	}
 
@@ -230,14 +238,15 @@ namespace GUI
 
 		// Texture from fonts are not writable
 		TexturePtr clone = CloneTexture(m_labelText);
-		if (clone && (SDL_SetRenderTarget(m_renderer, clone.get()) == 0))
+		if (clone)
 		{
-			SetDrawColor(m_foregroundColor);
-			SDL_RenderDrawLine(m_renderer, xPos, m_labelRect.h - 3, xPos + width, m_labelRect.h - 3);
-
-			SDL_SetRenderTarget(m_renderer, nullptr);
-
-			m_labelText = std::move(clone);
+			RenderTarget target(m_renderer, clone.get());
+			if (target)
+			{
+				SetDrawColor(m_foregroundColor);
+				SDL_RenderDrawLine(m_renderer, xPos, m_labelRect.h - 3, xPos + width, m_labelRect.h - 3);
+				m_labelText = std::move(clone);
+			}
 		}
 	}
 
