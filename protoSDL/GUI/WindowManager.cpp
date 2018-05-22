@@ -25,6 +25,8 @@ namespace GUI
 		{
 			window->Draw();
 		}
+
+		// Active menu needs to be drawn on top of everything
 		if (m_activeWindow)
 		{
 			m_activeWindow->DrawMenu();

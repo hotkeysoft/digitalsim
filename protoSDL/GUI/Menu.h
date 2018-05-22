@@ -41,6 +41,8 @@ namespace GUI
 
 		MenuItemPtr ItemAt(PointRef pt);
 
+		MenuItemPtr m_active;
+
 		int m_lineHeight;
 
 		MenuItems m_items;

@@ -49,8 +49,9 @@ namespace GUI
 		HIT_VSCROLL_ANY = HIT_VSCROLL_UP | HIT_VSCROLL_DOWN | HIT_VSCROLL_SLIDER | HIT_VSCROLL_AREA,
 
 		HIT_MENU				= 0x200000,
+		HIT_MENU_ITEM			= 0x400000,
 
-		HIT_CONTROL				= 0x400000,
+		HIT_CONTROL				= 0x800000,
 	};
 
 	// Creation flags.  These attribute don't change during the lifetime of the window

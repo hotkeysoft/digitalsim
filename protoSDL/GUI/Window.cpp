@@ -451,9 +451,13 @@ namespace GUI
 			if (!(m_showState & WS_MINIMIZED))
 			{
 				Rect clientRect = GetRawClientRect(false, false);
-				if (!active && m_menu)
+				if (m_menu)
 				{
-					DrawMenu();
+					// Active menu needs to be drawn on top of everything, let Window Manager handle it
+					if (!active)
+					{
+						DrawMenu();
+					}
 					int menuHeight = m_menu->GetHeight();
 					clientRect.y += menuHeight;
 					clientRect.h -= menuHeight;
@@ -678,15 +682,15 @@ namespace GUI
 				m_rect.h = rect->h;
 			}
 			
-			if (m_rect.w <= 100)
+			if (m_rect.w <= 120)
 			{
-				m_rect.w = 100;
+				m_rect.w = 120;
 				m_rect.x = origin.x;
 			}
 
-			if (m_rect.h <= 100)
+			if (m_rect.h <= 120)
 			{
-				m_rect.h = 100;
+				m_rect.h = 120;
 				m_rect.y = origin.y;
 			}
 

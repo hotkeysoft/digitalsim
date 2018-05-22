@@ -7,7 +7,7 @@
 
 namespace GUI
 {
-	class MenuItem : public Widget
+	class MenuItem : public Widget, public std::enable_shared_from_this<MenuItem>
 	{
 	public:
 		using MenuItems = std::vector<MenuItemPtr>;
@@ -20,9 +20,10 @@ namespace GUI
 
 		void Init() override;
 
-		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name);
+		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name, MenuItemRef parent);
 
 		MenuItemPtr AddMenuItem(const char * id, const char * name);
+		MenuItemRef GetParentMenuItem() { return static_cast<MenuItemRef>(m_parent); }
 
 		bool Hit(PointRef pt);
 
@@ -33,10 +34,11 @@ namespace GUI
 		LabelRef GetLabel() { return m_label.get(); }
 
 	protected:
-		MenuItem(RendererRef renderer, const char * id, const char * name);
+		MenuItem(RendererRef renderer, const char * id, const char * name, MenuItemRef parent);
+
+		MenuItemPtr ItemAt(PointRef pt);
 
 		void Render();
-		Rect DrawFrame(const RectRef &rect);
 
 		bool m_opened;
 		LabelPtr m_label;

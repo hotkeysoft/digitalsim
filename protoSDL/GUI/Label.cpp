@@ -43,19 +43,19 @@ namespace GUI
 
 	LabelPtr Label::CreateSingle(const char * id, RendererRef renderer, Rect rect, const char * label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_SINGLE_DEFAULT, 0 | flags);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, align, 0 | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
 	LabelPtr Label::CreateFill(const char * id, RendererRef renderer, const char * label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, TEXT_FILL_DEFAULT, WIN_FILL | flags);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, align, WIN_FILL | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
 	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, TEXT_FILL_DEFAULT, WIN_AUTOSIZE | flags);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, align, WIN_AUTOSIZE | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
@@ -181,12 +181,20 @@ namespace GUI
 
 			if ((m_labelAlign & TEXT_H_CENTER) == TEXT_H_RIGHT)
 			{
-				target.x += rect->w - source.w;
+				target.x += rect->w - (source.w + GetShrinkFactor().w);
+			}
+			else if ((m_labelAlign & TEXT_H_CENTER) == TEXT_H_LEFT)
+			{
+				target.x += GetShrinkFactor().w;
 			}
 
 			if ((m_labelAlign & TEXT_V_CENTER) == TEXT_V_BOTTOM)
 			{
-				target.y += rect->h - source.h;
+				target.y += rect->h - (source.h + GetShrinkFactor().h);
+			}
+			else if ((m_labelAlign & TEXT_V_CENTER) == TEXT_V_TOP)
+			{
+				target.y += GetShrinkFactor().h;
 			}
 
 			SDL_RenderCopy(m_renderer, m_labelText.get(), &source, &target);

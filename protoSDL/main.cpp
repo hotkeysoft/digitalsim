@@ -75,13 +75,14 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help");
 
 	fileMenu->AddMenuItem("open", "&Open");
-	fileMenu->AddMenuItem("quit", "&Exit");
+	fileMenu->AddMenuItem("long", "Option with a very long name");
+	fileMenu->AddMenuItem("exit", "&Exit");
 
-	editMenu->AddMenuItem("cut", "Cut");
-	editMenu->AddMenuItem("copy", "Copy");
-	editMenu->AddMenuItem("paste", "Paste");
+	editMenu->AddMenuItem("cut", "Cu&t");
+	editMenu->AddMenuItem("copy", "Cop&y");
+	editMenu->AddMenuItem("paste", "Pa&ste");
 
-	helpMenu->AddMenuItem("about", "About...");
+	helpMenu->AddMenuItem("about", "&About...");
 
 	editWnd->SetMenu(menu);
 }
@@ -257,26 +258,35 @@ int main(int argc, char ** argv)
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
 		LabelPtr l1 = GUI::Label::CreateFill("l1", ren.get(), "HLeft, VTop, b0m5");
+		l1->SetMargin(5);
 		l1->SetBorder(false);
-		l1->SetPadding(5);
+		l1->SetPadding(0);
 		l1->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_TOP);
 
 		LabelPtr l2 = GUI::Label::CreateFill("l2", ren.get(), "HCenter, VTop, b1");
+		l2->SetMargin(0);
+		l2->SetPadding(0);
+		l2->SetBorderWidth(1);
 		l2->SetBorder(true);
 		l2->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_TOP);
 
 		LabelPtr l3 = GUI::Label::CreateFill("l3", ren.get(), "HRight, VTop, b2p5");
+		l3->SetMargin(0);
 		l3->SetBorder(true);
 		l3->SetPadding(5);
 		l3->SetBorderWidth(2);
 		l3->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_TOP);
 
 		LabelPtr l4 = GUI::Label::CreateFill("l4", ren.get(), "HLeft VCenter, b0");
+		l4->SetMargin(0);
+		l4->SetPadding(0);
 		l4->SetBorder(false);
 		l4->SetBorderWidth(1);
 		l4->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_CENTER);
 
 		LabelPtr l5 = GUI::Label::CreateFill("l5", ren.get(), "HCenter, VCenter, b0");
+		l5->SetMargin(0);
+		l5->SetPadding(0);
 		l5->SetBorder(false);
 		l5->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_CENTER);
 
@@ -288,17 +298,21 @@ int main(int argc, char ** argv)
 		l6->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_CENTER);
 
 		LabelPtr l7 = GUI::Label::CreateFill("l7", ren.get(), "HLeft, VBottom, b2");
+		l7->SetMargin(0);
+		l7->SetPadding(0);
 		l7->SetBorder(true);
 		l7->SetBorderWidth(2);
 		l7->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_BOTTOM);
 
 		LabelPtr l8 = GUI::Label::CreateFill("l8", ren.get(), "HCenter, VBottom, b4m4");
+		l8->SetPadding(0);
 		l8->SetBorder(true);
 		l8->SetBorderWidth(4);
 		l8->SetMargin(4);		
 		l8->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_BOTTOM);
 
 		LabelPtr l9 = GUI::Label::CreateFill("l9", ren.get(), "HRight, VBottom, b2p5");
+		l9->SetMargin(0);
 		l9->SetBorder(true);
 		l9->SetBorderWidth(2);
 		l9->SetPadding(5);

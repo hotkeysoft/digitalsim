@@ -5,7 +5,8 @@
 
 namespace GUI
 {
-	MenuItem::MenuItem(RendererRef renderer, const char * id, const char * name) : Widget(id, renderer, nullptr, Rect(), name), m_opened(false)
+	MenuItem::MenuItem(RendererRef renderer, const char * id, const char * name, MenuItemRef parent) : 
+		Widget(id, renderer, parent, Rect(), name), m_opened(false)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -13,22 +14,22 @@ namespace GUI
 		}
 
 		m_margin = 0;
-		m_padding = 5;
+		m_padding = 4;
 		m_showBorder = false;
 		m_borderWidth = 1;
 	}
 
-	MenuItemPtr MenuItem::Create(RendererRef renderer, const char * id, const char * name)
+	MenuItemPtr MenuItem::Create(RendererRef renderer, const char * id, const char * name, MenuItemRef parent)
 	{
-		auto ptr = std::make_shared<shared_enabler>(renderer, id, name);
+		auto ptr = std::make_shared<shared_enabler>(renderer, id, name, parent);
 		return std::static_pointer_cast<MenuItem>(ptr);
 	}
 
 	void MenuItem::Init()
 	{
-		std::cout << "MenuItem:: Init: " << GetId() << std::endl;
 		m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str(), nullptr, Label::TEXT_AUTOSIZE_DEFAULT, LCF_MENUITEM);
-		m_label->SetPadding(Dimension(8, 0));
+
+		m_label->SetPadding(Dimension(8, 2));
 		m_label->Init();
 	}
 
@@ -49,7 +50,40 @@ namespace GUI
 
 	bool MenuItem::Hit(PointRef pt)
 	{
-		return m_labelRect.PointInRect(pt);
+		if (m_labelRect.PointInRect(pt))
+			return true;
+
+		if (IsOpened())
+		{
+			return m_renderedMenuRect.PointInRect(pt);
+		}
+
+		return false;
+	}
+
+	MenuItemPtr MenuItem::ItemAt(PointRef pt)
+	{
+		if (m_labelRect.PointInRect(pt))
+		{
+			return shared_from_this();
+		}
+
+		if (IsOpened())
+		{
+			Point rel(pt->x - m_renderedMenuRect.x, pt->y - m_renderedMenuRect.y);
+
+			for (auto & item : m_items)
+			{			
+				Rect & rect = item->m_rect;
+
+				if (rect.PointInRect(&rel))
+				{
+					return item;
+				}
+			}
+		}
+
+		return nullptr;
 	}
 
 	MenuItemPtr MenuItem::AddMenuItem(const char * id, const char * name)
@@ -61,8 +95,7 @@ namespace GUI
 			throw std::invalid_argument("id is null");
 		}
 
-		MenuItemPtr item = MenuItem::Create(m_renderer, id, name);
-		item->SetParent(this);
+		MenuItemPtr item = MenuItem::Create(m_renderer, id, name, this);
 		item->Init();
 
 		m_items.push_back(item);
@@ -72,15 +105,14 @@ namespace GUI
 
 	void MenuItem::Render()
 	{
-		std::cout << "Render: " << GetId() << std::endl;
 		m_renderedMenuRect = Rect();
 
 		m_renderedMenuRect.w = m_label->GetRect(true, false).w;
-		for (auto item : m_items)
+		for (auto & item : m_items)
 		{
 			Rect labelRect = item->m_label->GetRect(true, false);
 			m_renderedMenuRect.w = std::max(labelRect.w, m_renderedMenuRect.w);
-			m_renderedMenuRect.h += labelRect.h + 2;
+			m_renderedMenuRect.h += labelRect.h;// + 2;
 		}
 		m_renderedMenuRect.h = std::max(m_renderedMenuRect.h, 10);
 		m_renderedMenuRect.w += GetShrinkFactor().w * 2;
@@ -95,16 +127,17 @@ namespace GUI
 				DrawFilledRect(&m_renderedMenuRect, m_backgroundColor);
 				Draw3dFrame(&m_renderedMenuRect, true);
 
-				Rect target = Rect(m_renderedMenuRect.x + GetShrinkFactor().w, m_renderedMenuRect.y + GetShrinkFactor().h, 0, 0);
+				Rect target = m_renderedMenuRect.Deflate(GetShrinkFactor());
 
-				for (auto item : m_items)
-				{
+				for (auto & item : m_items)
+				{				
 					Rect labelRect = item->m_label->GetRect(true, false);
-					target.w = labelRect.w;
 					target.h = labelRect.h;
 
 					item->m_label->Draw(&target, true);
-					target.y += labelRect.h + 2;
+					item->m_rect = target;
+
+					target.y += labelRect.h;// + 2;
 				}
 
 				m_renderedMenu = TexturePtr(texture, sdl_deleter());

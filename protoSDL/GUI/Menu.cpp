@@ -6,14 +6,14 @@
 
 namespace GUI
 {
-	Menu::Menu(RendererRef renderer, const char * id) : Widget(id, renderer, nullptr, Rect(), nullptr)
+	Menu::Menu(RendererRef renderer, const char * id) : Widget(id, renderer, nullptr, Rect(), nullptr), m_lineHeight(0)
 	{
 		if (m_renderer == nullptr)
 		{
 			throw std::invalid_argument("no renderer");
 		}
 
-		m_padding = 2;
+		m_padding = Dimension(2, 2);
 		m_margin = 0;
 	}
 
@@ -25,7 +25,11 @@ namespace GUI
 
 	void Menu::Init()
 	{
-		m_lineHeight = TTF_FontLineSkip(m_font);
+		if (m_lineHeight == 0)
+		{
+			// Fallback
+			m_lineHeight = TTF_FontLineSkip(m_font);
+		}
 	}
 
 	void Menu::Draw(const RectRef rect)
@@ -39,10 +43,10 @@ namespace GUI
 		m_rect = drawRect;
 
 		//TODO: Get main window size
-		ClipRect clip(m_renderer, &Rect(0,0,1000,1000), false);
+		ClipRect clip(m_renderer, &Rect(0,0,2000,2000), false);
 		if (clip)
 		{
-			for (auto item : m_items)
+			for (auto & item : m_items)
 			{
 				Rect labelRect = item->GetLabel()->GetRect(true, false);				
 				drawRect.w = labelRect.w;
@@ -55,6 +59,16 @@ namespace GUI
 
 					// Menu is on top of everything so no need for bounding rect
 					item->Draw(&menuPos);
+				}
+
+				if (m_active)
+				{
+					MenuItemRef parent = m_active->GetParentMenuItem();
+					if (parent)
+					{
+						Rect highlight = m_active->m_rect.Offset(&parent->m_renderedMenuRect.Origin());
+						Draw3dFrame(&highlight, false);
+					}
 				}
 
 				item->m_label->Draw(&drawRect);
@@ -72,9 +86,10 @@ namespace GUI
 			throw std::invalid_argument("id is null");
 		}
 
-		MenuItemPtr item = MenuItem::Create(m_renderer, id, name);
+		MenuItemPtr item = MenuItem::Create(m_renderer, id, name, nullptr);
 		item->SetParent(this);
 		item->Init();
+		m_lineHeight = item->m_label->GetRect(true, false).h;
 
 		m_items.push_back(item);
 
@@ -88,6 +103,14 @@ namespace GUI
 			return HitResult(HitZone::HIT_MENU, this);
 		}
 
+		for (auto & item : m_items)
+		{
+			if (item->IsOpened() && item->m_renderedMenuRect.PointInRect(pt))
+			{
+				return HitResult(HitZone::HIT_MENU_ITEM, item.get());
+			}
+		}
+
 		return HitZone::HIT_NOTHING;
 	}
 
@@ -96,7 +119,7 @@ namespace GUI
 		auto it = std::find_if(m_items.begin(), m_items.end(), [pt](MenuItemPtr item) { return item->Hit(pt); });
 		if (it != m_items.end())
 		{
-			return *it;
+			return (*it)->ItemAt(pt);
 		}
 
 		return nullptr;
@@ -116,9 +139,14 @@ namespace GUI
 				if (capture)
 				{
 					MenuItemPtr item = ItemAt(&pt);
-					if (item != nullptr)
+					if (item && hit == HIT_MENU)
 					{
+						m_active = nullptr;
 						OpenMenu(item);
+					}
+					else if (item && hit == HIT_MENU_ITEM)
+					{
+						m_active = item;
 					}
 				}
 			}
@@ -129,8 +157,13 @@ namespace GUI
 
 			if (capture)
 			{
+				MenuItemPtr item = ItemAt(&pt);
 				CloseMenu();
 				WINMGR().ReleaseCapture();
+				if (item && hit == HIT_MENU_ITEM)
+				{
+					std::cout << "Clicked: " << item->GetId() << std::endl;
+				}
 				return true;
 			}
 
@@ -166,7 +199,8 @@ namespace GUI
 
 	void Menu::CloseMenu()
 	{
-		for (auto item : m_items)
+		m_active = nullptr;
+		for (auto & item : m_items)
 		{
 			item->m_opened = false;
 		}
