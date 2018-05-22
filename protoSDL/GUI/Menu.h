@@ -23,15 +23,23 @@ namespace GUI
 
 		static MenuPtr Create(RendererRef renderer);
 
-		MenuItemPtr AddMenuItem(const char * name);
+		MenuItemPtr AddMenuItem(const char * id, const char * name);
+
+		bool HandleEvent(SDL_Event *) override;
+		HitResult HitTest(const PointRef) override;
 
 		void Draw() override {};
 		void Draw(const RectRef);
+
+		void OpenMenu(MenuItemPtr item);
+		void CloseMenu();
 
 		int GetHeight() { return m_lineHeight + (2 * GetShrinkFactor().h); }
 
 	protected:
 		Menu(RendererRef renderer);
+
+		MenuItemPtr ItemAt(PointRef pt);
 
 		int m_lineHeight;
 

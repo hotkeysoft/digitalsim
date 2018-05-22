@@ -18,18 +18,30 @@ namespace GUI
 		MenuItem(MenuItem&&) = delete;
 		MenuItem& operator=(MenuItem&&) = delete;
 
-		static MenuItemPtr Create(RendererRef renderer);
+		void Init() override;
 
-		MenuItemPtr AddMenuItem(const char * name);
+		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name);
+
+		MenuItemPtr AddMenuItem(const char * id, const char * name);
+
+		bool Hit(PointRef pt);
 
 		void Draw() override {}
 		void Draw(const RectRef rect);
 
-	protected:
-		MenuItem(RendererRef renderer);
+		bool IsOpened() { return m_opened; }
+		LabelRef GetLabel() { return m_label.get(); }
 
+	protected:
+		MenuItem(RendererRef renderer, const char * id, const char * name);
+
+		bool m_opened;
+		LabelPtr m_label;
+		Rect m_labelRect;
 		MenuItems m_items;
 
 		struct shared_enabler;
+
+		friend class Menu;
 	};
 }

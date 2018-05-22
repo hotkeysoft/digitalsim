@@ -360,6 +360,15 @@ namespace GUI
 			return HitResult(HitZone::HIT_MAXBUTTON, this);
 		}
 
+		if (m_menu)
+		{
+			HitResult menuHit = m_menu->HitTest(pt);
+			if (menuHit)
+			{
+				return menuHit;
+			}
+		}
+
 		HitResult scrollHit = m_scrollBars->HitTest(pt);
 		if (scrollHit)
 		{
@@ -377,6 +386,7 @@ namespace GUI
 		bool top = pt->y < wndRect.y + 2*m_borderWidth;
 		bool right = pt->x > wndRect.x + wndRect.w - 2*m_borderWidth;
 		bool bottom = pt->y > wndRect.y + wndRect.h - 2*m_borderWidth;
+
 		if (top)
 		{
 			if (left) return HitResult(HitZone::HIT_CORNER_TOPLEFT, this);
@@ -389,10 +399,16 @@ namespace GUI
 			else if (right) return HitResult(HitZone::HIT_CORNER_BOTTOMRIGHT, this);
 			else return HitResult(HitZone::HIT_BORDER_BOTTOM, this);
 		}
-		else
+		else if (left)
 		{
-			return left ? HitResult(HitZone::HIT_BORDER_LEFT, this) : HitResult(HitZone::HIT_BORDER_RIGHT, this);
+			return HitResult(HitZone::HIT_BORDER_LEFT, this);
 		}
+		else if (right) 
+		{
+			return HitResult(HitZone::HIT_BORDER_RIGHT, this);
+		}
+
+		return HIT_NOTHING;
 	}
 
 	Rect Window::GetClipRect(WindowRef win)
@@ -435,15 +451,14 @@ namespace GUI
 			if (!(m_showState & WS_MINIMIZED))
 			{
 				Rect clientRect = GetRawClientRect(false, false);
-				if (m_menu)
+				if (!active && m_menu)
 				{
-					m_menu->Draw(&clientRect);
-
+					DrawMenu();
 					int menuHeight = m_menu->GetHeight();
 					clientRect.y += menuHeight;
 					clientRect.h -= menuHeight;
 				}
-				
+
 				if (!m_backgroundColor.IsTransparent())
 				{
 					DrawFilledRect(&clientRect, m_backgroundColor);
@@ -456,6 +471,15 @@ namespace GUI
 		}
 	}
 	
+	void Window::DrawMenu()
+	{
+		Rect clientRect = GetRawClientRect(false, false);
+		if (m_menu)
+		{
+			m_menu->Draw(&clientRect);
+		}
+	}
+
 	void Window::DrawControls()
 	{
 		ClipRect clip(m_renderer, &GetClientRect(false, false));

@@ -146,10 +146,10 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
 
 		MenuPtr menu = GUI::Menu::Create(ren.get());
-		menu->AddMenuItem("&File");
-		menu->AddMenuItem("&Edit");
-		menu->AddMenuItem("&View");
-		menu->AddMenuItem("&Help");
+		menu->AddMenuItem("file", "&File");
+		menu->AddMenuItem("edit", "&Edit");
+		menu->AddMenuItem("view", "&View");
+		menu->AddMenuItem("help", "&Help");
 		editWnd->SetMenu(menu);
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
@@ -314,6 +314,10 @@ int main(int argc, char ** argv)
 				{
 					quit = true;
 				}
+				else if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
+				{
+					Render(ren);
+				}
 				else if (e.type == SDL_MOUSEMOTION)
 				{
 					if (WINMGR().GetCapture())
@@ -344,9 +348,6 @@ int main(int argc, char ** argv)
 						}
 					}
 				}
-				//else if (e.type == SDL_MOUSEBUTTONUP/* || e.type == SDL_KEYUP*/) 
-				//{
-				//}
 				else if (e.type == SDL_KEYDOWN) 
 				{
 					// Pass to active window first
@@ -367,10 +368,6 @@ int main(int argc, char ** argv)
 					{
 						Render(ren);
 					}
-				}
-				else if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
-				{
-					Render(ren);
 				}
 				else // Pass to active window
 				{

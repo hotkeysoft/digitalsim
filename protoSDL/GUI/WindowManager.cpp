@@ -25,6 +25,10 @@ namespace GUI
 		{
 			window->Draw();
 		}
+		if (m_activeWindow)
+		{
+			m_activeWindow->DrawMenu();
+		}
 	}
 
 	WindowPtr WindowManager::AddWindow(const char * id, Rect pos, CreationFlags flags)

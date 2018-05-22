@@ -44,6 +44,7 @@ namespace GUI
 
 		HitResult HitTest(const PointRef) override;
 		void Draw() override;
+		void DrawMenu();
 
 		WindowState GetShowState() const { return m_showState; }
 
