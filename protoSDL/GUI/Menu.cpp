@@ -290,68 +290,105 @@ namespace GUI
 		}
 	}
 	
-	Menu::MenuItems::const_iterator Menu::FindMenuItem(MenuItemRef item) const
+	Menu::MenuItems::const_iterator Menu::FindMenuItem(MenuItemRef item, MenuItemRef parent) const
 	{
-		return std::find_if(m_items.begin(), m_items.end(), [item](MenuItemPtr it) { return it.get() == item; });
+		return std::find_if(
+			parent ? parent->m_items.begin() : m_items.begin(),
+			parent ? parent->m_items.end() : m_items.end(),
+			[item](MenuItemPtr it) { return it.get() == item; });
 	}
 
 	void Menu::MoveRight()
 	{
 		if (!m_active)
-		{
 			return;
-		}
 
 		// Top level
 		if (m_active->GetParentMenuItem() == nullptr)
 		{
 			auto item = FindMenuItem(m_active.get());
-			if (item != m_items.end())
+			if (item == m_items.end())
+				return;
+
+			item++;
+			if (item == m_items.end())
 			{
-				item++;
-				if (item == m_items.end())
-				{
-					item = m_items.begin();
-				}
-				m_active = *item;
-				OpenMenu(*item);
+				item = m_items.begin();
 			}
+			m_active = *item;
+			OpenMenu(*item);
+		}
+		else
+		{
+			OpenMenu(m_active);
 		}
 
 	}
 	void Menu::MoveLeft()
 	{
 		if (!m_active)
-		{
 			return;
-		}
 
-		// Top level
+		// Top level, move left right
 		if (m_active->GetParentMenuItem() == nullptr)
 		{
 			auto item = FindMenuItem(m_active.get());
-			if (item != m_items.end())
-			{
-				if (item == m_items.begin())
-				{
-					item = --m_items.end();
-				}
-				else
-				{
-					item--;
-				}
-				m_active = *item;
-				OpenMenu(*item);
-			}
+			if (item == m_items.end())
+				return;
+
+			item = (item == m_items.begin()) ? --m_items.end() : --item;
+			m_active = *item;
+			OpenMenu(m_active);
+		}
+		else if (m_active->IsOpened() && m_active->HasSubMenu()) // submenu, close is open
+		{
+			CloseMenuItem(m_active);
 		}
 	}
 	void Menu::MoveUp()
 	{
+		if (!m_active)
+			return;
 
+		MenuItemRef parent = m_active->GetParentMenuItem();
+		if (parent == nullptr)
+			return;
+
+		auto item = FindMenuItem(m_active.get(), parent);
+		if (item == parent->m_items.end())
+			return;
+
+		item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
+
+		m_active = *item;
+		OpenMenu(m_active);
 	}
+
 	void Menu::MoveDown()
 	{
+		if (!m_active)
+			return;
 
+		MenuItemRef parent = m_active->GetParentMenuItem();
+		if (parent == nullptr && !m_active->m_items.empty())
+		{ 
+			m_active = *(m_active->m_items.begin());
+			OpenMenu(m_active);
+		}
+		else
+		{
+			auto item = FindMenuItem(m_active.get(), parent);
+			if (item == parent->m_items.end())
+				return;
+
+			item++;
+			if (item == parent->m_items.end())
+			{
+				item = parent->m_items.begin();
+			}
+			m_active = *item;
+			OpenMenu(m_active);
+		}
 	}
 	
 	struct Menu::shared_enabler : public Menu

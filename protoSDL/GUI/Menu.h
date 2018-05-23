@@ -57,7 +57,7 @@ namespace GUI
 		void DrawActiveFrame(MenuItemRef parent);
 		void CloseMenuItem(MenuItemPtr item);
 
-		MenuItems::const_iterator FindMenuItem(MenuItemRef item) const;
+		MenuItems::const_iterator FindMenuItem(MenuItemRef item, MenuItemRef parent = nullptr) const;
 
 		MenuItemPtr m_active;
 		int m_lineHeight;
