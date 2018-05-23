@@ -69,31 +69,31 @@ void OnClick(WidgetRef widget)
 void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 {
 	MenuPtr menu = GUI::Menu::Create(ren.get(), "editMenu");
-	MenuItemPtr fileMenu = menu->AddMenuItem("file", "&File");
-	MenuItemPtr editMenu = menu->AddMenuItem("edit", "&Edit");
-	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View");
-	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help");
+	MenuItemPtr fileMenu = menu->AddMenuItem("file", "&File", SDLK_f);
+	MenuItemPtr editMenu = menu->AddMenuItem("edit", "&Edit", SDLK_e);
+	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View", SDLK_v);
+	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help", SDLK_h);
 
-	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open");
+	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open"/*, SDLK_o*/);
 
 	fileOpenMenu->AddMenuItem("open1", "Open this");
 	fileOpenMenu->AddMenuItem("open2", "Open that");
 
 	fileMenu->AddMenuItem("long", "Option with a very long name");
-	MenuItemPtr sub = fileMenu->AddMenuItem("sub", "&Another submenu");
+	MenuItemPtr sub = fileMenu->AddMenuItem("sub", "&Another submenu"/*, SDLK_a*/);
 	sub->AddMenuItem("sub1", "sub 1");
 	MenuItemPtr sub2 = sub->AddMenuItem("sub2", "sub 2");
 	sub2->AddMenuItem("sub2.1", "sub 2.1");
 	sub2->AddMenuItem("sub2.2", "sub 2.2");
 	sub2->AddMenuItem("sub2.3", "sub 2.3");
 	sub2->AddMenuItem("sub2.4", "sub 2.4");
-	fileMenu->AddMenuItem("exit", "&Exit");
+	fileMenu->AddMenuItem("exit", "&Exit"/*, SDLK_e*/);
 
-	editMenu->AddMenuItem("cut", "Cu&t");
-	editMenu->AddMenuItem("copy", "Cop&y");
-	editMenu->AddMenuItem("paste", "Pa&ste");
+	editMenu->AddMenuItem("cut", "Cu&t"/*, SDLK_t*/);
+	editMenu->AddMenuItem("copy", "Cop&y"/*, SDLK_y*/);
+	editMenu->AddMenuItem("paste", "Pa&ste"/*, SDLK_a*/);
 
-	helpMenu->AddMenuItem("about", "&About...");
+	helpMenu->AddMenuItem("about", "&About..."/*, SDLK_a*/);
 
 	editWnd->SetMenu(menu);
 }
@@ -171,6 +171,7 @@ int main(int argc, char ** argv)
 		RES().LoadImage("win.scroll.right", "./Resources/iconRightArrow.png");
 		RES().LoadImage("win.scroll.up", "./Resources/iconUpArrow.png");
 		RES().LoadImage("win.scroll.down", "./Resources/iconDownArrow.png");
+		RES().LoadImage("menu.subitem", "./Resources/iconMenuRightArrow.png");
 
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 

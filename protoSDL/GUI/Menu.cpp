@@ -63,12 +63,7 @@ namespace GUI
 
 				if (m_active)
 				{
-					MenuItemRef parent = m_active->GetParentMenuItem();
-					if (parent)
-					{
-						Rect highlight = m_active->m_rect.Offset(&parent->m_renderedMenuRect.Origin());
-						Draw3dFrame(&highlight, false);
-					}
+					DrawActiveFrame(m_active.get());
 				}
 
 				item->m_label->Draw(&drawRect);
@@ -79,7 +74,18 @@ namespace GUI
 		}
 	}
 
-	MenuItemPtr Menu::AddMenuItem(const char * id, const char * name)
+	void Menu::DrawActiveFrame(MenuItemRef item)
+	{
+		MenuItemRef parent = item->GetParentMenuItem();
+		if (parent)
+		{
+			Rect highlight = item->m_rect.Offset(&parent->m_renderedMenuRect.Origin());
+			Draw3dFrame(&highlight, false);
+			DrawActiveFrame(parent);
+		}
+	}
+
+	MenuItemPtr Menu::AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey)
 	{
 		if (id == nullptr)
 		{
@@ -93,6 +99,11 @@ namespace GUI
 
 		m_items.push_back(item);
 
+		if (hotkey != SDLK_UNKNOWN)
+		{
+			m_hotkeys[hotkey] = item;
+		}
+
 		return item;
 	}
 
@@ -105,7 +116,7 @@ namespace GUI
 
 		for (auto & item : m_items)
 		{
-			if (item->IsOpened() && item->m_renderedMenuRect.PointInRect(pt))
+			if (item->Hit(pt))
 			{
 				return HitResult(HitZone::HIT_MENU_ITEM, item.get());
 			}
@@ -139,14 +150,10 @@ namespace GUI
 				if (capture)
 				{
 					MenuItemPtr item = ItemAt(&pt);
-					if (item && hit == HIT_MENU)
-					{
-						m_active = nullptr;
-						OpenMenu(item);
-					}
-					else if (item && hit == HIT_MENU_ITEM)
+					if (item && (hit & (HIT_MENU | HIT_MENU_ITEM)))
 					{
 						m_active = item;
+						OpenMenu(item);
 					}
 				}
 			}
@@ -158,12 +165,18 @@ namespace GUI
 			if (capture)
 			{
 				MenuItemPtr item = ItemAt(&pt);
+				if (item && item->IsOpened() && item->HasSubMenu())
+				{
+					return true;
+				}
 				CloseMenu();
 				WINMGR().ReleaseCapture();
 				if (item && hit == HIT_MENU_ITEM)
 				{
 					PostEvent(EVENT_MENU_SELECTED, item.get());
+
 				}
+				// Eat the click anyway so user doesn't accidentally activate a control outside the menu area
 				return true;
 			}
 
@@ -172,18 +185,53 @@ namespace GUI
 
 			if (item)
 			{
+				m_active = item;
 				OpenMenu(item);
 				WINMGR().StartCapture(hit, &pt);
 			}
 
 			return item != nullptr;
 		}
-		case SDL_MOUSEBUTTONUP:
-			if (capture)
+		case SDL_KEYDOWN:
+		{
+			switch (e->key.keysym.sym)
 			{
-//				WINMGR().ReleaseCapture();
+			case SDLK_ESCAPE:
+				CloseMenu();
+				WINMGR().ReleaseCapture();
+				return true;
+			case SDLK_LEFT:
+				MoveLeft();
+				return true;
+			case SDLK_RIGHT:
+				MoveRight();
+				return true;
+			case SDLK_UP:
+				MoveUp();
+				return true;
+			case SDLK_DOWN:
+				MoveDown();
+				return true;
 			}
-//			return true;
+			// Hotkeys
+			{
+				if (SDL_GetModState() & KMOD_ALT)
+				{
+					auto it = m_hotkeys.find(e->key.keysym.sym);
+					if (it != m_hotkeys.end())
+					{
+						SetActive();
+						SetFocus(this);
+						m_active = it->second;
+						OpenMenu(it->second);
+						WINMGR().StartCapture(HitResult(HIT_MENU, this), &pt);
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 		default:
 			return false;
 		}
@@ -193,8 +241,40 @@ namespace GUI
 
 	void Menu::OpenMenu(MenuItemPtr item)
 	{
-		CloseMenu();
+		// Close other menus on same level
+		MenuItemRef parent = item->GetParentMenuItem();
+		if (parent)
+		{
+			for (auto & it : parent->m_items)
+			{
+				if (it != item)
+				{
+					CloseMenuItem(it);
+				}
+			}
+		}
+		else
+		{
+			for (auto & it : m_items)
+			{
+				if (it != item)
+				{
+					CloseMenuItem(it);
+				}
+			}
+		}
+
 		item->m_opened = true;
+	}
+
+	void Menu::CloseMenuItem(MenuItemPtr item)
+	{
+		// Close menu item and all children
+		item->m_opened = false;
+		for (auto & it : item->m_items)
+		{
+			CloseMenuItem(it);
+		}
 	}
 
 	void Menu::CloseMenu()
@@ -203,10 +283,77 @@ namespace GUI
 		for (auto & item : m_items)
 		{
 			item->m_opened = false;
+			for (auto & it : item->m_items)
+			{
+				CloseMenuItem(it);
+			}
 		}
 	}
+	
+	Menu::MenuItems::const_iterator Menu::FindMenuItem(MenuItemRef item) const
+	{
+		return std::find_if(m_items.begin(), m_items.end(), [item](MenuItemPtr it) { return it.get() == item; });
+	}
 
+	void Menu::MoveRight()
+	{
+		if (!m_active)
+		{
+			return;
+		}
 
+		// Top level
+		if (m_active->GetParentMenuItem() == nullptr)
+		{
+			auto item = FindMenuItem(m_active.get());
+			if (item != m_items.end())
+			{
+				item++;
+				if (item == m_items.end())
+				{
+					item = m_items.begin();
+				}
+				m_active = *item;
+				OpenMenu(*item);
+			}
+		}
+
+	}
+	void Menu::MoveLeft()
+	{
+		if (!m_active)
+		{
+			return;
+		}
+
+		// Top level
+		if (m_active->GetParentMenuItem() == nullptr)
+		{
+			auto item = FindMenuItem(m_active.get());
+			if (item != m_items.end())
+			{
+				if (item == m_items.begin())
+				{
+					item = --m_items.end();
+				}
+				else
+				{
+					item--;
+				}
+				m_active = *item;
+				OpenMenu(*item);
+			}
+		}
+	}
+	void Menu::MoveUp()
+	{
+
+	}
+	void Menu::MoveDown()
+	{
+
+	}
+	
 	struct Menu::shared_enabler : public Menu
 	{
 		template <typename... Args>

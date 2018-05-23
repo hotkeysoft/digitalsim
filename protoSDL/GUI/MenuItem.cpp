@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include "MenuItem.h"
 #include "Label.h"
+#include "Image.h"
 #include "RenderTarget.h"
 
 namespace GUI
@@ -129,6 +130,7 @@ namespace GUI
 
 		m_items.push_back(item);
 
+
 		return item;
 	}
 
@@ -143,7 +145,7 @@ namespace GUI
 			m_renderedMenuRect.w = std::max(labelRect.w, m_renderedMenuRect.w);
 			m_renderedMenuRect.h += labelRect.h;
 		}
-		m_renderedMenuRect.h = std::max(m_renderedMenuRect.h, 10);
+		m_renderedMenuRect.h = std::max(m_renderedMenuRect.h, 0);
 		m_renderedMenuRect.w += GetShrinkFactor().w * 2;
 		m_renderedMenuRect.h += GetShrinkFactor().h * 2;
 
@@ -168,7 +170,11 @@ namespace GUI
 
 					if (item->HasSubMenu())
 					{
-						DrawRect(&target, Color(64, 128, 128));
+						static ImageRef image = RES().FindImage("menu.subitem");
+						if (image)
+						{							
+							image->Draw(&target.Deflate(1), Image::IMG_H_RIGHT | Image::IMG_V_CENTER);
+						}
 					}
 
 					target.y += labelRect.h;

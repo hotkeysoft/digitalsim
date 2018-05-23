@@ -19,6 +19,7 @@ namespace GUI
 		};
 
 		using MenuItems = std::vector<MenuItemPtr>;
+		using HotkeyMap = std::map<SDL_Keycode, MenuItemPtr>;
 
 		virtual ~Menu() = default;
 		Menu(const Menu&) = delete;
@@ -30,7 +31,7 @@ namespace GUI
 
 		static MenuPtr Create(RendererRef renderer, const char * id);
 
-		MenuItemPtr AddMenuItem(const char * id, const char * name);
+		MenuItemPtr AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey = SDLK_UNKNOWN);
 
 		bool HandleEvent(SDL_Event *) override;
 		HitResult HitTest(const PointRef) override;
@@ -43,16 +44,25 @@ namespace GUI
 
 		int GetHeight() { return m_lineHeight + (2 * GetShrinkFactor().h); }
 
+		void MoveLeft();
+		void MoveRight();
+		void MoveUp();
+		void MoveDown();
+
 	protected:
 		Menu(RendererRef renderer, const char * id);
 
 		MenuItemPtr ItemAt(PointRef pt);
 
+		void DrawActiveFrame(MenuItemRef parent);
+		void CloseMenuItem(MenuItemPtr item);
+
+		MenuItems::const_iterator FindMenuItem(MenuItemRef item) const;
+
 		MenuItemPtr m_active;
-
 		int m_lineHeight;
-
 		MenuItems m_items;
+		HotkeyMap m_hotkeys;
 
 		struct shared_enabler;
 	};

@@ -950,6 +950,12 @@ namespace GUI
 			}
 		}
 
+		// Pass to menu
+		if (m_menu && m_menu->HandleEvent(e))
+		{
+			return true;
+		}
+
 		// Pass to controls
 		{
 			for (auto & child : m_controls)
