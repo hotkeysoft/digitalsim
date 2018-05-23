@@ -13,6 +13,11 @@ namespace GUI
 	public:
 		DECLARE_EVENT_CLASS_NAME(TextBox)
 
+		enum TextBoxEvents : EventCode
+		{
+			EVENT_TEXTBOX_CHANGED // Text changed
+		};
+
 		virtual ~TextBox() = default;
 		TextBox(const TextBox&) = delete;
 		TextBox& operator=(const TextBox&) = delete;
@@ -32,6 +37,7 @@ namespace GUI
 		void Draw() override;
 
 		void SetText(const char *) override;
+		std::string GetText() const override;
 
 		void MoveCursor(int x, int y);
 		void MoveCursorRel(int16_t deltaX, int16_t deltaY);

@@ -101,7 +101,23 @@ namespace GUI
 
 	void WindowManager::SetActive(WindowRef win)
 	{
+		if (win == m_activeWindow)
+		{
+			return;
+		}
+
+		if (m_activeWindow)
+		{
+			m_activeWindow->PostEvent(Window::EVENT_WINDOW_DEACTIVATED);
+		}
+		
 		m_activeWindow = win;
+
+		if (m_activeWindow)
+		{
+			m_activeWindow->PostEvent(Window::EVENT_WINDOW_ACTIVATED);
+		}
+
 		MoveToFront(win);
 	}
 	const CaptureInfo & WindowManager::StartCapture(HitResult hit, PointRef pt)

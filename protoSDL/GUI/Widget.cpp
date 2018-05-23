@@ -58,6 +58,11 @@ namespace GUI
 		}
 	}
 
+	void Widget::ClearFocus()
+	{
+		m_focused = false;
+	}
+
 	void Widget::SetFont(FontRef font)
 	{
 		if (font == nullptr)

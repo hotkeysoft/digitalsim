@@ -162,7 +162,7 @@ namespace GUI
 				WINMGR().ReleaseCapture();
 				if (item && hit == HIT_MENU_ITEM)
 				{
-					std::cout << "Clicked: " << item->GetId() << std::endl;
+					PostEvent(EVENT_MENU_SELECTED, item.get());
 				}
 				return true;
 			}

@@ -90,6 +90,7 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 int EventFilter(void* userdata, SDL_Event* event)
 {
 	static Uint32 timerEvent = WINMGR().GetEventType("timer");
+	static Uint32 menuEvent = WINMGR().GetEventType(Menu::EventClassName());
 
 	if (event->type >= SDL_USEREVENT && event->type != timerEvent)
 	{
@@ -99,6 +100,13 @@ int EventFilter(void* userdata, SDL_Event* event)
 			WidgetRef widget = WidgetRef(event->user.data1);
 			std::cout << "\t" << widget->GetId();
 		}
+		if (event->type == menuEvent && event->user.data2)
+		{
+			WidgetRef widget = WidgetRef(event->user.data2);
+
+			std::cout << "\t" << widget->GetId();
+		}
+
 		std::cout << std::endl;
 	}
 	return 0;

@@ -13,6 +13,11 @@ namespace GUI
 	public:
 		DECLARE_EVENT_CLASS_NAME(Menu)
 
+		enum TextBoxEvents : EventCode
+		{
+			EVENT_MENU_SELECTED // MenuItemRef in data2
+		};
+
 		using MenuItems = std::vector<MenuItemPtr>;
 
 		virtual ~Menu() = default;

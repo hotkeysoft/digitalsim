@@ -16,7 +16,7 @@ namespace GUI
 
 		enum ButtonEvents : EventCode
 		{
-			EVENT_BUTTON_CLICK
+			EVENT_BUTTON_CLICKED
 		};
 
 		virtual ~Button() = default;

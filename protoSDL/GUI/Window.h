@@ -13,6 +13,12 @@ namespace GUI
 	class Window : public Widget
 	{
 	public:
+		enum WindowEvents : EventCode
+		{
+			EVENT_WINDOW_ACTIVATED, // Window activated
+			EVENT_WINDOW_DEACTIVATED, // Window activated
+		};
+
 		DECLARE_EVENT_CLASS_NAME(Window)
 
 		using MinWindowList = std::vector<WindowRef>;
@@ -114,5 +120,6 @@ namespace GUI
 		struct shared_enabler;
 
 		friend class ScrollBars;
+		friend class WindowManager;
 	};
 }

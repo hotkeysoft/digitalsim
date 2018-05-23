@@ -176,6 +176,18 @@ namespace GUI
 		RenderText();
 	}
 
+	std::string TextBox::GetText() const
+	{
+		std::ostringstream os;
+		std::string delim = "";
+		for (auto & line : m_lines)
+		{
+			os << delim << line.text;
+			delim = "\n";
+		}
+		return os.str();
+	}
+
 	void TextBox::RenderText()
 	{
 		SplitLines();
@@ -271,6 +283,7 @@ namespace GUI
 			m_lines.insert(m_lines.begin() + at, text);
 		}
 		RenderLines();
+		PostEvent(EVENT_TEXTBOX_CHANGED);
 	}
 
 	void TextBox::InsertAt(const char * text, size_t line, size_t col)
@@ -290,6 +303,7 @@ namespace GUI
 			s.insert(col, text);
 			m_lines[line] = s;
 			RenderLines();
+			PostEvent(EVENT_TEXTBOX_CHANGED);
 		}
 	}
 
@@ -306,6 +320,7 @@ namespace GUI
 	{
 		line = std::min(m_lines.size() - 1, line);
 		m_lines.erase(m_lines.begin() + line);
+		PostEvent(EVENT_TEXTBOX_CHANGED);
 	}
 
 	void TextBox::MoveCursor(int x, int y)
@@ -526,6 +541,7 @@ namespace GUI
 			m_lines[m_currentPos.y].texture = nullptr;
 			RenderLines();
 			MoveCursorRel(-1, 0);
+			PostEvent(EVENT_TEXTBOX_CHANGED);
 		}		
 	}
 
@@ -548,6 +564,7 @@ namespace GUI
 		{
 			m_lines[m_currentPos.y].text.erase(m_currentPos.x, 1);
 			m_lines[m_currentPos.y].texture = nullptr;
+			PostEvent(EVENT_TEXTBOX_CHANGED);
 		}
 
 		RenderLines();

@@ -474,6 +474,8 @@ namespace GUI
 		{
 			node->m_selected = true;
 		}
+
+		PostEvent(EVENT_TREE_SELECT, node);
 	}
 
 	TreeNodeList::const_iterator Tree::FindSelectedNode() const

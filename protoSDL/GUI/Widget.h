@@ -48,7 +48,7 @@ namespace GUI
 		// Activation
 		virtual void SetActive() { if (m_parent) m_parent->SetActive(); }
 		virtual void SetFocus(WidgetRef focus, WidgetRef parent= nullptr);
-		virtual void ClearFocus() { m_focused = false; }
+		virtual void ClearFocus();
 		bool IsFocused() { return m_focused; }
 
 		virtual std::string GetText() const { return m_text; }

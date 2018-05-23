@@ -54,7 +54,7 @@ namespace GUI
 				WINMGR().ReleaseCapture();
 				if (hit.target == this)
 				{
-					PostEvent(EVENT_BUTTON_CLICK);
+					PostEvent(EVENT_BUTTON_CLICKED);
 				}
 			}
 			return true;
@@ -88,7 +88,7 @@ namespace GUI
 			if (capture && capture.Target.target == this)
 			{
 				WINMGR().ReleaseCapture();
-				PostEvent(EVENT_BUTTON_CLICK);
+				PostEvent(EVENT_BUTTON_CLICKED);
 			}
 			return true;
 		}

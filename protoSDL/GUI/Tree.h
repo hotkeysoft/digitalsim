@@ -59,6 +59,11 @@ namespace GUI
 	public:
 		DECLARE_EVENT_CLASS_NAME(Tree)
 
+		enum TreeEvents : EventCode
+		{
+			EVENT_TREE_SELECT // Selected TreeNodeRef in data2
+		};
+
 		virtual ~Tree() = default;
 		Tree(const Tree&) = delete;
 		Tree& operator=(const Tree&) = delete;
