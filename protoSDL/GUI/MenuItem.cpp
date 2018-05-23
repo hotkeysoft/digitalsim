@@ -33,7 +33,7 @@ namespace GUI
 		m_label->Init();
 	}
 
-	void MenuItem::Draw(const PointRef rect)
+	void MenuItem::Draw(const PointRef pos)
 	{
 		if (!m_renderedMenu)
 		{
@@ -42,20 +42,45 @@ namespace GUI
 
 		if (m_renderedMenu)
 		{
-			m_renderedMenuRect.x = rect->x;
-			m_renderedMenuRect.y = rect->y;
+			m_renderedMenuRect.x = pos->x;
+			m_renderedMenuRect.y = pos->y;
 			SDL_RenderCopy(m_renderer, m_renderedMenu.get(), nullptr, &m_renderedMenuRect);
+
+			if (HasSubMenu())
+			{
+				for (auto & item : m_items)
+				{
+					Point subMenuPos = *pos;
+					if (item->IsOpened() && item->HasSubMenu())
+					{
+						subMenuPos.y = item->m_rect.y + m_renderedMenuRect.y;
+						subMenuPos.x += m_renderedMenuRect.w;
+						item->Draw(&subMenuPos);
+					}
+				}
+			}
 		}
 	}
 
 	bool MenuItem::Hit(PointRef pt)
 	{
-		if (m_labelRect.PointInRect(pt))
+ 		if (m_labelRect.PointInRect(pt))
 			return true;
 
 		if (IsOpened())
 		{
-			return m_renderedMenuRect.PointInRect(pt);
+			if (m_renderedMenuRect.PointInRect(pt))
+			{
+				return true;
+			}
+
+			for (auto & item : m_items)
+			{
+				if (item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
+				{
+					return true;
+				}
+			}		
 		}
 
 		return false;
@@ -73,12 +98,16 @@ namespace GUI
 			Point rel(pt->x - m_renderedMenuRect.x, pt->y - m_renderedMenuRect.y);
 
 			for (auto & item : m_items)
-			{			
-				Rect & rect = item->m_rect;
-
-				if (rect.PointInRect(&rel))
+			{
+				Rect & itemRect = item->m_rect;
+				if (itemRect.PointInRect(&rel))
 				{
 					return item;
+				}
+
+				if (item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
+				{
+					return item->ItemAt(pt);
 				}
 			}
 		}
@@ -112,7 +141,7 @@ namespace GUI
 		{
 			Rect labelRect = item->m_label->GetRect(true, false);
 			m_renderedMenuRect.w = std::max(labelRect.w, m_renderedMenuRect.w);
-			m_renderedMenuRect.h += labelRect.h;// + 2;
+			m_renderedMenuRect.h += labelRect.h;
 		}
 		m_renderedMenuRect.h = std::max(m_renderedMenuRect.h, 10);
 		m_renderedMenuRect.w += GetShrinkFactor().w * 2;
@@ -137,7 +166,12 @@ namespace GUI
 					item->m_label->Draw(&target, true);
 					item->m_rect = target;
 
-					target.y += labelRect.h;// + 2;
+					if (item->HasSubMenu())
+					{
+						DrawRect(&target, Color(64, 128, 128));
+					}
+
+					target.y += labelRect.h;
 				}
 
 				m_renderedMenu = TexturePtr(texture, sdl_deleter());

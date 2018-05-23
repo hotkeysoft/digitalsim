@@ -74,8 +74,19 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View");
 	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help");
 
-	fileMenu->AddMenuItem("open", "&Open");
+	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open");
+
+	fileOpenMenu->AddMenuItem("open1", "Open this");
+	fileOpenMenu->AddMenuItem("open2", "Open that");
+
 	fileMenu->AddMenuItem("long", "Option with a very long name");
+	MenuItemPtr sub = fileMenu->AddMenuItem("sub", "&Another submenu");
+	sub->AddMenuItem("sub1", "sub 1");
+	MenuItemPtr sub2 = sub->AddMenuItem("sub2", "sub 2");
+	sub2->AddMenuItem("sub2.1", "sub 2.1");
+	sub2->AddMenuItem("sub2.2", "sub 2.2");
+	sub2->AddMenuItem("sub2.3", "sub 2.3");
+	sub2->AddMenuItem("sub2.4", "sub 2.4");
 	fileMenu->AddMenuItem("exit", "&Exit");
 
 	editMenu->AddMenuItem("cut", "Cu&t");

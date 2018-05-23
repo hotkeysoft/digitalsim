@@ -23,7 +23,7 @@ namespace GUI
 		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name, MenuItemRef parent);
 
 		MenuItemPtr AddMenuItem(const char * id, const char * name);
-		MenuItemRef GetParentMenuItem() { return static_cast<MenuItemRef>(m_parent); }
+		MenuItemRef GetParentMenuItem() { return dynamic_cast<MenuItemRef>(m_parent); }
 
 		bool Hit(PointRef pt);
 
@@ -31,6 +31,7 @@ namespace GUI
 		void Draw(const PointRef pt);
 
 		bool IsOpened() { return m_opened; }
+		bool HasSubMenu() { return !m_items.empty(); }
 		LabelRef GetLabel() { return m_label.get(); }
 
 	protected:
