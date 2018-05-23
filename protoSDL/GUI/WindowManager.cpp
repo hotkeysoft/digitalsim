@@ -237,6 +237,8 @@ namespace GUI
 			}
 			m_registeredEvents[type] = eventId;
 			m_registeredEventsReverse[eventId] = type;
+
+			std::cout << "Register: " << type << ", eventID = " << eventId << std::endl;
 		}		
 		
 		return eventId;

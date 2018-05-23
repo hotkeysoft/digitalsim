@@ -36,8 +36,6 @@ namespace GUI
 			throw std::invalid_argument("WIN_MINMAX flag needs parent window");
 		}
 
-		m_id = id;
-
 		m_scrollBars = ScrollBars::Create(renderer, this);
 
 		m_backgroundColor = Color::C_LIGHT_GREY;

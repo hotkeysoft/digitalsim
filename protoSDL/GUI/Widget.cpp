@@ -8,7 +8,7 @@
 namespace GUI
 {
 	Widget::Widget(const char* id) :
-		m_id(id ? id : "")
+		m_id(id ? id : ""), m_eventClassId(Uint32(-1))
 	{
 	}
 
@@ -30,7 +30,8 @@ namespace GUI
 		m_margin(0),
 		m_borderWidth(4),
 		m_focused(false),
-		m_flags(flags)
+		m_flags(flags),
+		m_eventClassId(Uint32(-1))
 	{
 		SetFont(font);
 	}
@@ -201,8 +202,11 @@ namespace GUI
 
 	Uint32 Widget::GetEventClassId()
 	{
-		static Uint32 eventID = WINMGR().GetEventType(GetClassName());
-		return eventID;
+		if (m_eventClassId == -1)
+		{
+			m_eventClassId = WINMGR().GetEventType(GetClassName());
+		}
+		return m_eventClassId;
 	}
 
 	void Widget::PostEvent(EventCode code, void * data2)

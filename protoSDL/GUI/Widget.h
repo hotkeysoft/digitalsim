@@ -131,7 +131,8 @@ namespace GUI
 		TexturePtr SurfaceToTexture(SDL_Surface* surf, bool writable = false);
 		TexturePtr CloneTexture(TexturePtr source, Color background = Color::C_TRANSPARENT);
 
-		std::string m_id;
+		const std::string m_id;
+		Uint32 m_eventClassId;
 		CreationFlags m_flags;
 		RendererRef m_renderer;
 		std::string m_text;

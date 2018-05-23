@@ -94,6 +94,7 @@ int EventFilter(void* userdata, SDL_Event* event)
 
 	if (event->type >= SDL_USEREVENT && event->type != timerEvent)
 	{
+		std::cout << "#" << event->type << " ";
 		std::cout << WINMGR().GetEventName(event->type) << ":" << event->user.code;
 		if (event->user.data1)
 		{
@@ -106,6 +107,7 @@ int EventFilter(void* userdata, SDL_Event* event)
 
 			std::cout << "\t" << widget->GetId();
 		}
+
 
 		std::cout << std::endl;
 	}
