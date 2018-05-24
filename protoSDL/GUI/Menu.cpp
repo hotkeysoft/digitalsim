@@ -225,6 +225,7 @@ namespace GUI
 			}
 			// Hotkeys
 			{
+				// ALT - main menu
 				if (SDL_GetModState() & KMOD_ALT)
 				{
 					auto it = m_hotkeys.find(e->key.keysym.sym);
@@ -235,6 +236,34 @@ namespace GUI
 						m_active = it->second.get();
 						OpenMenu(m_active);
 						WINMGR().StartCapture(HitResult(HIT_MENU, this), &pt);
+						return true;
+					}
+				} 
+				// Plain key - sub menu
+				else if (m_active)
+				{
+					MenuItemRef parent = m_active->GetParentMenuItem();
+					if (parent == nullptr)
+						parent = m_active;
+
+					auto it = parent->m_hotkeys.find(e->key.keysym.sym);
+					if (it != parent->m_hotkeys.end())
+					{
+						SetActive();
+						SetFocus(this);
+						m_active = it->second.get();
+						if (m_active->HasSubMenu())
+						{
+							OpenMenu(m_active);
+							MoveRight();
+							WINMGR().StartCapture(HitResult(HIT_MENU, this), &pt);
+						}
+						else
+						{
+							PostEvent(EVENT_MENU_SELECTED, m_active);
+							CloseMenu();
+						}
+
 						return true;
 					}
 				}
@@ -374,16 +403,25 @@ namespace GUI
 
 		MenuItemRef parent = m_active->GetParentMenuItem();
 		if (parent == nullptr)
-			return;
+		{
+			if (!m_active->m_items.empty())
+			{
+				m_active = (--m_active->m_items.end())->get();
+				OpenMenu(m_active);
+			}
+		}
+		else
+		{
 
-		auto item = FindMenuItem(m_active, parent);
-		if (item == parent->m_items.end())
-			return;
+			auto item = FindMenuItem(m_active, parent);
+			if (item == parent->m_items.end())
+				return;
 
-		item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
+			item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
 
-		m_active = item->get();
-		OpenMenu(m_active);
+			m_active = item->get();
+			OpenMenu(m_active);
+		}
 	}
 
 	void Menu::MoveDown()
@@ -392,10 +430,13 @@ namespace GUI
 			return;
 
 		MenuItemRef parent = m_active->GetParentMenuItem();
-		if (parent == nullptr && !m_active->m_items.empty())
+		if (parent == nullptr)
 		{ 
-			m_active = m_active->m_items.begin()->get();
-			OpenMenu(m_active);
+			if (!m_active->m_items.empty())
+			{
+				m_active = m_active->m_items.begin()->get();
+				OpenMenu(m_active);
+			}
 		}
 		else
 		{

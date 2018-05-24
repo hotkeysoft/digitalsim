@@ -74,26 +74,26 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View", SDLK_v);
 	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help", SDLK_h);
 
-	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open"/*, SDLK_o*/);
+	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open", SDLK_o);
 
-	fileOpenMenu->AddMenuItem("open1", "Open this");
-	fileOpenMenu->AddMenuItem("open2", "Open that");
+	fileOpenMenu->AddMenuItem("open1", "Open &this", SDLK_t);
+	fileOpenMenu->AddMenuItem("open2", "Open t&hat", SDLK_h);
 
-	fileMenu->AddMenuItem("long", "Option with a very long name");
-	MenuItemPtr sub = fileMenu->AddMenuItem("sub", "&Another submenu"/*, SDLK_a*/);
-	sub->AddMenuItem("sub1", "sub 1");
-	MenuItemPtr sub2 = sub->AddMenuItem("sub2", "sub 2");
-	sub2->AddMenuItem("sub2.1", "sub 2.1");
-	sub2->AddMenuItem("sub2.2", "sub 2.2");
-	sub2->AddMenuItem("sub2.3", "sub 2.3");
-	sub2->AddMenuItem("sub2.4", "sub 2.4");
-	fileMenu->AddMenuItem("exit", "&Exit"/*, SDLK_e*/);
+	fileMenu->AddMenuItem("long", "Option with a very &long name", SDLK_l);
+	MenuItemPtr sub = fileMenu->AddMenuItem("sub", "&Another submenu", SDLK_a);
+	sub->AddMenuItem("sub1", "sub &1", SDLK_1);
+	MenuItemPtr sub2 = sub->AddMenuItem("sub2", "sub &2", SDLK_2);
+	sub2->AddMenuItem("sub2.1", "sub 2.&1", SDLK_1);
+	sub2->AddMenuItem("sub2.2", "sub 2.&2", SDLK_2);
+	sub2->AddMenuItem("sub2.3", "sub 2.&3", SDLK_3);
+	sub2->AddMenuItem("sub2.4", "sub 2.&4", SDLK_4);
+	fileMenu->AddMenuItem("exit", "&Exit", SDLK_e);
 
-	editMenu->AddMenuItem("cut", "Cu&t"/*, SDLK_t*/);
-	editMenu->AddMenuItem("copy", "Cop&y"/*, SDLK_y*/);
-	editMenu->AddMenuItem("paste", "Pa&ste"/*, SDLK_a*/);
+	editMenu->AddMenuItem("cut", "Cu&t", SDLK_t);
+	editMenu->AddMenuItem("copy", "Cop&y", SDLK_y);
+	editMenu->AddMenuItem("paste", "Pa&ste", SDLK_s);
 
-	helpMenu->AddMenuItem("about", "&About..."/*, SDLK_a*/);
+	helpMenu->AddMenuItem("about", "&About...", SDLK_a);
 
 	editWnd->SetMenu(menu);
 }

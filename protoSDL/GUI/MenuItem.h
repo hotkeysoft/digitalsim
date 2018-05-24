@@ -11,6 +11,7 @@ namespace GUI
 	{
 	public:
 		using MenuItems = std::vector<MenuItemPtr>;
+		using HotkeyMap = std::map<SDL_Keycode, MenuItemPtr>;
 
 		virtual ~MenuItem() = default;
 		MenuItem(const MenuItem&) = delete;
@@ -22,7 +23,7 @@ namespace GUI
 
 		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name, MenuItemRef parent);
 
-		MenuItemPtr AddMenuItem(const char * id, const char * name);
+		MenuItemPtr AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey = SDLK_UNKNOWN);
 		MenuItemRef GetParentMenuItem() { return dynamic_cast<MenuItemRef>(m_parent); }
 
 		bool Hit(PointRef pt);
@@ -49,6 +50,8 @@ namespace GUI
 		Rect m_renderedMenuRect;
 
 		struct shared_enabler;
+
+		HotkeyMap m_hotkeys;
 
 		friend class Menu;
 	};

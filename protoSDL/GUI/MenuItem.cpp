@@ -116,7 +116,7 @@ namespace GUI
 		return nullptr;
 	}
 
-	MenuItemPtr MenuItem::AddMenuItem(const char * id, const char * name)
+	MenuItemPtr MenuItem::AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey)
 	{
 		m_renderedMenu = nullptr; // Force render next time menu is drawns
 
@@ -130,6 +130,10 @@ namespace GUI
 
 		m_items.push_back(item);
 
+		if (hotkey != SDLK_UNKNOWN)
+		{
+			m_hotkeys[hotkey] = item;
+		}
 
 		return item;
 	}
