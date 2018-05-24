@@ -39,7 +39,7 @@ namespace GUI
 		void Draw() override {};
 		void Draw(const RectRef);
 
-		void OpenMenu(MenuItemPtr item);
+		void OpenMenu(MenuItemRef item);
 		void CloseMenu();
 
 		int GetHeight() { return m_lineHeight + (2 * GetShrinkFactor().h); }
@@ -55,11 +55,11 @@ namespace GUI
 		MenuItemPtr ItemAt(PointRef pt);
 
 		void DrawActiveFrame(MenuItemRef parent);
-		void CloseMenuItem(MenuItemPtr item);
+		void CloseMenuItem(MenuItemRef item);
 
 		MenuItems::const_iterator FindMenuItem(MenuItemRef item, MenuItemRef parent = nullptr) const;
 
-		MenuItemPtr m_active;
+		MenuItemRef m_active;
 		int m_lineHeight;
 		MenuItems m_items;
 		HotkeyMap m_hotkeys;

@@ -6,7 +6,10 @@
 
 namespace GUI
 {
-	Menu::Menu(RendererRef renderer, const char * id) : Widget(id, renderer, nullptr, Rect(), nullptr), m_lineHeight(0)
+	Menu::Menu(RendererRef renderer, const char * id) : 
+		Widget(id, renderer, nullptr, Rect(), nullptr), 
+		m_lineHeight(0),
+		m_active(nullptr)
 	{
 		if (m_renderer == nullptr)
 		{
@@ -63,7 +66,7 @@ namespace GUI
 
 				if (m_active)
 				{
-					DrawActiveFrame(m_active.get());
+					DrawActiveFrame(m_active);
 				}
 
 				item->m_label->Draw(&drawRect);
@@ -152,8 +155,8 @@ namespace GUI
 					MenuItemPtr item = ItemAt(&pt);
 					if (item && (hit & (HIT_MENU | HIT_MENU_ITEM)))
 					{
-						m_active = item;
-						OpenMenu(item);
+						m_active = item.get();
+						OpenMenu(m_active);
 					}
 				}
 			}
@@ -174,7 +177,6 @@ namespace GUI
 				if (item && hit == HIT_MENU_ITEM)
 				{
 					PostEvent(EVENT_MENU_SELECTED, item.get());
-
 				}
 				// Eat the click anyway so user doesn't accidentally activate a control outside the menu area
 				return true;
@@ -185,8 +187,8 @@ namespace GUI
 
 			if (item)
 			{
-				m_active = item;
-				OpenMenu(item);
+				m_active = item.get();
+				OpenMenu(m_active);
 				WINMGR().StartCapture(hit, &pt);
 			}
 
@@ -212,6 +214,14 @@ namespace GUI
 			case SDLK_DOWN:
 				MoveDown();
 				return true;
+			case SDLK_RETURN:
+				if (m_active)
+				{
+					WINMGR().ReleaseCapture();
+					PostEvent(EVENT_MENU_SELECTED, m_active);
+					CloseMenu();
+					return true;
+				}
 			}
 			// Hotkeys
 			{
@@ -222,8 +232,8 @@ namespace GUI
 					{
 						SetActive();
 						SetFocus(this);
-						m_active = it->second;
-						OpenMenu(it->second);
+						m_active = it->second.get();
+						OpenMenu(m_active);
 						WINMGR().StartCapture(HitResult(HIT_MENU, this), &pt);
 						return true;
 					}
@@ -239,7 +249,7 @@ namespace GUI
 		return true;
 	}
 
-	void Menu::OpenMenu(MenuItemPtr item)
+	void Menu::OpenMenu(MenuItemRef item)
 	{
 		// Close other menus on same level
 		MenuItemRef parent = item->GetParentMenuItem();
@@ -247,9 +257,9 @@ namespace GUI
 		{
 			for (auto & it : parent->m_items)
 			{
-				if (it != item)
+				if (it.get() != item)
 				{
-					CloseMenuItem(it);
+					CloseMenuItem(it.get());
 				}
 			}
 		}
@@ -257,9 +267,9 @@ namespace GUI
 		{
 			for (auto & it : m_items)
 			{
-				if (it != item)
+				if (it.get() != item)
 				{
-					CloseMenuItem(it);
+					CloseMenuItem(it.get());
 				}
 			}
 		}
@@ -267,13 +277,13 @@ namespace GUI
 		item->m_opened = true;
 	}
 
-	void Menu::CloseMenuItem(MenuItemPtr item)
+	void Menu::CloseMenuItem(MenuItemRef item)
 	{
 		// Close menu item and all children
 		item->m_opened = false;
 		for (auto & it : item->m_items)
 		{
-			CloseMenuItem(it);
+			CloseMenuItem(it.get());
 		}
 	}
 
@@ -285,7 +295,7 @@ namespace GUI
 			item->m_opened = false;
 			for (auto & it : item->m_items)
 			{
-				CloseMenuItem(it);
+				CloseMenuItem(it.get());
 			}
 		}
 	}
@@ -306,7 +316,7 @@ namespace GUI
 		// Top level
 		if (m_active->GetParentMenuItem() == nullptr)
 		{
-			auto item = FindMenuItem(m_active.get());
+			auto item = FindMenuItem(m_active);
 			if (item == m_items.end())
 				return;
 
@@ -315,12 +325,16 @@ namespace GUI
 			{
 				item = m_items.begin();
 			}
-			m_active = *item;
-			OpenMenu(*item);
+			m_active = item->get();
+			OpenMenu(m_active);
 		}
 		else
 		{
 			OpenMenu(m_active);
+			if (m_active->HasSubMenu())
+			{
+				m_active = m_active->m_items.begin()->get();
+			}
 		}
 
 	}
@@ -332,17 +346,25 @@ namespace GUI
 		// Top level, move left right
 		if (m_active->GetParentMenuItem() == nullptr)
 		{
-			auto item = FindMenuItem(m_active.get());
+			auto item = FindMenuItem(m_active);
 			if (item == m_items.end())
 				return;
 
 			item = (item == m_items.begin()) ? --m_items.end() : --item;
-			m_active = *item;
+			m_active = item->get();
 			OpenMenu(m_active);
 		}
-		else if (m_active->IsOpened() && m_active->HasSubMenu()) // submenu, close is open
+		else if (m_active->IsOpened() && m_active->HasSubMenu()) // submenu, close if open
 		{
 			CloseMenuItem(m_active);
+		}
+		else
+		{
+			m_active = m_active->GetParentMenuItem();
+			if (m_active->GetParentMenuItem())
+			{
+				CloseMenuItem(m_active);
+			}
 		}
 	}
 	void Menu::MoveUp()
@@ -354,13 +376,13 @@ namespace GUI
 		if (parent == nullptr)
 			return;
 
-		auto item = FindMenuItem(m_active.get(), parent);
+		auto item = FindMenuItem(m_active, parent);
 		if (item == parent->m_items.end())
 			return;
 
 		item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
 
-		m_active = *item;
+		m_active = item->get();
 		OpenMenu(m_active);
 	}
 
@@ -372,12 +394,12 @@ namespace GUI
 		MenuItemRef parent = m_active->GetParentMenuItem();
 		if (parent == nullptr && !m_active->m_items.empty())
 		{ 
-			m_active = *(m_active->m_items.begin());
+			m_active = m_active->m_items.begin()->get();
 			OpenMenu(m_active);
 		}
 		else
 		{
-			auto item = FindMenuItem(m_active.get(), parent);
+			auto item = FindMenuItem(m_active, parent);
 			if (item == parent->m_items.end())
 				return;
 
@@ -386,7 +408,7 @@ namespace GUI
 			{
 				item = parent->m_items.begin();
 			}
-			m_active = *item;
+			m_active = item->get();
 			OpenMenu(m_active);
 		}
 	}
