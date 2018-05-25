@@ -86,10 +86,12 @@ namespace GUI
 				}
 
 				item->m_label->Draw(&drawRect);
+				
 				item->m_labelRect = drawRect;
 
 				if (item->IsOpened())
 				{
+					Draw3dFrame(&item->m_labelRect, false);
 					openedMenu = item;
 				}
 
@@ -110,7 +112,7 @@ namespace GUI
 		{
 			if (item)
 			{
-				Draw3dFrame(&item->m_labelRect, false);
+				//Draw3dFrame(&item->m_labelRect, false);
 				Point menuPos(item->m_labelRect.Origin());
 				menuPos.y += (m_lineHeight);
 

@@ -230,7 +230,7 @@ int main(int argc, char ** argv)
 		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
 		MenuPtr simMenu = GUI::Menu::Create(ren.get(), "simMenu");
-		simMenu->AddMenuItem("sim", "&Simulation");
+		simMenu->AddMenuItem("sim", "&Simulation with a long name");
 		simMenu->AddMenuItem("stop", "S&top");
 		simMenu->AddMenuItem("step", "Ste&p");
 		simMenu->AddMenuItem("view", "&View");
