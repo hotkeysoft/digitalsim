@@ -24,6 +24,7 @@ namespace GUI
 		static MenuItemPtr Create(RendererRef renderer, const char * id, const char * name, MenuItemRef parent);
 
 		MenuItemPtr AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey = SDLK_UNKNOWN);
+		void AddSeparator();
 		MenuItemRef GetParentMenuItem() { return dynamic_cast<MenuItemRef>(m_parent); }
 
 		bool Hit(PointRef pt);

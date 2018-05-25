@@ -280,6 +280,9 @@ namespace GUI
 
 	void Menu::OpenMenu(MenuItemRef item)
 	{
+		if (!item)
+			return;
+
 		// Close other menus on same level
 		MenuItemRef parent = item->GetParentMenuItem();
 		if (parent)
@@ -308,11 +311,17 @@ namespace GUI
 
 	void Menu::CloseMenuItem(MenuItemRef item)
 	{
+		if (!item)
+			return;
+
 		// Close menu item and all children
 		item->m_opened = false;
 		for (auto & it : item->m_items)
 		{
-			CloseMenuItem(it.get());
+			if (it)
+			{
+				CloseMenuItem(it.get());
+			}
 		}
 	}
 
@@ -321,10 +330,16 @@ namespace GUI
 		m_active = nullptr;
 		for (auto & item : m_items)
 		{
-			item->m_opened = false;
-			for (auto & it : item->m_items)
+			if (item)
 			{
-				CloseMenuItem(it.get());
+				item->m_opened = false;
+				for (auto & it : item->m_items)
+				{
+					if (it)
+					{
+						CloseMenuItem(it.get());
+					}
+				}
 			}
 		}
 	}
@@ -418,6 +433,10 @@ namespace GUI
 				return;
 
 			item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
+			if (*item == nullptr)
+			{
+				item = (item == parent->m_items.begin()) ? --parent->m_items.end() : --item;
+			}
 
 			m_active = item->get();
 			OpenMenu(m_active);
@@ -444,11 +463,20 @@ namespace GUI
 			if (item == parent->m_items.end())
 				return;
 
-			item++;
+			++item;
 			if (item == parent->m_items.end())
 			{
 				item = parent->m_items.begin();
 			}
+			if (*item == nullptr)
+			{
+				++item;
+				if (item == parent->m_items.end())
+				{
+					item = parent->m_items.begin();
+				}
+			}
+
 			m_active = item->get();
 			OpenMenu(m_active);
 		}

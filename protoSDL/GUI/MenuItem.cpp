@@ -52,7 +52,7 @@ namespace GUI
 				for (auto & item : m_items)
 				{
 					Point subMenuPos = *pos;
-					if (item->IsOpened() && item->HasSubMenu())
+					if (item && item->IsOpened() && item->HasSubMenu())
 					{
 						subMenuPos.y = item->m_rect.y + m_renderedMenuRect.y;
 						subMenuPos.x += m_renderedMenuRect.w;
@@ -77,7 +77,7 @@ namespace GUI
 
 			for (auto & item : m_items)
 			{
-				if (item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
+				if (item && item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
 				{
 					return true;
 				}
@@ -100,15 +100,18 @@ namespace GUI
 
 			for (auto & item : m_items)
 			{
-				Rect & itemRect = item->m_rect;
-				if (itemRect.PointInRect(&rel))
+				if (item)
 				{
-					return item;
-				}
+					Rect & itemRect = item->m_rect;
+					if (itemRect.PointInRect(&rel))
+					{
+						return item;
+					}
 
-				if (item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
-				{
-					return item->ItemAt(pt);
+					if (item->IsOpened() && item->HasSubMenu() && item->Hit(pt))
+					{
+						return item->ItemAt(pt);
+					}
 				}
 			}
 		}
@@ -118,7 +121,7 @@ namespace GUI
 
 	MenuItemPtr MenuItem::AddMenuItem(const char * id, const char * name, SDL_Keycode hotkey)
 	{
-		m_renderedMenu = nullptr; // Force render next time menu is drawns
+		m_renderedMenu = nullptr; // Force render next time menu is drawn
 
 		if (id == nullptr)
 		{
@@ -138,6 +141,23 @@ namespace GUI
 		return item;
 	}
 
+	void MenuItem::AddSeparator()
+	{
+		m_renderedMenu = nullptr; // Force render next time menu is drawn
+
+		if (m_items.empty())
+		{
+			throw std::invalid_argument("Can't start menu with separator");
+		}
+
+		if (*m_items.rbegin() == nullptr)
+		{
+			throw std::invalid_argument("Can't have two consecutive separators");
+		}
+
+		m_items.push_back(nullptr);
+	}
+
 	void MenuItem::Render()
 	{
 		m_renderedMenuRect = Rect();
@@ -145,9 +165,16 @@ namespace GUI
 		m_renderedMenuRect.w = m_label->GetRect(true, false).w;
 		for (auto & item : m_items)
 		{
-			Rect labelRect = item->m_label->GetRect(true, false);
-			m_renderedMenuRect.w = std::max(labelRect.w, m_renderedMenuRect.w);
-			m_renderedMenuRect.h += labelRect.h;
+			if (item)
+			{
+				Rect labelRect = item->m_label->GetRect(true, false);
+				m_renderedMenuRect.w = std::max(labelRect.w, m_renderedMenuRect.w);
+				m_renderedMenuRect.h += labelRect.h;
+			}
+			else
+			{
+				m_renderedMenuRect.h += 4;
+			}
 		}
 		m_renderedMenuRect.h = std::max(m_renderedMenuRect.h, 0);
 		m_renderedMenuRect.w += GetShrinkFactor().w * 2;
@@ -165,23 +192,32 @@ namespace GUI
 				Rect target = m_renderedMenuRect.Deflate(GetShrinkFactor());
 
 				for (auto & item : m_items)
-				{				
-					Rect labelRect = item->m_label->GetRect(true, false);
-					target.h = labelRect.h;
-
-					item->m_label->Draw(&target, true);
-					item->m_rect = target;
-
-					if (item->HasSubMenu())
+				{
+					if (item)
 					{
-						static ImageRef image = RES().FindImage("menu.subitem");
-						if (image)
-						{							
-							image->Draw(&target.Deflate(1), Image::IMG_H_RIGHT | Image::IMG_V_CENTER);
-						}
-					}
+						Rect labelRect = item->m_label->GetRect(true, false);
+						target.h = labelRect.h;
 
-					target.y += labelRect.h;
+						item->m_label->Draw(&target, true);
+						item->m_rect = target;
+
+						if (item->HasSubMenu())
+						{
+							static ImageRef image = RES().FindImage("menu.subitem");
+							if (image)
+							{
+								image->Draw(&target.Deflate(1), Image::IMG_H_RIGHT | Image::IMG_V_CENTER);
+							}
+						}
+
+						target.y += labelRect.h;
+					}
+					else
+					{
+						Rect separator(target.x, target.y+1, target.w, 2);
+						Draw3dFrame(&separator, false);
+						target.y += 4;
+					}
 				}
 
 				m_renderedMenu = TexturePtr(texture, sdl_deleter());

@@ -85,8 +85,12 @@ void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	MenuItemPtr sub2 = sub->AddMenuItem("sub2", "sub &2", SDLK_2);
 	sub2->AddMenuItem("sub2.1", "sub 2.&1", SDLK_1);
 	sub2->AddMenuItem("sub2.2", "sub 2.&2", SDLK_2);
+	sub2->AddSeparator();
 	sub2->AddMenuItem("sub2.3", "sub 2.&3", SDLK_3);
 	sub2->AddMenuItem("sub2.4", "sub 2.&4", SDLK_4);
+	sub2->AddSeparator();
+
+	fileMenu->AddSeparator();
 	fileMenu->AddMenuItem("exit", "&Exit", SDLK_e);
 
 	editMenu->AddMenuItem("cut", "Cu&t", SDLK_t);
