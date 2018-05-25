@@ -42,7 +42,7 @@ namespace GUI
 		{
 			SDL_Surface* surface = TTF_RenderText_Blended(m_tree->GetFont(), m_text.c_str(), m_tree->GetForegroundColor());
 
-			m_label = Label::CreateAutoSize("l", m_renderer, Rect(), m_text.c_str());
+			m_label = Label::CreateAutoSize("l", m_renderer, m_text.c_str());
 			m_label->SetParent(m_tree);
 			m_label->SetPadding(Dimension(5, 0));
 			m_label->SetBorder(false);

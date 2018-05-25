@@ -47,6 +47,9 @@ namespace GUI
 
 	void Widget::SetFocus(WidgetRef focus, WidgetRef parent)
 	{
+		if (m_flags & WIN_NOFOCUS)
+			return;
+
 		if (parent == nullptr)
 		{
 			m_focused = true;

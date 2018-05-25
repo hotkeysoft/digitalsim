@@ -53,9 +53,9 @@ namespace GUI
 		return std::static_pointer_cast<Label>(ptr);
 	}
 
-	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font, TextAlign align, CreationFlags flags)
+	LabelPtr Label::CreateAutoSize(const char* id, RendererRef renderer, const char* label, FontRef font, TextAlign align, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, font, align, WIN_AUTOSIZE | flags);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, font, align, WIN_AUTOSIZE | flags);
 		return std::static_pointer_cast<Label>(ptr);
 	}
 

@@ -10,8 +10,8 @@
 
 namespace GUI
 {
-	Button::Button(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font) :
-		Widget(id, renderer, nullptr, rect, label, image, font), m_pushed(false)
+	Button::Button(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font, CreationFlags flags) :
+		Widget(id, renderer, nullptr, rect, label, image, font, flags), m_pushed(false)
 	{
 		m_borderWidth = 2;
 	}
@@ -22,11 +22,22 @@ namespace GUI
 		{
 			CreateLabel();
 		}
+
+		if (m_image)
+		{
+			UpdateButtonSize();
+		}
 	}
 
-	ButtonPtr Button::Create(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font)
+	ButtonPtr Button::Create(const char * id, RendererRef renderer, Rect rect, const char * label, ImageRef image, FontRef font, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, image, font);
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, rect, label, image, font, flags);
+		return std::static_pointer_cast<Button>(ptr);
+	}
+
+	ButtonPtr Button::CreateAutoSize(const char * id, RendererRef renderer, const char* label, ImageRef image, FontRef font, CreationFlags flags)
+	{
+		auto ptr = std::make_shared<shared_enabler>(id, renderer, Rect(), label, image, font, WIN_AUTOSIZE | flags);
 		return std::static_pointer_cast<Button>(ptr);
 	}
 
@@ -72,7 +83,6 @@ namespace GUI
 		case SDL_KEYDOWN:
 			if (IsFocused())
 			{
-				bool ctrl = SDL_GetModState() & KMOD_CTRL;
 				switch (e->key.keysym.sym)
 				{
 				case SDLK_SPACE:
@@ -127,23 +137,81 @@ namespace GUI
 		}
 	}
 
+	void Button::Draw(RectRef rect)
+	{
+		DrawButton(rect, m_backgroundColor, nullptr, !m_pushed, m_borderWidth);
+		Rect drawRect = rect->Deflate(m_borderWidth);
+
+		if (m_image)
+		{
+			int imageWidth = m_image->GetRect(true, false).w ;
+			m_image->Draw(&drawRect, Image::IMG_H_LEFT | Image::IMG_V_CENTER);
+			drawRect.x += imageWidth;
+			drawRect.w -= imageWidth;
+		}
+
+		if (m_label)
+		{	
+			Rect target = m_label->GetRect(true, false).CenterInTarget(&drawRect, false, true);
+
+			m_label->SetBorder(IsFocused());
+			m_label->Draw(&target);
+		}
+	}
+
 	void Button::SetText(const char * label)
 	{
 		Widget::SetText(label);
-		CreateLabel();
+		CreateLabel();		
 	}
 
 	void Button::CreateLabel()
 	{
-		m_label = Label::CreateFill("label", m_renderer, m_text.c_str(), m_font);
-		m_label->SetMargin(1);
+		if (m_flags & WIN_AUTOSIZE)
+		{
+			m_label = Label::CreateAutoSize("label", m_renderer, m_text.c_str(), m_font);
+		}
+		else
+		{
+			m_label = Label::CreateFill("label", m_renderer, m_text.c_str(), m_font);
+		}
+
+		m_label->SetMargin(Dimension(5,2));
 		m_label->SetPadding(0);
+		m_label->SetBorderColor(Color::C_MED_GREY);
 		m_label->SetBorderWidth(1);
 		m_label->SetBorder(true);
 		m_label->SetParent(this);
 		m_label->Init();
+		UpdateButtonSize();
 	}
 
+	void Button::UpdateButtonSize()
+	{
+		if (!(m_flags & WIN_AUTOSIZE))
+			return;
+
+		bool hasImage = (m_image != nullptr);
+		bool hasText = (!m_text.empty());
+
+		int width = 0;
+		int height = 0;
+		if (hasImage)
+		{
+			Rect image = m_image->GetRect(false, false);
+			width = image.w;
+			height = image.h;
+		}
+
+		if (hasText)
+		{
+			Rect labelRect = m_label->GetRect(true, false);
+			width += labelRect.w;
+			height = std::max(height, labelRect.h);
+		}
+
+		m_rect = Rect(0, 0, width + (2*m_borderWidth), height + (2*m_borderWidth));
+	}
 	struct Button::shared_enabler : public Button
 	{
 		template <typename... Args>

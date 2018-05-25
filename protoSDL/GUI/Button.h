@@ -27,19 +27,25 @@ namespace GUI
 
 		void Init() override;
 
-		static ButtonPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image = nullptr, FontRef font = nullptr);
+		// Regular button at position & size rect
+		static ButtonPtr Create(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image = nullptr, FontRef font = nullptr, CreationFlags flags = 0);
+
+		// Auto-size
+		static ButtonPtr CreateAutoSize(const char* id, RendererRef renderer, const char* label, ImageRef image = nullptr, FontRef font = nullptr, CreationFlags flags = 0);
 
 		Rect GetClientRect(bool relative = true, bool scrolled = true) const override;
 
 		bool HandleEvent(SDL_Event *) override;
 		HitResult HitTest(const PointRef) override;
 		void Draw() override;
+		void Draw(RectRef);
 
 		void SetText(const char *) override;
 
 	protected:
-		Button(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image, FontRef font);
+		Button(const char* id, RendererRef renderer, Rect rect, const char* label, ImageRef image, FontRef font, CreationFlags flags);
 
+		void UpdateButtonSize();
 		void CreateLabel();
 		LabelPtr m_label;
 		bool m_pushed;

@@ -46,8 +46,8 @@ namespace GUI
 		// Fills whole parent window
 		static LabelPtr CreateFill(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_FILL_DEFAULT, CreationFlags flags = 0);
 
-		// Auto-size
-		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, Rect rect, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT, CreationFlags flags = 0);
+		// Auto-size, draw at desired position with Draw(Rect)
+		static LabelPtr CreateAutoSize(const char* id, RendererRef renderer, const char* label, FontRef font = nullptr, TextAlign align = TEXT_AUTOSIZE_DEFAULT, CreationFlags flags = 0);
 
 		void SetForegroundColor(Color color) override;
 

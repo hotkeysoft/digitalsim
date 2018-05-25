@@ -52,7 +52,9 @@ namespace GUI
 		HIT_MENU				= 0x200000,
 		HIT_MENU_ITEM			= 0x400000,
 
-		HIT_CONTROL				= 0x800000,
+		HIT_TOOLBAR				= 0x800000,
+
+		HIT_CONTROL				= 0x2000000,
 	};
 
 	// Creation flags.  These attribute don't change during the lifetime of the window
@@ -66,6 +68,8 @@ namespace GUI
 		WIN_NOSCROLL = 64, // No scroll bars
 		WIN_FILL = 128, // Fill parent
 		WIN_AUTOSIZE = 256, // Window grows & shrinks to accomodate contents
+
+		WIN_NOFOCUS = 512, // Control doesn't get focus
 
 		WIN_DEFAULT = WIN_SYSMENU | WIN_MINMAX | WIN_CANMOVE | WIN_CANRESIZE,
 
@@ -88,6 +92,14 @@ namespace GUI
 
 	class TreeNode;
 	using TreeNodeRef = TreeNode * ;
+
+	class Toolbar;
+	using ToolbarPtr = std::shared_ptr<Toolbar>;
+	using ToolbarRef = Toolbar * ;
+
+	class ToolbarItem;
+	using ToolbarItemPtr = std::shared_ptr<ToolbarItem>;
+	using ToolbarItemRef = ToolbarItem * ;
 
 	class Menu;
 	using MenuPtr = std::shared_ptr<Menu>;

@@ -16,19 +16,16 @@
     <Filter Include="GUI">
       <UniqueIdentifier>{1d014452-ca8f-4347-a91a-f1ffaaf9bc09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GUI\Widgets">
+      <UniqueIdentifier>{eae7d64b-eea2-4287-ade9-1a498949941a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Util">
+      <UniqueIdentifier>{6d753173-8ab5-45eb-9edb-3ff3fbc4a34d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Window.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Color.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Image.cpp">
-      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\WindowManager.cpp">
       <Filter>GUI</Filter>
@@ -36,49 +33,55 @@
     <ClCompile Include="GUI\ResourceManager.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="GUI\Rect.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Point.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\ScrollBars.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Widget.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
     <ClCompile Include="GUI\Button.cpp">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Image.cpp">
+      <Filter>GUI\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Label.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\TextBox.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\Tree.cpp">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Menu.cpp">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="GUI\MenuItem.cpp">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\ScrollBars.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\TextBox.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Tree.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Window.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Widget.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Color.cpp">
+      <Filter>GUI\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Point.cpp">
+      <Filter>GUI\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Rect.cpp">
+      <Filter>GUI\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Toolbar.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\ToolbarItem.cpp">
+      <Filter>GUI\Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GUI\Window.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\Color.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\Image.h">
-      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\WindowManager.h">
       <Filter>GUI</Filter>
@@ -86,41 +89,56 @@
     <ClInclude Include="GUI\ResourceManager.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\Rect.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\Point.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\Widget.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\ScrollBars.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="GUI\Button.h">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Image.h">
+      <Filter>GUI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Label.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\TextBox.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\Tree.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\ClipRect.h">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Menu.h">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="GUI\MenuItem.h">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ScrollBars.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\TextBox.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Tree.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Window.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Widget.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ClipRect.h">
+      <Filter>GUI\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Color.h">
+      <Filter>GUI\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Point.h">
+      <Filter>GUI\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Rect.h">
+      <Filter>GUI\Util</Filter>
     </ClInclude>
     <ClInclude Include="GUI\RenderTarget.h">
-      <Filter>GUI</Filter>
+      <Filter>GUI\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Toolbar.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ToolbarItem.h">
+      <Filter>GUI\Widgets</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

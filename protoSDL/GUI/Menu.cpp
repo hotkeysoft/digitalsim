@@ -216,7 +216,6 @@ namespace GUI
 
 			if (capture)
 			{
-				MenuItemPtr item = ItemAt(&pt);
 				if (item && item->GetParentMenuItem() && item->IsOpened() && item->HasSubMenu())
 				{
 					return true;
@@ -429,8 +428,8 @@ namespace GUI
 				m_active = m_active->m_items.begin()->get();
 			}
 		}
-
 	}
+
 	void Menu::MoveLeft()
 	{
 		if (!m_active)
@@ -460,6 +459,7 @@ namespace GUI
 			}
 		}
 	}
+
 	void Menu::MoveUp()
 	{
 		if (!m_active)

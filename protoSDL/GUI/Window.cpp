@@ -5,6 +5,7 @@
 #include "Rect.h"
 #include "Image.h"
 #include "Menu.h"
+#include "Toolbar.h"
 #include "ResourceManager.h"
 #include <algorithm>
 
@@ -208,6 +209,13 @@ namespace GUI
 			rect.h -= height;
 		}
 
+		if (m_toolbar)
+		{
+			int height = m_toolbar->GetHeight(rect.w);
+			rect.y += height;
+			rect.h -= height;
+		}
+
 		ScrollStateRef scroll = m_scrollBars->GetScrollState();
 		auto size = m_scrollBars->GetSize();
 
@@ -368,6 +376,15 @@ namespace GUI
 			}
 		}
 
+		if (m_toolbar)
+		{
+			HitResult toolbarHit = m_toolbar->HitTest(pt);
+			if (toolbarHit)
+			{
+				return toolbarHit;
+			}
+		}
+
 		HitResult scrollHit = m_scrollBars->HitTest(pt);
 		if (scrollHit)
 		{
@@ -462,6 +479,15 @@ namespace GUI
 					clientRect.h -= menuHeight;
 				}
 
+				if (m_toolbar)
+				{
+					DrawToolbar();
+
+					int toolbarHeight = m_toolbar->GetHeight(clientRect.w);
+					clientRect.y += toolbarHeight;
+					clientRect.h -= toolbarHeight;
+				}
+
 				if (!m_backgroundColor.IsTransparent())
 				{
 					DrawFilledRect(&clientRect, m_backgroundColor);
@@ -476,11 +502,24 @@ namespace GUI
 	
 	void Window::DrawMenu()
 	{
+		if (m_menu)
+		{
+			Rect clientRect = GetRawClientRect(false, false);
+			m_menu->Draw(&clientRect);
+		}
+	}
+
+	void Window::DrawToolbar()
+	{
 		Rect clientRect = GetRawClientRect(false, false);
 		if (m_menu)
 		{
-			m_menu->Draw(&clientRect);
+			int menuHeight = m_menu->GetHeight(clientRect.w);
+			clientRect.y += menuHeight;
+			clientRect.h -= menuHeight;
 		}
+
+		m_toolbar->Draw(&clientRect);
 	}
 
 	void Window::DrawControls()
@@ -957,6 +996,11 @@ namespace GUI
 			return true;
 		}
 
+		if (m_toolbar && m_toolbar->HandleEvent(e))
+		{
+			return true;
+		}
+
 		// Pass to controls
 		{
 			for (auto & child : m_controls)
@@ -991,6 +1035,13 @@ namespace GUI
 		m_menu = menu; 
 		m_menu->SetParent(this); 
 		m_menu->Init();
+	}
+
+	void Window::SetToolbar(ToolbarPtr toolbar)
+	{
+		m_toolbar = toolbar;
+		m_toolbar->SetParent(this);
+		m_toolbar->Init();
 	}
 
 	struct Window::shared_enabler : public Window

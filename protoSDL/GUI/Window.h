@@ -52,8 +52,7 @@ namespace GUI
 
 		HitResult HitTest(const PointRef) override;
 		void Draw() override;
-		void DrawMenu();
-
+		
 		WindowState GetShowState() const { return m_showState; }
 
 		void ToggleButtonState(HitZone button, bool pushed);
@@ -78,6 +77,9 @@ namespace GUI
 		void SetMenu(MenuPtr menu);
 		MenuPtr GetMenu() { return m_menu; }
 
+		void SetToolbar(ToolbarPtr toolbar);
+		ToolbarPtr GetToolbar() { return m_toolbar; }
+
 	protected:
 		Window(const char* id, RendererRef renderer, WindowRef parent, FontRef font, Rect rect, CreationFlags flags);
 		Window();
@@ -95,6 +97,8 @@ namespace GUI
 		void DrawTitleBar(Rect rect, bool active);
 		void DrawTitle(Rect rect, bool active);
 		void DrawControls();
+		void DrawMenu();
+		void DrawToolbar();
 		void RenderTitle();
 
 		Rect GetClipRect(WindowRef win);
@@ -116,6 +120,7 @@ namespace GUI
 		ControlList m_controls;
 
 		MenuPtr m_menu;
+		ToolbarPtr m_toolbar;
 
 		struct shared_enabler;
 

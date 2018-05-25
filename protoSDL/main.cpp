@@ -11,6 +11,8 @@
 #include "GUI\Tree.h"
 #include "GUI\Menu.h"
 #include "GUI\MenuItem.h"
+#include "GUI\Toolbar.h"
+//#include "GUI\ToolbarItem.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -65,6 +67,18 @@ void OnClick(WidgetRef widget)
 	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("sim")->FindControl("text"))->InsertAt("#", pos, col);
 }
 
+void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
+{
+	ToolbarPtr toolbar = GUI::Toolbar::Create(ren.get(), "editToolbar", 32);
+
+	toolbar->AddToolbarItem("image", RES().FindImage("iconChip"));
+	toolbar->AddToolbarItem("item", nullptr, "button with a long name");
+	toolbar->AddToolbarItem("item2", RES().FindImage("iconChip"), "button 2");
+	toolbar->AddToolbarItem("item3", nullptr, "button 3");
+	//"iconChip"
+
+	editWnd->SetToolbar(toolbar);
+}
 
 void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 {
@@ -211,6 +225,7 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
 
 		CreateMainMenu(ren, editWnd);
+		CreateMainToolbar(ren, editWnd);
 
 		WindowPtr edit1Wnd = WINMGR().FindWindow("edit.1");
 		WINMGR().AddWindow("edit.1.1", edit1Wnd, { 0, 0, 200, 100 }, WindowFlags::WIN_CANRESIZE | WindowFlags::WIN_CANMOVE)->SetText("edit.1.1  With a long name");
@@ -230,7 +245,7 @@ int main(int argc, char ** argv)
 		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
 		MenuPtr simMenu = GUI::Menu::Create(ren.get(), "simMenu");
-		simMenu->AddMenuItem("sim", "&Simulation with a long name");
+		simMenu->AddMenuItem("sim", "&Simulation");
 		simMenu->AddMenuItem("stop", "S&top");
 		simMenu->AddMenuItem("step", "Ste&p");
 		simMenu->AddMenuItem("view", "&View");
@@ -269,9 +284,9 @@ int main(int argc, char ** argv)
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 //		WINMGR().AddWindow("e22", e2, Rect(10, 10, 100, 100));
 
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 55, 24), "Button"));
-		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 110, 24), "Another Button"));
-		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(225, 30, 90, 70), "A Big Button"));
+		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 60, 24), "Button"));
+		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 115, 24), "Another Button"));
+		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(225, 30, 100, 70), "A Big Button"));
 		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 		
 		{
