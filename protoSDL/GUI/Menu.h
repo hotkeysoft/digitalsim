@@ -42,7 +42,7 @@ namespace GUI
 		void OpenMenu(MenuItemRef item);
 		void CloseMenu();
 
-		int GetHeight() { return m_lineHeight + (2 * GetShrinkFactor().h); }
+		int GetHeight(int clientWidth) const;
 
 		void MoveLeft();
 		void MoveRight();
@@ -55,6 +55,7 @@ namespace GUI
 		MenuItemPtr ItemAt(PointRef pt);
 
 		void DrawActiveFrame(MenuItemRef parent);
+		void DrawOpenedMenu(MenuItemPtr & item);
 		void CloseMenuItem(MenuItemRef item);
 
 		MenuItems::const_iterator FindMenuItem(MenuItemRef item, MenuItemRef parent = nullptr) const;

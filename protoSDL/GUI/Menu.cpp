@@ -35,44 +35,91 @@ namespace GUI
 		}
 	}
 
+	int Menu::GetHeight(int clientWidth) const
+	{ 
+		clientWidth -= (2 * GetShrinkFactor().w);
+		int currX = 0;
+		int lineCount = 1;
+		for (auto & item : m_items)
+		{
+			int itemWidth = item->m_label->GetRect(true, false).w;
+			currX += itemWidth;
+			if (currX > clientWidth)
+			{
+				++lineCount;
+				currX = itemWidth;
+			}
+		}
+
+		return (m_lineHeight * lineCount) + (2 * GetShrinkFactor().h); 
+	}
+
 	void Menu::Draw(const RectRef rect)
 	{
 		Rect drawRect = *rect;
-		drawRect.h = GetHeight();
-
+		drawRect.h = GetHeight(rect->w);
 		Draw3dFrame(&drawRect, true);
 
 		drawRect = drawRect.Deflate(GetShrinkFactor());
 		m_rect = drawRect;
+	
+		MenuItemPtr openedMenu = nullptr;
 
-		//TODO: Get main window size
-		ClipRect clip(m_renderer, &Rect(0,0,2000,2000), false);
+		ClipRect clip(m_renderer, &drawRect);
 		if (clip)
 		{
+			int currX = 0;
+			int originalX = drawRect.x;
+			drawRect.h = m_lineHeight;
+
 			for (auto & item : m_items)
 			{
-				Rect labelRect = item->GetLabel()->GetRect(true, false);				
+				Rect labelRect = item->GetLabel()->GetRect(true, false);
 				drawRect.w = labelRect.w;
 
-				if (item->IsOpened())
+				currX += labelRect.w;
+				if (currX > m_rect.w)
 				{
-					Draw3dFrame(&drawRect, false);
-					Point menuPos(drawRect.Origin());
-					menuPos.y += (labelRect.h);
-
-					// Menu is on top of everything so no need for bounding rect
-					item->Draw(&menuPos);
-				}
-
-				if (m_active)
-				{
-					DrawActiveFrame(m_active);
+					currX = labelRect.w;
+					drawRect.x = originalX;
+					drawRect.y += m_lineHeight;
 				}
 
 				item->m_label->Draw(&drawRect);
 				item->m_labelRect = drawRect;
 
+				if (item->IsOpened())
+				{
+					openedMenu = item;
+				}
+
 				drawRect.x += labelRect.w;
+			}
+		}
+
+		DrawOpenedMenu(openedMenu);
+
+	}
+
+	void Menu::DrawOpenedMenu(GUI::MenuItemPtr & item)
+	{
+		// Menu is on top of everything so no need for bounding rect
+		//TODO: Get main window size
+		ClipRect noclip(m_renderer, &Rect(0, 0, 2000, 2000), false);
+		if (noclip)
+		{
+			if (item)
+			{
+				Draw3dFrame(&item->m_labelRect, false);
+				Point menuPos(item->m_labelRect.Origin());
+				menuPos.y += (m_lineHeight);
+
+				item->Draw(&menuPos);
+			}
+
+			if (m_active)
+			{
+				DrawActiveFrame(m_active);
 			}
 		}
 	}
@@ -168,7 +215,7 @@ namespace GUI
 			if (capture)
 			{
 				MenuItemPtr item = ItemAt(&pt);
-				if (item && item->IsOpened() && item->HasSubMenu())
+				if (item && item->GetParentMenuItem() && item->IsOpened() && item->HasSubMenu())
 				{
 					return true;
 				}
@@ -481,7 +528,7 @@ namespace GUI
 			OpenMenu(m_active);
 		}
 	}
-	
+
 	struct Menu::shared_enabler : public Menu
 	{
 		template <typename... Args>

@@ -198,14 +198,15 @@ namespace GUI
 			rect.y += m_borderWidth + (m_buttonSize + 2) + 1;
 		}
 
-		if (m_menu)
-		{
-			rect.y += m_menu->GetHeight();
-			rect.h -= m_menu->GetHeight();
-		}
-
 		rect.w -= (2 * (m_borderWidth + 1));
 		rect.h -= (2 * (m_borderWidth + 1)) + (m_buttonSize + 2);
+
+		if (m_menu)
+		{
+			int height = m_menu->GetHeight(rect.w);
+			rect.y += height;
+			rect.h -= height;
+		}
 
 		ScrollStateRef scroll = m_scrollBars->GetScrollState();
 		auto size = m_scrollBars->GetSize();
@@ -456,7 +457,7 @@ namespace GUI
 					{
 						DrawMenu();
 					}
-					int menuHeight = m_menu->GetHeight();
+					int menuHeight = m_menu->GetHeight(clientRect.w);
 					clientRect.y += menuHeight;
 					clientRect.h -= menuHeight;
 				}
