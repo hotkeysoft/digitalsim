@@ -29,7 +29,8 @@ namespace GUI
 
 		// Images
 		ImageRef LoadImage(const char * id, const char * fileName);
-		ImageRef FindImage(const char * id);
+		ImageMapRef LoadImageMap(const char * id, const char * fileName, int tileWidth, int tileHeight);
+		ImageRef FindImage(const char * id, int index = -1);
 
 		// Cursors
 		CursorRef LoadCursor(const char * id, SDL_SystemCursor);

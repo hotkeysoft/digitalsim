@@ -15,6 +15,8 @@ namespace GUI
 
 		bool IsTransparent() { return a == 0; }
 
+		Color Darken() const { return Color(r / 2, g / 2, b / 2, a); }
+
 		static const Color C_TRANSPARENT;
 
 		static const Color C_WHITE;

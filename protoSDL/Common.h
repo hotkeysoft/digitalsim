@@ -134,6 +134,10 @@ namespace GUI
 	class Point;
 	using PointRef = Point * ;
 
+	class ImageMap;
+	using ImageMapPtr = std::shared_ptr<ImageMap>;
+	using ImageMapRef = ImageMap * ;
+
 	class Image;
 	using ImagePtr = std::shared_ptr<Image>;
 	using ImageRef = Image * ;

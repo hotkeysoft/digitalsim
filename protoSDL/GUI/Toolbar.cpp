@@ -43,7 +43,8 @@ namespace GUI
 	{
 		Rect drawRect = *rect;
 		drawRect.h = GetHeight(rect->w);
-		Draw3dFrame(&drawRect, true);
+		DrawFilledRect(rect, m_backgroundColor);
+		Draw3dFrame(&drawRect, true, m_backgroundColor);
 
 		drawRect = drawRect.Deflate(GetShrinkFactor());
 		m_rect = drawRect;

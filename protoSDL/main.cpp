@@ -69,13 +69,15 @@ void OnClick(WidgetRef widget)
 
 void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 {
-	ToolbarPtr toolbar = GUI::Toolbar::Create(ren.get(), "editToolbar", 32);
+	ToolbarPtr toolbar = GUI::Toolbar::Create(ren.get(), "editToolbar", 26);
+	toolbar->SetBackgroundColor(Color::C_MED_GREY);
 
-	toolbar->AddToolbarItem("image", RES().FindImage("iconChip"));
+	toolbar->AddToolbarItem("image1", RES().FindImage("simToolbar", 0));
+	toolbar->AddToolbarItem("image2", RES().FindImage("simToolbar", 1));
+	toolbar->AddToolbarItem("image3", RES().FindImage("simToolbar", 2));
 	toolbar->AddToolbarItem("item", nullptr, "button with a long name");
-	toolbar->AddToolbarItem("item2", RES().FindImage("iconChip"), "button 2");
+	//toolbar->AddToolbarItem("item2", RES().FindImage("iconChip"), "button 2");
 	toolbar->AddToolbarItem("item3", nullptr, "button 3");
-	//"iconChip"
 
 	editWnd->SetToolbar(toolbar);
 }
@@ -190,8 +192,8 @@ int main(int argc, char ** argv)
 		RES().LoadImage("win.scroll.up", "./Resources/iconUpArrow.png");
 		RES().LoadImage("win.scroll.down", "./Resources/iconDownArrow.png");
 		RES().LoadImage("menu.subitem", "./Resources/iconMenuRightArrow.png");
-
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
+		RES().LoadImageMap("simToolbar", "./Resources/simToolbar.png", 16, 16);
 
 		std::string sampleText;
 

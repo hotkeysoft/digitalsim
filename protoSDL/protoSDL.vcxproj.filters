@@ -78,6 +78,9 @@
     <ClCompile Include="GUI\ToolbarItem.cpp">
       <Filter>GUI\Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\ImageMap.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -138,6 +141,9 @@
       <Filter>GUI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="GUI\ToolbarItem.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ImageMap.h">
       <Filter>GUI\Widgets</Filter>
     </ClInclude>
   </ItemGroup>

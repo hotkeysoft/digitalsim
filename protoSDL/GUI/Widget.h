@@ -125,7 +125,7 @@ namespace GUI
 		void DrawFilledRect(const RectRef pos, const GUI::Color & col);
 		void DrawRect(const RectRef pos, const GUI::Color & col);
 		void DrawButton(const RectRef pos, const GUI::Color & col, ImageRef image, bool raised, int thickness = 1);
-		void Draw3dFrame(const RectRef pos, bool raised);
+		void Draw3dFrame(const RectRef pos, bool raised, const GUI::Color & col = Color::C_LIGHT_GREY);
 		void DrawReliefBox(const RectRef pos, const GUI::Color & col, bool raised);
 
 		TexturePtr SurfaceToTexture(SDL_Surface* surf, bool writable = false);

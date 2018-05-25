@@ -26,6 +26,13 @@ namespace GUI
 		return (image->LoadFromTexture(texture)) ? image : nullptr;
 	}
 
+	ImagePtr Image::FromMap(RendererRef renderer, TexturePtr texture, RectRef subset)
+	{
+		auto ptr = std::make_shared<shared_enabler>(renderer);
+		ImagePtr image = std::static_pointer_cast<Image>(ptr);
+		return (image->LoadFromMap(texture, subset)) ? image : nullptr;
+	}
+
 	bool Image::LoadFromFile(const char* fileName)
 	{
 		m_texture = TexturePtr(IMG_LoadTexture(m_renderer, fileName), sdl_deleter());
@@ -43,15 +50,29 @@ namespace GUI
 	bool Image::LoadFromTexture(TexturePtr texture)
 	{
 		m_texture = texture;
-		if (m_texture)
+		if (m_texture == nullptr)
 		{
-			SDL_QueryTexture(m_texture.get(), NULL, NULL, &m_rect.w, &m_rect.h);
-			m_rect.x = 0;
-			m_rect.y = 0;
-			return true;
+			m_rect = Rect();
+			return false;
 		}
-		m_rect = Rect();
-		return false;
+
+		SDL_QueryTexture(m_texture.get(), NULL, NULL, &m_rect.w, &m_rect.h);
+		m_rect.x = 0;
+		m_rect.y = 0;
+		return true;
+	}
+
+	bool Image::LoadFromMap(TexturePtr texture, RectRef subset)
+	{
+		m_texture = texture;
+		if (m_texture == nullptr)
+		{
+			m_rect = Rect();
+			return false;
+		}
+
+		m_rect = *subset;
+		return true;
 	}
 
 	void Image::Draw(const PointRef pos)
@@ -59,7 +80,7 @@ namespace GUI
 		Rect rect = m_rect.Offset(pos);
 		if (m_texture && m_renderer)
 		{
-			SDL_RenderCopy(m_renderer, m_texture.get(), NULL, &rect);
+			SDL_RenderCopy(m_renderer, m_texture.get(), &m_rect, &rect);
 		}
 	}
 	
@@ -71,10 +92,7 @@ namespace GUI
 			bool vCenter = (align & IMG_V_CENTER) == IMG_V_CENTER;
 
 			Rect target = m_rect.CenterInTarget(rect, hCenter, vCenter);
-			Rect source = { 0, 0, target.w, target.h };
-
-//			SetDrawColor(Color(255, 0, 0));
-//			SDL_RenderDrawRect(m_renderer, rect);
+			Rect source = { m_rect.x, m_rect.y, target.w, target.h };
 
 			int deltaX = target.x - rect->x;
 			if (deltaX < 0) // Clip x

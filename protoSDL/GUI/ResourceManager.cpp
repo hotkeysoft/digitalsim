@@ -3,6 +3,7 @@
 #include "SDL_ttf.h"
 #include "ResourceManager.h"
 #include "Image.h"
+#include "ImageMap.h"
 
 namespace GUI
 {
@@ -78,7 +79,29 @@ namespace GUI
 		return image.get();
 	}
 
-	ImageRef ResourceManager::FindImage(const char * id)
+	ImageMapRef ResourceManager::LoadImageMap(const char * id, const char * fileName, int tileWidth, int tileHeight)
+	{
+		if (id == nullptr || fileName == nullptr)
+		{
+			throw std::invalid_argument("id or filename is null");
+		}
+		if (m_images.find(id) != m_images.end())
+		{
+			throw std::invalid_argument("image id already loaded: " + std::string(id));
+		}
+
+		ImageMapPtr image = ImageMap::FromFile(m_renderer, fileName, tileWidth, tileHeight);
+		if (image == nullptr)
+		{
+			std::cerr << "Image not loaded" << fileName << std::endl;
+			return nullptr;
+		}
+
+		m_images[id] = image;
+		return image.get();
+	}
+
+	ImageRef ResourceManager::FindImage(const char * id, int index)
 	{
 		if (id == nullptr)
 		{
@@ -91,7 +114,18 @@ namespace GUI
 			return nullptr;
 		}
 
-		return it->second.get();
+		if (index == -1)
+		{
+			return it->second.get();
+		}
+
+		ImageMapPtr imageMap = std::dynamic_pointer_cast<ImageMap>(it->second);
+		if (imageMap == nullptr)
+		{
+			throw std::invalid_argument("not an image map");
+		}
+
+		return imageMap->GetTile(index);
 	}
 
 	CursorRef ResourceManager::LoadCursor(const char * id, SDL_SystemCursor cursorType)

@@ -17,6 +17,7 @@ namespace GUI
 	void ToolbarItem::Init()
 	{
 		Button::Init();
+		m_borderWidth = 1;
 	}
 
 	ToolbarItemPtr ToolbarItem::Create(const char * id, RendererRef renderer, const char * label, ImageRef image, FontRef font)

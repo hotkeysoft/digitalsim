@@ -34,6 +34,7 @@ namespace GUI
 
 		static ImagePtr FromFile(RendererRef renderer, const char* fileName);
 		static ImagePtr FromTexture(RendererRef renderer, TexturePtr texture);
+		static ImagePtr FromMap(RendererRef renderer, TexturePtr texture, RectRef subset);
 
 		explicit operator bool() const { return IsSet(); }
 
@@ -47,6 +48,7 @@ namespace GUI
 
 		bool LoadFromFile(const char* fileName);
 		bool LoadFromTexture(TexturePtr);
+		bool LoadFromMap(TexturePtr, RectRef);
 
 		TexturePtr m_texture;
 

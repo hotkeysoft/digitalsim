@@ -88,16 +88,16 @@ namespace GUI
 		SDL_SetRenderDrawColor(m_renderer, col.r, col.g, col.b, col.a);
 	}
 
-	void Widget::Draw3dFrame(const RectRef pos, bool raised)
+	void Widget::Draw3dFrame(const RectRef pos, bool raised, const GUI::Color & col)
 	{
 		// Relief effect
 		Point points[5] = { { pos->x, pos->y + pos->h - 1 },{ pos->x + pos->w - 1, pos->y + pos->h - 1 },
 		{ pos->x + pos->w - 1, pos->y },{ pos->x, pos->y },{ pos->x, pos->y + pos->h - 2 } };
 
-		SetDrawColor(raised ? Color::C_DARK_GREY : Color::C_WHITE);
+		SetDrawColor(raised ? col.Darken() : Color::C_WHITE);
 		SDL_RenderDrawLines(m_renderer, points + 0, 3);
 
-		SetDrawColor(raised ? Color::C_WHITE : Color::C_DARK_GREY);
+		SetDrawColor(raised ? Color::C_WHITE : col.Darken());
 		SDL_RenderDrawLines(m_renderer, points + 2, 3);
 	}
 
