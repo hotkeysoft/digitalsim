@@ -2,16 +2,16 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include "Common.h"
-#include "GUI\Window.h"
-#include "GUI\WindowManager.h"
-#include "GUI\ResourceManager.h"
-#include "GUI\Button.h"
-#include "GUI\Label.h"
-#include "GUI\TextBox.h"
-#include "GUI\Tree.h"
-#include "GUI\Menu.h"
-#include "GUI\MenuItem.h"
-#include "GUI\Toolbar.h"
+#include "Core\Window.h"
+#include "Core\WindowManager.h"
+#include "Core\ResourceManager.h"
+#include "Widgets\Button.h"
+#include "Widgets\Label.h"
+#include "Widgets\TextBox.h"
+#include "Widgets\Tree.h"
+#include "Widgets\Menu.h"
+#include "Widgets\MenuItem.h"
+#include "Widgets\Toolbar.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -19,7 +19,7 @@
 #include <sstream>
 #include <fstream>
 
-using namespace GUI;
+using namespace CoreUI;
 
 void ToggleFullscreen(MainWindowPtr & window) {
 	Uint32 FullscreenFlag = SDL_WINDOW_FULLSCREEN;
@@ -66,9 +66,9 @@ void OnClick(WidgetRef widget)
 	std::static_pointer_cast<TextBox>(WINMGR().FindWindow("sim")->FindControl("text"))->InsertAt("#", pos, col);
 }
 
-void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
+void CreateMainToolbar(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 {
-	ToolbarPtr toolbar = GUI::Toolbar::CreateAutoSize(ren.get(), "editToolbar");
+	ToolbarPtr toolbar = CoreUI::Toolbar::CreateAutoSize(ren.get(), "editToolbar");
 	toolbar->SetBackgroundColor(Color::C_MED_GREY);
 
 	toolbar->AddToolbarItem("image1", RES().FindImage("simToolbar", 0));
@@ -81,9 +81,9 @@ void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	editWnd->SetToolbar(toolbar);
 }
 
-void CreateMainMenu(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
+void CreateMainMenu(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 {
-	MenuPtr menu = GUI::Menu::Create(ren.get(), "editMenu");
+	MenuPtr menu = CoreUI::Menu::Create(ren.get(), "editMenu");
 	MenuItemPtr fileMenu = menu->AddMenuItem("file", "&File", SDLK_f);
 	MenuItemPtr editMenu = menu->AddMenuItem("edit", "&Edit", SDLK_e);
 	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View", SDLK_v);
@@ -242,9 +242,9 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
 		WindowPtr simWnd = WINMGR().FindWindow("sim");
 		simWnd->SetImage(RES().FindImage("iconSim"));
-		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
+		simWnd->AddControl(CoreUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
-		MenuPtr simMenu = GUI::Menu::Create(ren.get(), "simMenu");
+		MenuPtr simMenu = CoreUI::Menu::Create(ren.get(), "simMenu");
 		simMenu->AddMenuItem("sim", "&Simulation", SDLK_s);
 		simMenu->AddMenuItem("stop", "S&top", SDLK_t);
 		simMenu->AddMenuItem("step", "Ste&p", SDLK_p);
@@ -257,7 +257,7 @@ int main(int argc, char ** argv)
 			ImageRef opened = RES().FindImage("win.scroll.down");
 			ImageRef closed = RES().FindImage("win.scroll.right");
 
-			TreePtr tree = GUI::Tree::CreateFill("tree", ren.get(), 20, nullptr, TCF_FULLROWSELECT);
+			TreePtr tree = CoreUI::Tree::CreateFill("tree", ren.get(), 20, nullptr, TCF_FULLROWSELECT);
 			TreeNodeRef root = tree->AddNode("Root");
 			
 			TreeNodeRef l1 = tree->AddNode("1", opened, closed, root);
@@ -284,22 +284,22 @@ int main(int argc, char ** argv)
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
 //		WINMGR().AddWindow("e22", e2, Rect(10, 10, 100, 100));
 
-		e2->AddControl(GUI::Button::Create("b1", ren.get(), Rect(100, 30, 60, 24), "Button"));
-		e2->AddControl(GUI::Button::Create("b2", ren.get(), Rect(50, 60, 115, 24), "Another Button"));
-		e2->AddControl(GUI::Button::Create("b3", ren.get(), Rect(225, 30, 100, 70), "A Big Button"));
-		e2->AddControl(GUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
+		e2->AddControl(CoreUI::Button::Create("b1", ren.get(), Rect(100, 30, 60, 24), "Button"));
+		e2->AddControl(CoreUI::Button::Create("b2", ren.get(), Rect(50, 60, 115, 24), "Another Button"));
+		e2->AddControl(CoreUI::Button::Create("b3", ren.get(), Rect(225, 30, 100, 70), "A Big Button"));
+		e2->AddControl(CoreUI::Button::Create("b4", ren.get(), Rect(500, 100, 220, 24), "A button far far away"));
 		
 		{
-			LabelPtr label = GUI::Label::CreateSingle("alabel", ren.get(), Rect(100, 8, 55, 24), "A label");
+			LabelPtr label = CoreUI::Label::CreateSingle("alabel", ren.get(), Rect(100, 8, 55, 24), "A label");
 			e2->AddControl(label);
 		}
 
 		{
-			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt", ren.get(), Rect(50, 90, 155, 24), "Text");
+			TextBoxPtr box = CoreUI::TextBox::CreateSingleLine("txt", ren.get(), Rect(50, 90, 155, 24), "Text");
 			e2->AddControl(box);
 		}
 		{
-			TextBoxPtr box = GUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 40), "123456789012345");
+			TextBoxPtr box = CoreUI::TextBox::CreateSingleLine("txt2", ren.get(), Rect(50, 116, 155, 40), "123456789012345");
 			box->SetPadding(10);
 			box->SetMargin(0);
 			box->SetBorderWidth(2);
@@ -309,61 +309,61 @@ int main(int argc, char ** argv)
 
 		Rect rect = WINMGR().FindWindow("edit.1.1")->GetClientRect(true, false);
 
-		LabelPtr l1 = GUI::Label::CreateFill("l1", ren.get(), "HLeft, VTop, b0m5");
+		LabelPtr l1 = CoreUI::Label::CreateFill("l1", ren.get(), "HLeft, VTop, b0m5");
 		l1->SetMargin(5);
 		l1->SetBorder(false);
 		l1->SetPadding(0);
 		l1->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_TOP);
 
-		LabelPtr l2 = GUI::Label::CreateFill("l2", ren.get(), "HCenter, VTop, b1");
+		LabelPtr l2 = CoreUI::Label::CreateFill("l2", ren.get(), "HCenter, VTop, b1");
 		l2->SetMargin(0);
 		l2->SetPadding(0);
 		l2->SetBorderWidth(1);
 		l2->SetBorder(true);
 		l2->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_TOP);
 
-		LabelPtr l3 = GUI::Label::CreateFill("l3", ren.get(), "HRight, VTop, b2p5");
+		LabelPtr l3 = CoreUI::Label::CreateFill("l3", ren.get(), "HRight, VTop, b2p5");
 		l3->SetMargin(0);
 		l3->SetBorder(true);
 		l3->SetPadding(5);
 		l3->SetBorderWidth(2);
 		l3->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_TOP);
 
-		LabelPtr l4 = GUI::Label::CreateFill("l4", ren.get(), "HLeft VCenter, b0");
+		LabelPtr l4 = CoreUI::Label::CreateFill("l4", ren.get(), "HLeft VCenter, b0");
 		l4->SetMargin(0);
 		l4->SetPadding(0);
 		l4->SetBorder(false);
 		l4->SetBorderWidth(1);
 		l4->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_CENTER);
 
-		LabelPtr l5 = GUI::Label::CreateFill("l5", ren.get(), "HCenter, VCenter, b0");
+		LabelPtr l5 = CoreUI::Label::CreateFill("l5", ren.get(), "HCenter, VCenter, b0");
 		l5->SetMargin(0);
 		l5->SetPadding(0);
 		l5->SetBorder(false);
 		l5->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_CENTER);
 
-		LabelPtr l6 = GUI::Label::CreateFill("l6", ren.get(), "HRight, VCenter, b1p5m5");
+		LabelPtr l6 = CoreUI::Label::CreateFill("l6", ren.get(), "HRight, VCenter, b1p5m5");
 		l6->SetBorder(true);
 		l6->SetMargin(5);
 		l6->SetPadding(5);
 		l6->SetBorderWidth(1);
 		l6->SetAlign(Label::TEXT_H_RIGHT | Label::TEXT_V_CENTER);
 
-		LabelPtr l7 = GUI::Label::CreateFill("l7", ren.get(), "HLeft, VBottom, b2");
+		LabelPtr l7 = CoreUI::Label::CreateFill("l7", ren.get(), "HLeft, VBottom, b2");
 		l7->SetMargin(0);
 		l7->SetPadding(0);
 		l7->SetBorder(true);
 		l7->SetBorderWidth(2);
 		l7->SetAlign(Label::TEXT_H_LEFT | Label::TEXT_V_BOTTOM);
 
-		LabelPtr l8 = GUI::Label::CreateFill("l8", ren.get(), "HCenter, VBottom, b4m4");
+		LabelPtr l8 = CoreUI::Label::CreateFill("l8", ren.get(), "HCenter, VBottom, b4m4");
 		l8->SetPadding(0);
 		l8->SetBorder(true);
 		l8->SetBorderWidth(4);
 		l8->SetMargin(4);		
 		l8->SetAlign(Label::TEXT_H_CENTER | Label::TEXT_V_BOTTOM);
 
-		LabelPtr l9 = GUI::Label::CreateFill("l9", ren.get(), "HRight, VBottom, b2p5");
+		LabelPtr l9 = CoreUI::Label::CreateFill("l9", ren.get(), "HRight, VBottom, b2p5");
 		l9->SetMargin(0);
 		l9->SetBorder(true);
 		l9->SetBorderWidth(2);

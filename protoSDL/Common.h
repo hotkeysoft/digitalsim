@@ -6,7 +6,7 @@
 #include <memory>
 #include <iostream>
 
-namespace GUI
+namespace CoreUI
 {
 	using CreationFlags = uint32_t;
 	using EventCode = Sint32;
