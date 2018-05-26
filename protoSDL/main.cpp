@@ -75,9 +75,9 @@ void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 	toolbar->AddToolbarItem("image1", RES().FindImage("simToolbar", 0));
 	toolbar->AddToolbarItem("image2", RES().FindImage("simToolbar", 1));
 	toolbar->AddToolbarItem("image3", RES().FindImage("simToolbar", 2));
-	toolbar->AddToolbarItem("item", nullptr, "button with a long name");
-	//toolbar->AddToolbarItem("item2", RES().FindImage("iconChip"), "button 2");
-	toolbar->AddToolbarItem("item3", nullptr, "button 3");
+	toolbar->AddSeparator();
+	toolbar->AddToolbarItem("item", nullptr, "Button with a long name");
+	toolbar->AddToolbarItem("item3", nullptr, "Button 3");
 
 	editWnd->SetToolbar(toolbar);
 }
@@ -247,10 +247,10 @@ int main(int argc, char ** argv)
 		simWnd->AddControl(GUI::TextBox::CreateFill("text", ren.get(), sampleText.c_str()));
 
 		MenuPtr simMenu = GUI::Menu::Create(ren.get(), "simMenu");
-		simMenu->AddMenuItem("sim", "&Simulation");
-		simMenu->AddMenuItem("stop", "S&top");
-		simMenu->AddMenuItem("step", "Ste&p");
-		simMenu->AddMenuItem("view", "&View");
+		simMenu->AddMenuItem("sim", "&Simulation", SDLK_s);
+		simMenu->AddMenuItem("stop", "S&top", SDLK_t);
+		simMenu->AddMenuItem("step", "Ste&p", SDLK_p);
+		simMenu->AddMenuItem("view", "&View", SDLK_v);
 		simWnd->SetMenu(simMenu);
 
 		WINMGR().AddWindow("parts", mainWnd, { client.w-300, 0, 300, client.h})->SetText("Parts");

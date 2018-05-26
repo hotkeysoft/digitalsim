@@ -205,14 +205,14 @@ namespace GUI
 		if (m_menu)
 		{
 			int height = m_menu->GetHeight(rect.w);
-			rect.y += height;
+			rect.y += relative ? 0 : height;
 			rect.h -= height;
 		}
 
 		if (m_toolbar)
 		{
 			int height = m_toolbar->GetHeight(rect.w);
-			rect.y += height;
+			rect.y += relative ? 0 : height;
 			rect.h -= height;
 		}
 

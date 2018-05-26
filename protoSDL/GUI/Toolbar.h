@@ -39,17 +39,13 @@ namespace GUI
 		void Draw() override {};
 		void Draw(const RectRef);
 
-		void SetFocus(WidgetRef focus, WidgetRef parent = nullptr) override;
-
 		int GetHeight(int clientWidth) const;
 
 	protected:
 		Toolbar(RendererRef renderer, const char * id, int height);
 
 		ToolbarItemPtr ItemAt(PointRef pt);
-
-		ToolbarItems::const_iterator FindToolbarItem(ToolbarItemRef item) const;
-		
+	
 		ToolbarItems m_items;
 		int m_height;
 

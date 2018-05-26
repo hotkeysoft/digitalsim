@@ -18,10 +18,7 @@ namespace GUI
 		if (height < 8 || height > 128)
 		{
 			throw std::out_of_range("toolbar height out of range [8-128]");
-		}
-
-		m_padding = Dimension(2, 2);
-		m_margin = 0;
+		}	
 	}
 
 	ToolbarPtr Toolbar::Create(RendererRef renderer, const char * id, int height)
@@ -54,10 +51,17 @@ namespace GUI
 		{			
 			for (auto & item : m_items)
 			{
-				Rect itemRect = item->GetRect(true, false);
-				drawRect.w = itemRect.w;
-				item->Draw(&drawRect);
-				drawRect.x += itemRect.w;
+				if (item)
+				{
+					Rect itemRect = item->GetRect(true, false);
+					drawRect.w = itemRect.w;
+					item->Draw(&drawRect);
+					drawRect.x += itemRect.w;
+				}
+				else
+				{
+					drawRect.x += m_borderWidth;
+				}
 			}
 		}
 	}
@@ -87,6 +91,11 @@ namespace GUI
 		return item;
 	}
 
+	void Toolbar::AddSeparator()
+	{
+		m_items.push_back(nullptr);
+	}
+
 	HitResult Toolbar::HitTest(const PointRef pt)
 	{		
 		if (m_rect.PointInRect(pt))
@@ -101,7 +110,7 @@ namespace GUI
 	{
 		for (auto & item : m_items)
 		{
-			if (item->HitTest(pt))
+			if (item && item->HitTest(pt))
 			{
 				return item;
 			}
@@ -123,26 +132,6 @@ namespace GUI
 			}
 		}
 		return false;
-	}
-
-	void Toolbar::SetFocus(WidgetRef focus, WidgetRef parent)
-	{
-		// Remove focus from other controls
-		for (auto & control : m_items)
-		{
-			if (control.get() != parent)
-			{
-				control->ClearFocus();
-			}
-		}
-	}
-
-	Toolbar::ToolbarItems::const_iterator Toolbar::FindToolbarItem(ToolbarItemRef item) const
-	{
-		return std::find_if(
-			m_items.begin(),
-			m_items.end(),
-			[item](ToolbarItemPtr it) { return it.get() == item; });
 	}
 
 	struct Toolbar::shared_enabler : public Toolbar

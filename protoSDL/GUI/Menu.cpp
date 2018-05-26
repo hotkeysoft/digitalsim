@@ -244,31 +244,34 @@ namespace GUI
 		}
 		case SDL_KEYDOWN:
 		{
-			switch (e->key.keysym.sym)
+			if (capture)
 			{
-			case SDLK_ESCAPE:
-				CloseMenu();
-				WINMGR().ReleaseCapture();
-				return true;
-			case SDLK_LEFT:
-				MoveLeft();
-				return true;
-			case SDLK_RIGHT:
-				MoveRight();
-				return true;
-			case SDLK_UP:
-				MoveUp();
-				return true;
-			case SDLK_DOWN:
-				MoveDown();
-				return true;
-			case SDLK_RETURN:
-				if (m_active)
+				switch (e->key.keysym.sym)
 				{
-					WINMGR().ReleaseCapture();
-					PostEvent(EVENT_MENU_SELECTED, m_active);
+				case SDLK_ESCAPE:
 					CloseMenu();
+					WINMGR().ReleaseCapture();
 					return true;
+				case SDLK_LEFT:
+					MoveLeft();
+					return true;
+				case SDLK_RIGHT:
+					MoveRight();
+					return true;
+				case SDLK_UP:
+					MoveUp();
+					return true;
+				case SDLK_DOWN:
+					MoveDown();
+					return true;
+				case SDLK_RETURN:
+					if (m_active)
+					{
+						WINMGR().ReleaseCapture();
+						PostEvent(EVENT_MENU_SELECTED, m_active);
+						CloseMenu();
+						return true;
+					}
 				}
 			}
 			// Hotkeys
