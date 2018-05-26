@@ -11,7 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "profile", "profile\profile.vcxproj", "{66988E3A-6AC2-4F51-AB81-3DEB4041F451}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "protoSDL", "protoSDL\protoSDL.vcxproj", "{83E70E1A-F130-4DA9-A8CB-CBD10A5821A0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreUI", "protoSDL\CoreUI.vcxproj", "{83E70E1A-F130-4DA9-A8CB-CBD10A5821A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
