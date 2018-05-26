@@ -12,7 +12,6 @@
 #include "GUI\Menu.h"
 #include "GUI\MenuItem.h"
 #include "GUI\Toolbar.h"
-//#include "GUI\ToolbarItem.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -69,15 +68,15 @@ void OnClick(WidgetRef widget)
 
 void CreateMainToolbar(GUI::RendererPtr &ren, GUI::WindowPtr &editWnd)
 {
-	ToolbarPtr toolbar = GUI::Toolbar::Create(ren.get(), "editToolbar", 26);
+	ToolbarPtr toolbar = GUI::Toolbar::CreateAutoSize(ren.get(), "editToolbar");
 	toolbar->SetBackgroundColor(Color::C_MED_GREY);
 
 	toolbar->AddToolbarItem("image1", RES().FindImage("simToolbar", 0));
 	toolbar->AddToolbarItem("image2", RES().FindImage("simToolbar", 1));
 	toolbar->AddToolbarItem("image3", RES().FindImage("simToolbar", 2));
 	toolbar->AddSeparator();
-	toolbar->AddToolbarItem("item", nullptr, "Button with a long name");
-	toolbar->AddToolbarItem("item3", nullptr, "Button 3");
+	toolbar->AddToolbarItem("image4", RES().FindImage("simToolbar", 4));
+	toolbar->AddToolbarItem("image5", RES().FindImage("simToolbar", 3));
 
 	editWnd->SetToolbar(toolbar);
 }
@@ -213,7 +212,6 @@ int main(int argc, char ** argv)
 
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
 		SDL_SetCursor(normalCursor);
-
 
 		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
 		mainWnd->SetText("DIGI-SIM");

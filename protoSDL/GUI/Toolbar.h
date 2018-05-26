@@ -28,7 +28,8 @@ namespace GUI
 
 		void Init() override;
 
-		static ToolbarPtr Create(RendererRef renderer, const char * id, int height);
+		static ToolbarPtr Create(RendererRef renderer, const char * id, int height, CreationFlags flags = 0);
+		static ToolbarPtr CreateAutoSize(RendererRef renderer, const char * id, CreationFlags flags = 0);
 
 		ToolbarItemPtr AddToolbarItem(const char * id, ImageRef image, const char * name = nullptr);
 		void AddSeparator();
@@ -42,7 +43,10 @@ namespace GUI
 		int GetHeight(int clientWidth) const;
 
 	protected:
-		Toolbar(RendererRef renderer, const char * id, int height);
+		Toolbar(RendererRef renderer, const char * id, int height, CreationFlags flags = 0);
+
+		ToolbarItems::const_iterator FindByID(const char * id) const;
+		void UpdateSize(ToolbarItemPtr);
 
 		ToolbarItemPtr ItemAt(PointRef pt);
 	

@@ -7,23 +7,29 @@
 
 namespace GUI
 {
-	Toolbar::Toolbar(RendererRef renderer, const char * id, int height) :
-		Widget(id, renderer, nullptr, Rect(), nullptr), m_height(height)
+	Toolbar::Toolbar(RendererRef renderer, const char * id, int height, CreationFlags flags) :
+		Widget(id, renderer, nullptr, Rect(), nullptr, nullptr, nullptr, flags), m_height(height)
 	{
 		if (m_renderer == nullptr)
 		{
 			throw std::invalid_argument("no renderer");
 		}
 
-		if (height < 8 || height > 128)
+		if (((flags & WIN_AUTOSIZE) == 0) && (height < 8 || height > 128))
 		{
 			throw std::out_of_range("toolbar height out of range [8-128]");
 		}	
 	}
 
-	ToolbarPtr Toolbar::Create(RendererRef renderer, const char * id, int height)
+	ToolbarPtr Toolbar::Create(RendererRef renderer, const char * id, int height, CreationFlags flags)
 	{
-		auto ptr = std::make_shared<shared_enabler>(renderer, id, height);
+		auto ptr = std::make_shared<shared_enabler>(renderer, id, height, flags);
+		return std::static_pointer_cast<Toolbar>(ptr);
+	}
+
+	ToolbarPtr Toolbar::CreateAutoSize(RendererRef renderer, const char * id, CreationFlags flags)
+	{
+		auto ptr = std::make_shared<shared_enabler>(renderer, id, 8, flags | WIN_AUTOSIZE);
 		return std::static_pointer_cast<Toolbar>(ptr);
 	}
 
@@ -73,7 +79,12 @@ namespace GUI
 			throw std::invalid_argument("id is null");
 		}
 
-		if (image)
+		if (FindByID(id) != m_items.end())
+		{
+			throw std::invalid_argument("tool bar item id already used: " + std::string(id));
+		}
+
+		if (image && !(m_flags & WIN_AUTOSIZE))
 		{
 			Rect imageRect = image->GetRect(false, false);
 			if ((imageRect.h + (2*m_borderWidth)) > m_height || imageRect.w > 128)
@@ -88,12 +99,32 @@ namespace GUI
 		
 		m_items.push_back(item);
 
+		UpdateSize(item);
+
 		return item;
+	}
+
+	Toolbar::ToolbarItems::const_iterator Toolbar::FindByID(const char * id) const
+	{
+		return std::find_if(m_items.begin(), m_items.end(),
+			[id](ToolbarItemPtr it) { return it && it->GetId() == id; });
 	}
 
 	void Toolbar::AddSeparator()
 	{
 		m_items.push_back(nullptr);
+	}
+
+	void Toolbar::UpdateSize(ToolbarItemPtr item)
+	{
+		if (item && (m_flags & WIN_AUTOSIZE))
+		{
+			Rect itemRect = item->GetRect(true, false);
+			m_height = std::max(itemRect.h, m_height);
+
+			// Clip to sensible value
+			m_height = std::min(128, m_height);
+		}
 	}
 
 	HitResult Toolbar::HitTest(const PointRef pt)
