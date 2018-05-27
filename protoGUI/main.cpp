@@ -84,9 +84,7 @@ void CreateMainMenu(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View", SDLK_v);
 	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help", SDLK_h);
 
-	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open...", SDLK_o);
-
-	fileOpenMenu->SetImage(RES().FindImage("simToolbar", 5));
+	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open...", RES().FindImage("simToolbar", 5), SDLK_o);
 
 	fileOpenMenu->AddMenuItem("open1", "Open &this", SDLK_t);
 	fileOpenMenu->AddMenuItem("open2", "Open t&hat", SDLK_h);
@@ -105,9 +103,9 @@ void CreateMainMenu(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 	fileMenu->AddSeparator();
 	fileMenu->AddMenuItem("exit", "&Exit", SDLK_e);
 
-	editMenu->AddMenuItem("cut", "Cu&t", SDLK_t);
-	editMenu->AddMenuItem("copy", "Cop&y", SDLK_y);
-	editMenu->AddMenuItem("paste", "Pa&ste", SDLK_s);
+	editMenu->AddMenuItem("cut", "Cu&t", RES().FindImage("simToolbar", 0), SDLK_t);
+	editMenu->AddMenuItem("copy", "Cop&y", RES().FindImage("simToolbar", 1), SDLK_y);
+	editMenu->AddMenuItem("paste", "Pa&ste", RES().FindImage("simToolbar", 2), SDLK_s);
 
 	helpMenu->AddMenuItem("about", "&About...", SDLK_a);
 
