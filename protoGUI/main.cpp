@@ -19,15 +19,9 @@
 #include <cassert>
 #include <sstream>
 #include <fstream>
+#include <set>
 
 using namespace CoreUI;
-
-void ToggleFullscreen(MainWindowPtr & window) {
-	Uint32 FullscreenFlag = SDL_WINDOW_FULLSCREEN;
-	bool IsFullscreen = SDL_GetWindowFlags(window.get()) & FullscreenFlag;
-	SDL_SetWindowFullscreen(window.get(), IsFullscreen ? 0 : FullscreenFlag);
-	SDL_ShowCursor(1);
-}
 
 MainWindowPtr CreateWindow(char const *title, int x, int y, int w, int h, Uint32 flags)
 {
@@ -115,6 +109,13 @@ void CreateMainMenu(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 
 	helpMenu->AddMenuItem("about", "&About...", SDLK_a);
 
+	for (auto & res : WINMGR().GetScreenResolutions())
+	{
+		std::ostringstream os;
+		os << "res_" << res.id;
+		viewMenu->AddMenuItem(os.str().c_str(), res.ToString().c_str())->SetTag(res.id);
+	}
+
 	editWnd->SetMenu(menu);
 }
 
@@ -139,10 +140,18 @@ int EventFilter(void* userdata, SDL_Event* event)
 			std::cout << "\t" << widget->GetId();
 		}
 
-
 		std::cout << std::endl;
 	}
 	return 0;
+}
+
+void OnMenuItemSelected(MainWindowPtr & win, MenuItemRef w2)
+{
+	if (w2->GetParent()->GetId() == "view")
+	{
+		int index = w2->GetTag().i;
+		WINMGR().SetScreenResolution(index);
+	}
 }
 
 int main(int argc, char ** argv)
@@ -177,7 +186,7 @@ int main(int argc, char ** argv)
 		}
 
 		RES().Init(ren);
-		WINMGR().Init(ren);
+		WINMGR().Init(win.get(), ren);
 
 		RES().LoadFont("default", "./Resources/Oxygen-Regular.ttf", 14);
 		RES().LoadFont("win.title", "./Resources/Oxygen-Bold.ttf", 14);
@@ -214,10 +223,11 @@ int main(int argc, char ** argv)
 		CursorRef normalCursor = RES().LoadCursor("default", SDL_SYSTEM_CURSOR_ARROW);
 		SDL_SetCursor(normalCursor);
 
-		WindowPtr mainWnd = WINMGR().AddWindow("main", { 0, 0, 1280, 720 }, WindowFlags::WIN_SYSMENU | WindowFlags::WIN_ACTIVE | WindowFlags::WIN_NOSCROLL);
+		WindowPtr mainWnd = WINMGR().AddWindowFill("main", WIN_SYSMENU | WIN_ACTIVE | WIN_NOSCROLL);
 		mainWnd->SetText("DIGI-SIM");
 		mainWnd->SetImage(image);
 		Rect client = mainWnd->GetClientRect();
+		
 
 		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetText("Editor");
 
@@ -398,6 +408,7 @@ int main(int argc, char ** argv)
 		bool quit = false;
 
 		Uint32 buttonEvent = WINMGR().GetEventType(Button::EventClassName());
+		Uint32 menuEvent = WINMGR().GetEventType(Menu::EventClassName());
 		SDL_AddEventWatch(EventFilter, nullptr);
 
 		while (!quit) 
@@ -411,6 +422,10 @@ int main(int argc, char ** argv)
 				else if (e.type == buttonEvent)
 				{
 					OnClick((WidgetRef)e.user.data1);
+				}
+				else if (e.type == menuEvent)
+				{
+					OnMenuItemSelected(win, (MenuItemRef)e.user.data2);
 				}
 				else if (WINMGR().GetCapture() && WINMGR().GetCapture().Target.target->HandleEvent(&e))
 				{
@@ -456,7 +471,7 @@ int main(int argc, char ** argv)
 						case SDLK_RETURN:
 							if (SDL_GetModState() & KMOD_ALT)
 							{
-								ToggleFullscreen(win);
+								WINMGR().ToggleFullscreen();
 								Render(ren);
 							}
 							break;
