@@ -84,7 +84,9 @@ void CreateMainMenu(CoreUI::RendererPtr &ren, CoreUI::WindowPtr &editWnd)
 	MenuItemPtr viewMenu = menu->AddMenuItem("view", "&View", SDLK_v);
 	MenuItemPtr helpMenu = menu->AddMenuItem("help", "&Help", SDLK_h);
 
-	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open", SDLK_o);
+	MenuItemPtr fileOpenMenu = fileMenu->AddMenuItem("open", "&Open with a long name asda fas", SDLK_o);
+
+	fileOpenMenu->SetImage(RES().FindImage("simToolbar", 5));
 
 	fileOpenMenu->AddMenuItem("open1", "Open &this", SDLK_t);
 	fileOpenMenu->AddMenuItem("open2", "Open t&hat", SDLK_h);
