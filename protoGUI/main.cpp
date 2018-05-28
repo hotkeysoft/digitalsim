@@ -163,6 +163,8 @@ void OnMenuItemSelected(MainWindowPtr & win, MenuItemRef w2)
 
 int main(int argc, char ** argv)
 {
+	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
@@ -192,7 +194,9 @@ int main(int argc, char ** argv)
 			return 1;
 		}
 
+		
 		RES().Init(ren);
+
 		WINMGR().Init(win.get(), ren);
 
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
@@ -219,10 +223,12 @@ int main(int argc, char ** argv)
 		SDL_SetCursor(normalCursor);
 
 		WindowPtr mainWnd = WINMGR().AddWindowFill("main", WIN_SYSMENU | WIN_ACTIVE | WIN_NOSCROLL);
+
 		mainWnd->SetText("DIGI-SIM");
 		mainWnd->SetImage(image);
+
 		Rect client = mainWnd->GetClientRect();
-		
+
 
 		WINMGR().AddWindow("edit", mainWnd, { 0, 0, client.w - 300, client.h - 200 })->SetText("Editor");
 
@@ -486,8 +492,10 @@ int main(int argc, char ** argv)
 			SDL_WaitEvent(nullptr);
 //			SDL_Delay(2);
 		}
-	}
 
+		WINMGR().Dispose();
+		RES().Dispose();
+	}
 	SDL_Quit();
 
 	return 0;
