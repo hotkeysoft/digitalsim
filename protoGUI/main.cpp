@@ -123,6 +123,7 @@ int EventFilter(void* userdata, SDL_Event* event)
 {
 	static Uint32 timerEvent = WINMGR().GetEventType("timer");
 	static Uint32 menuEvent = WINMGR().GetEventType(Menu::EventClassName());
+	static Uint32 treeEvent = WINMGR().GetEventType(Tree::EventClassName());
 
 	if (event->type >= SDL_USEREVENT && event->type != timerEvent)
 	{
@@ -138,6 +139,12 @@ int EventFilter(void* userdata, SDL_Event* event)
 			WidgetRef widget = WidgetRef(event->user.data2);
 
 			std::cout << "\t" << widget->GetId();
+		}
+		else if (event->type == treeEvent && event->user.data2)
+		{
+			TreeNodeRef treeNode = TreeNodeRef(event->user.data2);
+
+			std::cout << "\t" << treeNode->GetText();
 		}
 
 		std::cout << std::endl;
@@ -203,6 +210,7 @@ int main(int argc, char ** argv)
 		RES().LoadImage("menu.subitem", "./Resources/iconMenuRightArrow.png");
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 		RES().LoadImageMap("simToolbar", "./Resources/simToolbar.png", 16, 16);
+		RES().LoadImageMap("win.widget8x12", "./Resources/widget8x12.png", 8, 12);
 
 		std::string sampleText;
 
@@ -268,7 +276,7 @@ int main(int argc, char ** argv)
 			ImageRef opened = RES().FindImage("win.scroll.down");
 			ImageRef closed = RES().FindImage("win.scroll.right");
 
-			TreePtr tree = CoreUI::Tree::CreateFill("tree", ren.get(), 20, nullptr, TCF_FULLROWSELECT);
+			TreePtr tree = CoreUI::Tree::CreateFill("tree", ren.get(), 20, nullptr, /*TCF_FULLROWSELECT |*/ TCF_HASBUTTONS);
 			TreeNodeRef root = tree->AddNode("Root");
 			
 			TreeNodeRef l1 = tree->AddNode("1", opened, closed, root);
