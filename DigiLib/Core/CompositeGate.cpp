@@ -20,7 +20,7 @@ namespace DigiLib
 		void CompositeGate::SetMode(Mode mode, SimulatorRef simulator)
 		{
 			GateBase::SetMode(mode, simulator);
-			for (auto gate : m_internalGates)
+			for (auto & gate : m_internalGates)
 			{
 				gate.second->SetMode(mode, simulator);
 			}
@@ -56,7 +56,7 @@ namespace DigiLib
 
 		size_t CompositeGate::GetGateCount(bool recursive) noexcept
 		{
-			size_t count = 0;// m_internalGates.size();
+			size_t count = m_internalGates.size();
 			if (recursive)
 			{
 				// Should we include CompositeGate as one gate or 
@@ -83,7 +83,7 @@ namespace DigiLib
 		void CompositeGate::ResetPins()
 		{
 			GateBase::ResetPins();
-			for (auto child : m_internalGates)
+			for (auto & child : m_internalGates)
 			{
 				child.second->ResetPins();
 			}
@@ -242,7 +242,7 @@ namespace DigiLib
 
 		void CompositeGate::InternalCloneInnerLinks(GatePtr source, GatePtr clone)
 		{
-			for (auto connections : source->GetConnectedToPins())
+			for (auto & connections : source->GetConnectedToPins())
 			{
 				InternalClonePinLinks(connections, source, clone);
 			}
@@ -253,7 +253,7 @@ namespace DigiLib
 		void CompositeGate::InternalClonePinLinks(PinConnectionsType connections, GatePtr source, GatePtr clone)
 		{
 			CompositeGatePtr compositeClone = std::dynamic_pointer_cast<CompositeGate>(clone);
-			for (auto link : connections)
+			for (auto & link : connections)
 			{
 				IOPinPtr clonedSource = nullptr;
 				IOPinPtr clonedTarget = nullptr;

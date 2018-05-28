@@ -311,7 +311,7 @@ namespace DigiLib
 
 		void GateBase::ResetPins()
 		{
-			for (auto pin : m_ioPins)
+			for (auto & pin : m_ioPins)
 			{
 				pin->Reset();
 			}

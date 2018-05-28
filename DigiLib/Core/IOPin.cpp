@@ -126,7 +126,7 @@ namespace DigiLib
 			if (connectedFrom.size() > 1)
 			{
 				m_state = IOState(IOState::HI_Z, m_width);
-				for (auto pin : connectedFrom)
+				for (auto & pin : connectedFrom)
 				{
 					size_t offset = pin.GetTarget()->GetOffset();
 					size_t width = pin.GetSource()->GetWidth();
