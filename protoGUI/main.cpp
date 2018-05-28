@@ -195,22 +195,9 @@ int main(int argc, char ** argv)
 		RES().Init(ren);
 		WINMGR().Init(win.get(), ren);
 
-		RES().LoadFont("default", "./Resources/Oxygen-Regular.ttf", 14);
-		RES().LoadFont("win.title", "./Resources/Oxygen-Bold.ttf", 14);
-		RES().LoadFont("mono", "./Resources/FiraMono-Regular.ttf", 14);
-		RES().LoadFont("big", "./Resources/Oxygen-Regular.ttf", 18);
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
-		RES().LoadImage("win.maximize", "./Resources/iconMaximize.png");
-		RES().LoadImage("win.minimize", "./Resources/iconMinimize.png");
-		RES().LoadImage("win.restore", "./Resources/iconRestore.png");
-		RES().LoadImage("win.scroll.left", "./Resources/iconLeftArrow.png");
-		RES().LoadImage("win.scroll.right", "./Resources/iconRightArrow.png");
-		RES().LoadImage("win.scroll.up", "./Resources/iconUpArrow.png");
-		RES().LoadImage("win.scroll.down", "./Resources/iconDownArrow.png");
-		RES().LoadImage("menu.subitem", "./Resources/iconMenuRightArrow.png");
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 		RES().LoadImageMap("simToolbar", "./Resources/simToolbar.png", 16, 16);
-		RES().LoadImageMap("win.widget8x12", "./Resources/widget8x12.png", 8, 12);
 
 		std::string sampleText;
 

@@ -18,47 +18,12 @@
     <Image Include="Resources\iconSim.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\iconUpArrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="Resources\simToolbar.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\iconChip.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\iconDownArrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconLeftArrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconMaximize.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconMenuRightArrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconMinimize.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconRestore.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\iconRightArrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Resources\Oxygen-Bold.ttf">
-      <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Resources\Oxygen-Regular.ttf">
-      <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Resources\FiraMono-Regular.ttf">
-      <Filter>Resource Files</Filter>
-    </Font>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\sample.txt">

@@ -141,21 +141,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="Resources\iconChip.png" />
-    <Image Include="Resources\iconDownArrow.png" />
-    <Image Include="Resources\iconLeftArrow.png" />
-    <Image Include="Resources\iconMaximize.png" />
-    <Image Include="Resources\iconMenuRightArrow.png" />
-    <Image Include="Resources\iconMinimize.png" />
-    <Image Include="Resources\iconRestore.png" />
-    <Image Include="Resources\iconRightArrow.png" />
     <Image Include="Resources\iconSim.png" />
-    <Image Include="Resources\iconUpArrow.png" />
     <Image Include="Resources\simToolbar.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Resources\FiraMono-Regular.ttf" />
-    <Font Include="Resources\Oxygen-Bold.ttf" />
-    <Font Include="Resources\Oxygen-Regular.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\sample.txt" />
