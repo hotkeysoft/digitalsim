@@ -234,7 +234,7 @@ int main(int argc, char ** argv)
 
 		WindowPtr editWnd = WINMGR().FindWindow("edit");
 		WINMGR().AddWindow("edit.1", editWnd, { 0, 0, 650, 400 })->SetText("edit.1");
-		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 })->SetText("edit.2");
+		WINMGR().AddWindow("edit.2", editWnd, { 650, 0, 300, 400 }, WIN_DEFAULTDLG)->SetText("edit.2");
 
 		CreateMainMenu(ren, editWnd);
 		CreateMainToolbar(ren, editWnd);
@@ -248,7 +248,7 @@ int main(int argc, char ** argv)
 		WINMGR().AddWindow("edit.1.6", edit1Wnd, { 400, 100, 200, 100 })->SetText("edit.1.6");
 		WINMGR().AddWindow("edit.1.7", edit1Wnd, { 0, 200, 200, 100 })->SetText("edit.1.7");
 		WINMGR().AddWindow("edit.1.8", edit1Wnd, { 200, 200, 200, 100 })->SetText("edit.1.8");
-		WINMGR().AddWindow("edit.1.9", edit1Wnd, { 400, 200, 200, 100 })->SetText("edit.1.9");
+		WINMGR().AddWindow("edit.1.9", edit1Wnd, { 400, 200, 200, 100 }, WindowFlags::WIN_DIALOG)->SetText("edit.1.9");
 
 
 		WINMGR().AddWindow("sim", mainWnd, { 0, client.h - 200, client.w - 300, 200 })->SetText("Simulation");
