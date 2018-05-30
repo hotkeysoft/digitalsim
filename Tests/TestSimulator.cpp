@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #pragma warning( disable:4251 )
 
 #include "TestCommon.h"
