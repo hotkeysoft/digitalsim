@@ -59,14 +59,14 @@ namespace DigiLib {
 			for (const auto & sectionDef : m_sectionNames)
 			{
 				// mandatory section
-				if (std::get<1>(sectionDef))
+				if (sectionDef.mandatory)
 				{
-					const std::string &expected = std::get<0>(sectionDef);
+					const std::string &expected = sectionDef.name;
 					if (currSection == sections.end())
 					{
 						throw std::invalid_argument("missing section: " + expected);
 					}
-					else if (currSection->Name != expected)
+					else if (currSection->name != expected)
 					{
 						throw std::invalid_argument("expected section: " + expected);
 					}
@@ -78,8 +78,8 @@ namespace DigiLib {
 				}
 				else // optional section
 				{
-					const std::string &expected = std::get<0>(sectionDef);
-					if (currSection->Name == expected)
+					const std::string &expected = sectionDef.name;
+					if (currSection->name == expected)
 					{
 						// Check next one
 						++currSection;
@@ -88,7 +88,7 @@ namespace DigiLib {
 			}
 			if (currSection != sections.end())
 			{
-				throw std::invalid_argument("unexpected section: " + currSection->Name);
+				throw std::invalid_argument("unexpected section: " + currSection->name);
 			}
 
 			for (const auto & section : sections)
@@ -99,19 +99,19 @@ namespace DigiLib {
 
 		void TextParser::ParseSection(const DigiLib::Parser::TextParser::Section & section)
 		{
-			if (section.Name == "Description")
+			if (section.name == "Description")
 			{
 				//TODO
 			}
-			else if (section.Name == "Parts")
-				ParsePartsSection(section.Data.c_str());
-			else if (section.Name == "Inputs")
-				ParseInputsSection(section.Data.c_str());
-			else if (section.Name == "Outputs")
-				ParseOutputsSection(section.Data.c_str());
-			else if (section.Name == "Wires")
-				ParseWireSection(section.Data.c_str());
-			else throw std::invalid_argument("unknown section: " + section.Name);
+			else if (section.name == "Parts")
+				ParsePartsSection(section.data.c_str());
+			else if (section.name == "Inputs")
+				ParseInputsSection(section.data.c_str());
+			else if (section.name == "Outputs")
+				ParseOutputsSection(section.data.c_str());
+			else if (section.name == "Wires")
+				ParseWireSection(section.data.c_str());
+			else throw std::invalid_argument("unknown section: " + section.name);
 		}
 
 		void TextParser::ParseConnection(const char * in)
@@ -313,7 +313,7 @@ namespace DigiLib {
 			// Since we need a trailing ;, we expect an empty element at the end
 			if (sections.size() > 0)
 			{
-				if (!sections.rbegin()->Name.empty())
+				if (!sections.rbegin()->name.empty())
 				{
 					throw std::invalid_argument("unterminated section (need trailing ;)");
 				}
@@ -339,9 +339,9 @@ namespace DigiLib {
 				throw std::invalid_argument("Unexpected ':' character");
 			}
 			Section section;
-			section.Name = trim(in.substr(0, index));
-			section.Data = trim(in.substr(index + 1));
-			if (section.Name.empty())
+			section.name = trim(in.substr(0, index));
+			section.data = trim(in.substr(index + 1));
+			if (section.name.empty())
 			{
 				throw std::invalid_argument("missing section label");
 			}

@@ -9,12 +9,12 @@ namespace DigiLib {
 		class DllExport TextParser
 		{
 		public:
-			struct Section { std::string Name;  std::string Data; };
+			struct SectionDefType { std::string name; bool mandatory; };
+			struct Section { std::string name;  std::string data; };
 			using Sections = std::vector<Section>;
 			using SectionElement = std::list<std::string>;
 			using PinDefType = std::tuple<std::string, size_t>;
 			using PartDefType = std::tuple<std::string, std::string>;
-			using SectionDefType = std::tuple<std::string, bool>;
 			using SectionDef = std::list<SectionDefType>;
 
 			void Attach(Core::CompositeGatePtr gate, PartsBinPtr parts = nullptr)
