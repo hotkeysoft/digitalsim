@@ -2,6 +2,16 @@
 #include <memory>
 #define MAX_PINS 16
 
+#ifdef  DIGILIB_EXPORTS 
+/*Enabled as "export" while compiling the dll project*/
+#define DllExport __declspec(dllexport)  
+#elif defined _WINDOWS
+/*Enabled as "import" in the Client side for using already created dll file*/
+#define DllExport __declspec(dllimport)  
+#else 
+#define DllExport
+#endif
+
 namespace DigiLib
 {
 	namespace Core

@@ -123,7 +123,7 @@ namespace DigiLib
 			{
 				return false;
 			}
-			if (dot == -1)
+			if (dot == std::string::npos)
 			{
 				pin = in;
 			}

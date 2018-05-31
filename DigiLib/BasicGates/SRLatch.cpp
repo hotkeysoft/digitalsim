@@ -35,7 +35,6 @@ namespace DigiLib {
 			CompositeGate::InitializeState();
 			// To avoit initial oscillation, we set Q and notQ to opposite (random) states.
 			IOState initialState = IOState::IOState::Random();
-			IOState notState = !initialState;
 			GetPin("q")->Set(initialState);
 			GetPin("/q")->Set(!initialState);
 		}

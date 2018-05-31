@@ -3,16 +3,16 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include "Common.h"
-#include "Core\Window.h"
-#include "Core\WindowManager.h"
-#include "Core\ResourceManager.h"
-#include "Widgets\Button.h"
-#include "Widgets\Label.h"
-#include "Widgets\TextBox.h"
-#include "Widgets\Tree.h"
-#include "Widgets\Menu.h"
-#include "Widgets\MenuItem.h"
-#include "Widgets\Toolbar.h"
+#include "Core/Window.h"
+#include "Core/WindowManager.h"
+#include "Core/ResourceManager.h"
+#include "Widgets/Button.h"
+#include "Widgets/Label.h"
+#include "Widgets/TextBox.h"
+#include "Widgets/Tree.h"
+#include "Widgets/Menu.h"
+#include "Widgets/MenuItem.h"
+#include "Widgets/Toolbar.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -40,7 +40,10 @@ void Render(RendererPtr & ren)
 	SDL_RenderClear(ren.get());
 
 	WINMGR().Draw();
-
+	
+	//static int i = 0;
+	//std::cout << "Render" << i++ << std::endl;
+	
 	SDL_RenderPresent(ren.get());
 }
 
@@ -185,7 +188,7 @@ int main(int argc, char ** argv)
 	{
 		MainWindowPtr win = CreateWindow("Hello SDL World!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
 
-		RendererPtr ren = CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		RendererPtr ren = CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
 		if (ren == nullptr)
 		{
 			SDL_DestroyWindow(win.get());
@@ -196,9 +199,8 @@ int main(int argc, char ** argv)
 
 		
 		RES().Init(ren);
-
 		WINMGR().Init(win.get(), ren);
-
+		
 		ImageRef image = RES().LoadImage("iconChip", "./Resources/iconChip.png");
 		RES().LoadImage("iconSim", "./Resources/iconSim.png");
 		RES().LoadImageMap("simToolbar", "./Resources/simToolbar.png", 16, 16);
@@ -434,22 +436,15 @@ int main(int argc, char ** argv)
 				}
 				else if (e.type == SDL_MOUSEMOTION)
 				{
-					if (WINMGR().GetCapture())
+					Point pt(e.button.x, e.button.y);
+					HitResult hit = WINMGR().HitTest(&pt);
+					if (hit)
 					{
-						WINMGR().GetCapture().Target.target->HandleEvent(&e);
-						Render(ren);
-					}
-					else
-					{
-						Point pt(e.button.x, e.button.y);
-						HitResult hit = WINMGR().HitTest(&pt);
-						if (hit && hit.target->HandleEvent(&e))
-						{
-							Render(ren);
-						}
+						hit.target->HandleEvent(&e);
 					}
 				}
-				else if (e.type == SDL_MOUSEBUTTONDOWN) {
+				else if (e.type == SDL_MOUSEBUTTONDOWN) 
+				{
 					if (e.button.button == SDL_BUTTON_LEFT)
 					{
 						Point pt(e.button.x, e.button.y);

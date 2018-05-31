@@ -2,10 +2,10 @@
 #pragma warning( disable:4251 )
 
 #include "TestCommon.h"
-#include "Core\GateBase.h"
-#include "Core\CompositeGate.h"
-#include "Core\IOConnection.h"
-#include "Core\Simulator.h"
+#include "Core/GateBase.h"
+#include "Core/CompositeGate.h"
+#include "Core/IOConnection.h"
+#include "Core/Simulator.h"
 #include "BasicGates\NOTGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\NANDGate.h"

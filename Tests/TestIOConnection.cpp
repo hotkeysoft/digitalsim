@@ -2,9 +2,9 @@
 #pragma warning( disable:4251 )
 
 #include "TestCommon.h"
-#include "Core\IOState.h"
-#include "Core\GateBase.h"
-#include "Core\IOConnection.h"
+#include "Core/IOState.h"
+#include "Core/GateBase.h"
+#include "Core/IOConnection.h"
 #include "BasicGates\NOTGate.h"
 #include "BasicGates\BufferGate.h"
 

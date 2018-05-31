@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "TextParser.h"
-#include "Core\IOPin.h"
-#include "Core\GateBase.h"
-#include "Core\CompositeGate.h"
+#include "Core/IOPin.h"
+#include "Core/GateBase.h"
+#include "Core/CompositeGate.h"
 #include <cctype>
 #include <regex>
 #include <fstream>
@@ -134,12 +134,12 @@ namespace DigiLib {
 
 			size_t firstSeparator = inStr.find(separator);
 
-			if (firstSeparator == -1)
+			if (firstSeparator == std::string::npos)
 			{
 				throw std::invalid_argument("connection separator not found");
 			}
 			size_t nextSeparator = inStr.find(separator, firstSeparator + 1);
-			if (nextSeparator != -1)
+			if (nextSeparator != std::string::npos)
 			{
 				throw std::invalid_argument("more than one connection separator");
 			}
@@ -330,11 +330,11 @@ namespace DigiLib {
 				return TextParser::Section();
 			}
 			size_t index = in.find_first_of(':');
-			if (index == -1)
+			if (index == std::string::npos)
 			{
 				throw std::invalid_argument("section label not found");
 			}
-			if (in.find_first_of(':', index + 1) != -1)
+			if (in.find_first_of(':', index + 1) != std::string::npos)
 			{
 				throw std::invalid_argument("Unexpected ':' character");
 			}

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <random>
+#include <cstring>
 
 namespace DigiLib
 {
@@ -12,7 +13,7 @@ namespace DigiLib
 		{
 			if (width < 1 || width > MAX_PINS)
 				throw std::out_of_range("invalid pin width");
-			for (int i = 0; i < width; ++i)
+			for (size_t i = 0; i < width; ++i)
 			{
 				m_states[i] = state;
 			}
@@ -75,6 +76,9 @@ namespace DigiLib
 				case IOState::HI:
 				case IOState::HI_Z:
 					out[i] = rhs[i];
+					break;
+				default: // do nothing
+					break;
 				}
 			}
 			return out;
@@ -215,7 +219,7 @@ namespace DigiLib
 
 			IOState ret(IOState::LOW, bitCount);
 
-			for (int i = 0; i < bitCount; ++i)
+			for (size_t i = 0; i < bitCount; ++i)
 			{
 				bool b = distribution(gen);
 				ret[i] = b ? IOState::HI : IOState::LOW;

@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include <iomanip>
 #include "LogicTools.h"
-#include "Core\IOPin.h"
-#include "Core\GateBase.h"
-#include "Core\CompositeGate.h"
-#include "Core\Simulator.h"
+#include "Core/IOPin.h"
+#include "Core/GateBase.h"
+#include "Core/CompositeGate.h"
+#include "Core/Simulator.h"
 
 namespace DigiLib {
 	namespace Tools {
@@ -219,7 +219,7 @@ namespace DigiLib {
 		void LogicTools::OutputStates(const IOPinListType & inputs, std::vector<std::ostringstream> &outputs, bool busAsHex)
 		{
 			size_t output = 0;
-			for (int i = 0; i < inputs.size(); ++i)
+			for (size_t i = 0; i < inputs.size(); ++i)
 			{
 				if (inputs[i] == nullptr)
 				{
@@ -244,7 +244,7 @@ namespace DigiLib {
 				}
 				else
 				{
-					for (int j = 0; j < state.GetWidth(); ++j)
+					for (size_t j = 0; j < state.GetWidth(); ++j)
 					{
 						outputs[output++] << IOState::ToString(state[j]);
 					}
@@ -293,7 +293,7 @@ namespace DigiLib {
 		void LogicTools::PrintHeader(const DigiLib::Core::IOPinListType & inputs, std::vector<std::ostringstream> &outputs, const size_t maxlen, bool busAsHex)
 		{
 			int output = 0;
-			for (int i = 0; i < inputs.size(); ++i)
+			for (size_t i = 0; i < inputs.size(); ++i)
 			{
 				if (inputs[i] == nullptr)
 				{
@@ -305,7 +305,7 @@ namespace DigiLib {
 				}
 				else
 				{
-					for (int j = 0; j < inputs[i]->GetWidth(); ++j)
+					for (size_t j = 0; j < inputs[i]->GetWidth(); ++j)
 					{
 						outputs[output++] << std::setw(maxlen - 3) << inputs[i]->GetFullName() << "[" << j << "]" << '|';
 					}

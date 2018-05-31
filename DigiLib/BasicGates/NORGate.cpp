@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Core\Simulator.h"
+#include "Core/Simulator.h"
 #include "NORGate.h"
 
 namespace DigiLib {

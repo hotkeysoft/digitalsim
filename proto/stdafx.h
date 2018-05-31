@@ -8,7 +8,10 @@
 #include "targetver.h"
 
 #include <stdio.h>
+
+#ifdef _WINDOWS
 #include <tchar.h>
+#endif
 
 #include <exception>
 #include <assert.h>

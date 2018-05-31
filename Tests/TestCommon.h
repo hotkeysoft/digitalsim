@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "Core\GateBase.h"
-#include "Core\CompositeGate.h"
+#include "Core/GateBase.h"
+#include "Core/CompositeGate.h"
 #include "Tools\LogicTools.h"
 
 using namespace DigiLib;

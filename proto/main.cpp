@@ -3,22 +3,22 @@
 
 #include "stdafx.h"
 
-#include "Core\CompositeGate.h"
-#include "BasicGates\ANDGate.h"
-#include "BasicGates\NANDGate.h"
-#include "BasicGates\ORGate.h"
-#include "BasicGates\XORGate.h"
-#include "BasicGates\NOTGate.h"
-#include "BasicGates\WireGate.h"
-#include "BasicGates\BufferGate.h"
-#include "BasicGates\SRLatch.h"
-#include "BasicGates\DFlipFlop.h"
-#include "BasicGates\TFlipFlop.h"
-#include "BasicGates\JKFlipFlop.h"
-#include "Core\Simulator.h"
-#include "Parser\PartsBin.h"
-#include "Parser\TextParser.h"
-#include "Tools\LogicTools.h"
+#include "Core/CompositeGate.h"
+#include "BasicGates/ANDGate.h"
+#include "BasicGates/NANDGate.h"
+#include "BasicGates/ORGate.h"
+#include "BasicGates/XORGate.h"
+#include "BasicGates/NOTGate.h"
+#include "BasicGates/WireGate.h"
+#include "BasicGates/BufferGate.h"
+#include "BasicGates/SRLatch.h"
+#include "BasicGates/DFlipFlop.h"
+#include "BasicGates/TFlipFlop.h"
+#include "BasicGates/JKFlipFlop.h"
+#include "Core/Simulator.h"
+#include "Parser/PartsBin.h"
+#include "Parser/TextParser.h"
+#include "Tools/LogicTools.h"
 
 #include <vector>
 #include <memory>
@@ -425,11 +425,24 @@ void TestLeak2()
 	getchar();
 }
 
+void TestAdder4()
+{
+	std::cout << "---------------------" << std::endl;
+	std::cout << "Building 4 bit adder" << std::endl;
+	GatePtr adder4 = Build4BitAdder();
+	adder4->GetPin("x")->Set(IOState::FromInt(10, 4));
+	adder4->GetPin("y")->Set(IOState::FromInt(4, 4));
+	adder4->GetPin("cin")->Set(IOState::LOW);
+
+	std::cout << "10 + 4= " << adder4->GetPin("s")->Get().ToInt16() << std::endl;
+}
+
 void TestAdder16()
 {
 	std::cout << "---------------------" << std::endl;
 	std::cout << "Building 16 bit adder" << std::endl;
 	CompositeGatePtr adder16 = CompositeGate::Create("adder16");
+	adder16->AddInput("cin");
 	adder16->AddInput("x", 16);
 	adder16->AddInput("y", 16);
 	adder16->AddOutput("s", 16);
@@ -454,13 +467,15 @@ void TestAdder16()
 	adder16->GetGate("a3")->GetPin("s")->ConnectTo(adder16->GetPin("s", 8, 11));
 	adder16->GetGate("a4")->GetPin("s")->ConnectTo(adder16->GetPin("s", 12, 15));
 
-	adder16->GetGate("a1")->GetPin("cin")->Set(IOState::LOW);
+	adder16->GetPin("cin")->ConnectTo(adder16->GetGate("a1")->GetPin("cin"));
 	adder16->GetGate("a1")->GetPin("cout")->ConnectTo(adder16->GetGate("a2")->GetPin("cin"));
 	adder16->GetGate("a2")->GetPin("cout")->ConnectTo(adder16->GetGate("a3")->GetPin("cin"));
 	adder16->GetGate("a3")->GetPin("cout")->ConnectTo(adder16->GetGate("a4")->GetPin("cin"));
 
+	adder16->GetPin("cin")->Set(IOState::LOW);
 	adder16->GetPin("x")->Set(IOState::FromInt(12345, 16));
 	adder16->GetPin("y")->Set(IOState::FromInt(34567, 16));
+
 	std::cout << "12345 + 34567 = " << adder16->GetPin("s")->Get().ToInt16() << std::endl;
 }
 
@@ -667,8 +682,10 @@ int main()
 {
 	try
 	{
-		//TestAdder16();
-		
+		TestAdder4();
+
+		TestAdder16();
+
 		//TestLeak1();
 		//TestLeak2();
 

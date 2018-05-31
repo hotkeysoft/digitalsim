@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 #include <vector>
-#include "Core\CompositeGate.h"
+#include "Core/CompositeGate.h"
 #include "BasicGates\ANDGate.h"
 #include "BasicGates\NANDGate.h"
 #include "BasicGates\ORGate.h"

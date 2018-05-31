@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "IOPinSubset.h"
-#include "Core\GateBase.h"
+#include "Core/GateBase.h"
 
 namespace DigiLib
 {
@@ -57,7 +57,7 @@ namespace DigiLib
 
 		IOState IOPinSubset::GetMask() noexcept
 		{
-			IOState::IO_STATE state = IOState::UNDEF;
+			IOState::IO_STATE state;
 			switch (m_direction)
 			{
 			case INPUT:
@@ -66,6 +66,8 @@ namespace DigiLib
 				state = IOState::HI; break;
 			case OUTPUT_HI_Z:
 				state = IOState::HI_Z; break;
+			default: 
+				state = IOState::UNDEF;
 			}
 
 			IOState ret(IOState::UNDEF, m_parentPin->GetWidth());

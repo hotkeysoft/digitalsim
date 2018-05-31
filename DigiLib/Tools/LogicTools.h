@@ -1,18 +1,10 @@
 #pragma once
 #include <vector>
 #include <sstream>
-#include "Core\Common.h"
-#include "Core\IOState.h"
-#include "Core\IOPin.h"
-#include "Core\GateBase.h"
-
-#ifdef  DIGILIB_EXPORTS 
-/*Enabled as "export" while compiling the dll project*/
-#define DllExport __declspec(dllexport)  
-#else
-/*Enabled as "import" in the Client side for using already created dll file*/
-#define DllExport __declspec(dllimport)  
-#endif
+#include "Core/Common.h"
+#include "Core/IOState.h"
+#include "Core/IOPin.h"
+#include "Core/GateBase.h"
 
 namespace DigiLib {
 	namespace Tools {

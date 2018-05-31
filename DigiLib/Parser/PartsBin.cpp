@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "PartsBin.h"
-#include "Core\IOPin.h"
-#include "Core\GateBase.h"
-#include "Core\CompositeGate.h"
+#include "Core/IOPin.h"
+#include "Core/GateBase.h"
+#include "Core/CompositeGate.h"
 
 namespace DigiLib {
 	namespace Parser {

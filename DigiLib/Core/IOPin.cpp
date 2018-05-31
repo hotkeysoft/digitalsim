@@ -28,7 +28,7 @@ namespace DigiLib
 
 		IOState IOPin::GetMask() noexcept
 		{
-			IOState::IO_STATE state = IOState::UNDEF;
+			IOState::IO_STATE state;
 			switch (m_direction)
 			{
 			case INPUT:
@@ -37,6 +37,8 @@ namespace DigiLib
 				state = IOState::HI; break;
 			case OUTPUT_HI_Z:
 				state = IOState::HI_Z; break;
+			default:
+				state = IOState::UNDEF;
 			}
 
 			return IOState(state, m_width);
