@@ -319,13 +319,13 @@ namespace UnitTests
 
 		TextParser::Sections sections = parser.GetSections("S1: section1 ; S2: section2 ; S3: section3 ;\n");
 		ASSERT_EQ(3, sections.size());
-		EXPECT_STREQ("S1", sections[0].Name.c_str());
-		EXPECT_STREQ("S2", sections[1].Name.c_str());
-		EXPECT_STREQ("S3", sections[2].Name.c_str());
+		EXPECT_STREQ("S1", sections[0].name.c_str());
+		EXPECT_STREQ("S2", sections[1].name.c_str());
+		EXPECT_STREQ("S3", sections[2].name.c_str());
 
-		EXPECT_STREQ("section1", sections[0].Data.c_str());
-		EXPECT_STREQ("section2", sections[1].Data.c_str());
-		EXPECT_STREQ("section3", sections[2].Data.c_str());
+		EXPECT_STREQ("section1", sections[0].data.c_str());
+		EXPECT_STREQ("section2", sections[1].data.c_str());
+		EXPECT_STREQ("section3", sections[2].data.c_str());
 
 		EXPECT_THROW(parser.GetSections("S1:: section1 ; S2: section2 ; S3: section3\n"), std::invalid_argument);
 		EXPECT_THROW(parser.GetSections("S1: section1: ; S2: section2 ; S3: section3\n"), std::invalid_argument);
@@ -412,33 +412,33 @@ namespace UnitTests
 
 		TextParser::Sections sections = parser.GetSections("S1: section1 #; S2: section2 ; S3: section3 \n;");
 		ASSERT_EQ(1, sections.size());
-		EXPECT_STREQ("S1", sections[0].Name.c_str());
-		EXPECT_STREQ("section1", sections[0].Data.c_str());
+		EXPECT_STREQ("S1", sections[0].name.c_str());
+		EXPECT_STREQ("section1", sections[0].data.c_str());
 
 		sections = parser.GetSections("S1: section1 ; # S2: section2 ;\n S3: section3 ;\n");
 		ASSERT_EQ(2, sections.size());
-		EXPECT_STREQ("S1", sections[0].Name.c_str());
-		EXPECT_STREQ("section1", sections[0].Data.c_str());
-		EXPECT_STREQ("S3", sections[1].Name.c_str());
-		EXPECT_STREQ("section3", sections[1].Data.c_str());
+		EXPECT_STREQ("S1", sections[0].name.c_str());
+		EXPECT_STREQ("section1", sections[0].data.c_str());
+		EXPECT_STREQ("S3", sections[1].name.c_str());
+		EXPECT_STREQ("section3", sections[1].data.c_str());
 
 		sections = parser.GetSections("S1: section1 ; # this is a comment \nS2: section2 ;\n S3: section3 ;\n");
 		ASSERT_EQ(3, sections.size());
-		EXPECT_STREQ("S1", sections[0].Name.c_str());
-		EXPECT_STREQ("section1", sections[0].Data.c_str());
-		EXPECT_STREQ("S2", sections[1].Name.c_str());
-		EXPECT_STREQ("section2", sections[1].Data.c_str());
-		EXPECT_STREQ("S3", sections[2].Name.c_str());
-		EXPECT_STREQ("section3", sections[2].Data.c_str());
+		EXPECT_STREQ("S1", sections[0].name.c_str());
+		EXPECT_STREQ("section1", sections[0].data.c_str());
+		EXPECT_STREQ("S2", sections[1].name.c_str());
+		EXPECT_STREQ("section2", sections[1].data.c_str());
+		EXPECT_STREQ("S3", sections[2].name.c_str());
+		EXPECT_STREQ("section3", sections[2].data.c_str());
 
 		sections = parser.GetSections("# begin ;S1: comment ; \n S1: section1 ;# this is a comment \nS2: section2 ;\n S3: section3 ;\n");
 		ASSERT_EQ(3, sections.size());
-		EXPECT_STREQ("S1", sections[0].Name.c_str());
-		EXPECT_STREQ("section1", sections[0].Data.c_str());
-		EXPECT_STREQ("S2", sections[1].Name.c_str());
-		EXPECT_STREQ("section2", sections[1].Data.c_str());
-		EXPECT_STREQ("S3", sections[2].Name.c_str());
-		EXPECT_STREQ("section3", sections[2].Data.c_str());
+		EXPECT_STREQ("S1", sections[0].name.c_str());
+		EXPECT_STREQ("section1", sections[0].data.c_str());
+		EXPECT_STREQ("S2", sections[1].name.c_str());
+		EXPECT_STREQ("section2", sections[1].data.c_str());
+		EXPECT_STREQ("S3", sections[2].name.c_str());
+		EXPECT_STREQ("section3", sections[2].data.c_str());
 	}
 
 	bool isDir(std::string path)

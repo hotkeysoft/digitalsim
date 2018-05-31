@@ -352,7 +352,7 @@ namespace DigiLib {
 		{
 			static std::regex commentRegex(COMMENT_REGEX);
 
-			return std::regex_replace(in, commentRegex, "");
+			return std::regex_replace(in, commentRegex, std::string(""));
 		}
 
 		TextParser::SectionElement TextParser::ParseSection(const char * in)
