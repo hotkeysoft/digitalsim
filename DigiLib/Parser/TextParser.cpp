@@ -3,6 +3,7 @@
 #include "Core/IOPin.h"
 #include "Core/GateBase.h"
 #include "Core/CompositeGate.h"
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include "PartsBin.h"
@@ -418,7 +419,8 @@ namespace DigiLib {
 			if (endpos == nullptr)
 				return nullptr;
 
-			strncpy_s(out, outSize, in, endpos - in);
+			strncpy(out, in, endpos - in);
+			out[endpos - in] = '\0';
 
 			return endpos;
 		}
@@ -429,7 +431,8 @@ namespace DigiLib {
 			if (endpos == nullptr)
 				return nullptr;
 
-			strncpy_s(out, outSize, in, endpos - in);
+			strncpy(out, in, endpos - in);
+			out[endpos - in] = '\0';
 
 			return endpos;
 		}
