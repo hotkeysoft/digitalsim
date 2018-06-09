@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "CompositeGate.h"
-#include <regex>
 
 namespace DigiLib
 {

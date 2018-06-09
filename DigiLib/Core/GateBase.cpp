@@ -8,7 +8,6 @@
 
 #define PIN_NAME_REGEX "(\\/?[A-Za-z](?:\\w){0,31})"
 #define PIN_RANGE_REGEX "(?:\\[(\\d+)(?:-(\\d+))?\\])?"
-#define GATE_NAME_REGEX "([A-Za-z](?:\\w){0,31})"
 
 namespace DigiLib
 {
@@ -541,16 +540,54 @@ namespace DigiLib
 
 		}
 
+		inline bool isWordChar(char ch)
+		{
+			return ((ch >= 'A' && ch <= 'Z') ||
+				(ch >= 'a' && ch <= 'z') ||
+				(ch >= '0' && ch <= '9') ||
+				ch == '_');
+		}
+
+		inline bool isAlpha(char ch)
+		{
+			return ((ch >= 'A' && ch <= 'Z') ||
+				(ch >= 'a' && ch <= 'z'));
+		}
+
 		bool GateBase::IsValidPinName(const char* name)
 		{
-			static std::regex pinNameRegex(PIN_NAME_REGEX);
-
 			if (name == NULL)
 			{
 				return false;
 			}
 
-			if (!std::regex_match(name, pinNameRegex))
+			size_t index = 0;
+
+			if (name[index] == '\0')
+			{
+				return false;
+			}
+
+			// Optional '/' at beginning
+			if (name[index] == '/')
+			{
+				++index;
+			}
+
+			// first character = letter
+			if (!isalpha(name[index++]))
+				return false;
+
+			size_t len = 0;
+			for (len = 0; len < 32; ++len, ++index)
+			{
+				auto ch = name[index];
+				if (ch == '\0')
+					break;
+				if (!isWordChar(ch))
+					return false;
+			}
+			if (len == 32)
 			{
 				return false;
 			}
@@ -591,14 +628,32 @@ namespace DigiLib
 
 		bool GateBase::IsValidGateName(const char* name)
 		{
-			static std::regex gateNameRegex(GATE_NAME_REGEX);
-
 			if (name == NULL)
 			{
 				return false;
 			}
 
-			if (!std::regex_match(name, gateNameRegex))
+			size_t index = 0;
+
+			if (name[index] == '\0')
+			{
+				return false;
+			}
+
+			// first character = letter
+			if (!isalpha(name[index++]))
+				return false;
+
+			size_t len = 0;
+			for (len = 0; len < 32; ++len, ++index)
+			{
+				auto ch = name[index];
+				if (ch == '\0')
+					break;
+				if (!isWordChar(ch))
+					return false;
+			}
+			if (len == 32)
 			{
 				return false;
 			}
@@ -617,6 +672,7 @@ namespace DigiLib
 		{
 			InitVccGndPins();
 		}
+
 		void GateBase::InitializeState()
 		{
 			m_vccPin->Set(IOState::HI);

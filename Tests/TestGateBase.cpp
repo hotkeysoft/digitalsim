@@ -42,20 +42,28 @@ namespace UnitTests
 	{
 		CompositeGatePtr gate = CompositeGate::Create("test");
 
-		//Logger::WriteMessage("TestAddInput: Bad input");
+		// Bad input
 		EXPECT_THROW(gate->AddInput(NULL), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput(""), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput(" "), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("/"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("!"), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("3"), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("3d"), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("a b"), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("a "), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput(" a"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("a!"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("a2 "), std::invalid_argument);
 		EXPECT_THROW(gate->AddInput("a23456789012345678901234567890123"), std::invalid_argument);
 		gate->AddInput("a2345678901234567890123456789012");
 		ASSERT_EQ(1, (int)gate->GetInputCount());
 
-		//Logger::WriteMessage("TestAddInput: Good Input");
+		// Reserved pin name
+		EXPECT_THROW(gate->AddInput("vcc"), std::invalid_argument);
+		EXPECT_THROW(gate->AddInput("gnd"), std::invalid_argument);
+
+		// Good Input
 		gate->AddInput("a");
 		ASSERT_EQ(2, (int)gate->GetInputCount());
 	
@@ -70,7 +78,7 @@ namespace UnitTests
 		ASSERT_NE(nullptr, gate->GetPin("a"));
 		ASSERT_NE(nullptr, gate->GetPin("a12345"));
 			
-		//Logger::WriteMessage("TestAddInput: Duplicate");
+		// Duplicate
 		EXPECT_THROW(gate->AddInput("a"), std::invalid_argument);
 		EXPECT_THROW(gate->AddOutput("a"), std::invalid_argument);
 		EXPECT_THROW(gate->AddOutput("/a"), std::invalid_argument);
