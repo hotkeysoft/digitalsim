@@ -8,13 +8,26 @@
 #include <fstream>
 #include "PartsBin.h"
 
-#define PIN_DEF_REGEX "^(\\/?[A-Za-z](?:\\w){0,31})(?:\\[(\\d+)\\])?$"
 #define PART_DEF_REGEX "^([A-Za-z](?:\\w){0,31})\\s+([A-Za-z](?:\\w){0,31})$"
 #define COMMENT_REGEX "#.*"
 
 namespace DigiLib {
 	namespace Parser {
 		using namespace DigiLib::Core;
+
+		inline bool isWordChar(char ch)
+		{
+			return ((ch >= 'A' && ch <= 'Z') ||
+				(ch >= 'a' && ch <= 'z') ||
+				(ch >= '0' && ch <= '9') ||
+				ch == '_');
+		}
+
+		inline bool isAlpha(char ch)
+		{
+			return ((ch >= 'A' && ch <= 'Z') ||
+				(ch >= 'a' && ch <= 'z'));
+		}
 
 		inline std::string trim(const std::string &s)
 		{
@@ -215,31 +228,25 @@ namespace DigiLib {
 
 		TextParser::PinDefType TextParser::ExtractPinDef(const std::string & in)
 		{
-			static std::regex pinRegex(PIN_DEF_REGEX);
-
-			std::string name;
-			size_t size;
-
-			std::smatch base_match;
-			if (!std::regex_match(in, base_match, pinRegex))
-			{
+			char pinName[40];
+			const char* endPos = TextParser::ExtractPinName(in.c_str(), pinName, 40);
+			if (endPos == nullptr)
 				throw std::invalid_argument("invalid pin definition");
-			}
-			// Pin name
-			assert(base_match[1].matched);
-			std::string pinName = base_match[1];
 
-			// Pin width
-			if (base_match[2].matched)
+			if (*endPos == '\0')
 			{
-				size = atoi(base_match[2].str().c_str());
-			}
-			else
-			{
-				size = 1;
+				return std::make_tuple(pinName, 1);
 			}
 
-			return std::make_tuple(pinName, size);
+			size_t size;
+			endPos = TextParser::ExtractPinSize(endPos, size);
+
+			if (endPos && *endPos == '\0')			
+			{
+				return std::make_tuple(pinName, size);
+			}
+
+			throw std::invalid_argument("invalid pin definition");
 		}
 
 		TextParser::PartDefType TextParser::ExtractPartDef(const std::string & in)
@@ -384,6 +391,140 @@ namespace DigiLib {
 			}
 
 			return section;
+		}
+
+		const char * TextParser::ExtractPinName(const char * in, char * out, size_t outSize)
+		{
+			const char *endpos = ReadPinName(in);
+			if (endpos == nullptr)
+				return nullptr;
+
+			strncpy_s(out, outSize, in, endpos - in);
+
+			return endpos;
+		}
+
+		const char * TextParser::ReadPinNumber(const char * in, size_t & out)
+		{
+			out = 0;
+			const char * endpos = in;
+			if (endpos == nullptr)
+				return nullptr;
+
+			// At most two digits
+			if (!isdigit(*endpos))
+				return nullptr;
+
+			// First digit
+			out = *endpos - '0';
+			++endpos;
+
+			// (optional) 2nd digit
+			if (!isdigit(*endpos))
+				return endpos;
+
+			out *= 10;
+			out += *endpos - '0';
+
+			return ++endpos;
+		}
+
+		const char * TextParser::ExtractPinRange(const char * in, size_t & pinLow, size_t & pinHi)
+		{
+			const char *endPos = in;
+			if (endPos == nullptr)
+				return nullptr;
+
+			if (*endPos != '[')
+				return nullptr;
+
+			++endPos;
+
+			endPos = ReadPinNumber(endPos, pinLow);
+			if (endPos == nullptr)
+				return nullptr;
+
+			if (*endPos == ']')
+			{
+				pinHi = pinLow;
+				return ++endPos;
+			}
+
+			if (*endPos != '-')
+				return nullptr;
+
+			endPos = ReadPinNumber(++endPos, pinHi);
+			if (endPos == nullptr)
+				return nullptr;
+
+			if (*endPos == ']')
+			{
+				return ++endPos;
+			}
+
+			return nullptr;
+		}
+
+		const char * TextParser::ExtractPinSize(const char * in, size_t & size)
+		{
+			const char *endPos = in;
+			if (endPos == nullptr)
+				return nullptr;
+
+			if (*endPos != '[')
+				return nullptr;
+
+			++endPos;
+
+			endPos = ReadPinNumber(endPos, size);
+			if (endPos == nullptr)
+				return nullptr;
+
+			if (*endPos == ']')
+			{
+				return ++endPos;
+			}
+
+			return nullptr;
+		}
+
+		const char * TextParser::ReadPinName(const char * in)
+		{
+			if (in == nullptr)
+			{
+				return nullptr;
+			}
+
+			size_t index = 0;
+
+			if (in[index] == '\0')
+			{
+				return nullptr;
+			}
+
+			// Optional '/' at beginning
+			if (in[index] == '/')
+			{
+				++index;
+			}
+
+			// first character = letter
+			if (!isalpha(in[index++]))
+				return nullptr;
+
+			size_t len;
+			for (len = 0; len < 32; ++len, ++index)
+			{
+				auto ch = in[index];
+				if (ch == '\0' || !isWordChar(ch))
+					break;
+			}
+			if (len == 32)
+			{
+				return nullptr;
+			}
+
+			return in + index;
 		}
 	}
 }

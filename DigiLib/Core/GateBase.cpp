@@ -3,12 +3,20 @@
 #include "GateBase.h"
 #include "IOPin.h"
 #include "IOPinSubset.h"
+#include "Parser/TextParser.h"
 #include <memory>
+
+using namespace DigiLib::Parser;
 
 namespace DigiLib
 {
 	namespace Core
 	{
+		AllowedConnectionMapType GateBase::m_outsideOutsideMap;
+		AllowedConnectionMapType GateBase::m_insideInsideMap;
+		AllowedConnectionMapType GateBase::m_insideParentMap;
+		AllowedConnectionMapType GateBase::m_parentInsideMap;
+
 		inline bool isWordChar(char ch)
 		{
 			return ((ch >= 'A' && ch <= 'Z') ||
@@ -16,17 +24,6 @@ namespace DigiLib
 				(ch >= '0' && ch <= '9') ||
 				ch == '_');
 		}
-
-		inline bool isAlpha(char ch)
-		{
-			return ((ch >= 'A' && ch <= 'Z') ||
-				(ch >= 'a' && ch <= 'z'));
-		}
-
-		AllowedConnectionMapType GateBase::m_outsideOutsideMap;
-		AllowedConnectionMapType GateBase::m_insideInsideMap;
-		AllowedConnectionMapType GateBase::m_insideParentMap;
-		AllowedConnectionMapType GateBase::m_parentInsideMap;
 
 		GateBase::GateBase(const char* name, size_t delay) : m_name(name), m_parent(NULL), m_ioPinCount(0), m_mode(ASYNC), m_simulator(nullptr), m_delay(delay)
 		{
@@ -328,89 +325,15 @@ namespace DigiLib
 			GetPin("gnd")->Reset(IOState::UNDEF);
 		}
 
-		const char * GateBase::ExtractPinName(const char * in, char * out, size_t outSize)
-		{
-			const char *endpos = ReadPinName(in);
-			if (endpos == nullptr)
-				return nullptr;
-
-			strncpy_s(out, outSize, in, endpos - in);
-
-			return endpos;
-		}
-
-		const char * GateBase::ReadPinNumber(const char * in, size_t & out)
-		{
-			out = 0;
-			const char * endpos = in;
-			if (endpos == nullptr)
-				return nullptr;
-
-			// At most two digits
-			if (!isdigit(*endpos))
-				return nullptr;
-
-			// First digit
-			out = *endpos - '0';
-			++endpos;
-
-			// (optional) 2nd digit
-			if (!isdigit(*endpos))
-				return endpos;
-
-			out *= 10;
-			out += *endpos - '0';
-
-			return ++endpos;
-		}
-
-		const char * GateBase::ExtractPinRange(const char * in, size_t & pinLow, size_t & pinHi)
-		{
-			const char *endPos = in;
-			if (endPos == nullptr)
-				return nullptr;
-
-			if (*endPos != '[')
-				return nullptr;
-
-			++endPos;
-		
-			endPos = ReadPinNumber(endPos, pinLow);
-			if (endPos == nullptr)
-				return nullptr;
-
-			if (*endPos == ']')
-			{
-				pinHi = pinLow;
-				return ++endPos;
-			}	
-			
-			if (*endPos != '-')
-				return nullptr;
-
-			endPos = ReadPinNumber(++endPos, pinHi);
-			if (endPos == nullptr)
-				return nullptr;
-
-			if (*endPos == ']')
-			{
-				return ++endPos;
-			}
-
-			return nullptr;
-		}
-
 		IOPinPtr GateBase::FindPin(const char * name)
 		{
-//			static std::regex pinRegex(PIN_NAME_REGEX PIN_RANGE_REGEX);		
-
 			if (name == nullptr)
 			{
 				throw std::invalid_argument("name cannot be null");
 			}
 
 			char pinName[40];
-			const char* endPos = ExtractPinName(name, pinName, 40);
+			const char* endPos = TextParser::ExtractPinName(name, pinName, 40);
 			if (endPos == nullptr)
 				return IOPinPtr();
 
@@ -421,41 +344,12 @@ namespace DigiLib
 
 			size_t pinLow;
 			size_t pinHi;
-			endPos = ExtractPinRange(endPos, pinLow, pinHi);
+			endPos = TextParser::ExtractPinRange(endPos, pinLow, pinHi);
 
 			if (endPos && *endPos == '\0')
 			{
 				return GetPin(pinName, pinLow, pinHi);
 			}
-
-			//std::cmatch base_match;
-			//if (std::regex_match(name, base_match, pinRegex))
-			//{
-			//	// Pin name
-			//	std::csub_match base_sub_match = base_match[1];
-			//	if (!base_sub_match.matched)
-			//	{
-			//		return nullptr;
-			//	}
-			//	std::string pinName = base_sub_match;
-
-			//	base_sub_match = base_match[2];
-			//	if (!base_sub_match.matched)
-			//	{
-			//		return GetPin(pinName.c_str());
-			//	}
-
-			//	size_t pinLow = atoi(base_sub_match.str().c_str());
-			//	size_t pinHi = pinLow;
-
-			//	base_sub_match = base_match[3];
-			//	if (base_sub_match.matched)
-			//	{
-			//		pinHi = atoi(base_sub_match.str().c_str());
-			//	}
-
-			//	return GetPin(pinName.c_str(), pinLow, pinHi);
-			//}
 
 			return IOPinPtr();
 		}
@@ -641,48 +535,9 @@ namespace DigiLib
 
 		}
 
-		const char * GateBase::ReadPinName(const char * in)
-		{
-			if (in == nullptr)
-			{
-				return nullptr;
-			}
-
-			size_t index = 0;
-
-			if (in[index] == '\0')
-			{
-				return nullptr;
-			}
-
-			// Optional '/' at beginning
-			if (in[index] == '/')
-			{
-				++index;
-			}
-
-			// first character = letter
-			if (!isalpha(in[index++]))
-				return nullptr;
-
-			size_t len;
-			for (len = 0; len < 32; ++len, ++index)
-			{
-				auto ch = in[index];
-				if (ch == '\0' || !isWordChar(ch))
-					break;
-			}
-			if (len == 32)
-			{
-				return nullptr;
-			}
-
-			return in + index;
-		}
-
 		bool GateBase::IsValidPinName(const char* name)
 		{
-			const char* out = ReadPinName(name);
+			const char* out = TextParser::ReadPinName(name);
 			return (out != nullptr) && (*out == '\0');
 		}
 

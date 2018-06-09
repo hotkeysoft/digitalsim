@@ -37,6 +37,12 @@ namespace DigiLib {
 
 			Sections GetSections(const char*);
 
+			static const char * ReadPinName(const char * in);
+			static const char * ReadPinNumber(const char * in, size_t & out);
+			static const char * ExtractPinName(const char * in, char * out, size_t outSize);
+			static const char * ExtractPinRange(const char * in, size_t & pinLow, size_t & pinHi);
+			static const char * ExtractPinSize(const char * in, size_t & size);
+
 		protected:
 			static SectionElement ParseSection(const char *in);
 			static PinDefType ExtractPinDef(const std::string & in);
