@@ -117,6 +117,11 @@ namespace DigiLib
 			void ValidatePinName(const char* name);
 			void ValidatePinWidth(size_t width);
 
+			static const char * ReadPinName(const char * in);
+			static const char * ReadPinNumber(const char * in, size_t & out);
+			static const char * ExtractPinName(const char * in, char * out, size_t outSize);
+			static const char * ExtractPinRange(const char * in, size_t & pinLow, size_t & pinHi);
+
 			PinConnectionsType& GetConnectedFromPin(size_t pinID);
 			PinConnectionsType& GetConnectedToPin(size_t pinID);
 
