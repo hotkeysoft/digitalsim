@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
+#include <string.h>
 #include "PartsBin.h"
 
 namespace DigiLib {
