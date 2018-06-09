@@ -573,38 +573,9 @@ namespace DigiLib
 		}
 
 		bool GateBase::IsValidGateName(const char* name)
-		{		
-			if (name == NULL)
-			{
-				return false;
-			}
-
-			size_t index = 0;
-
-			if (name[index] == '\0')
-			{
-				return false;
-			}
-
-			// first character = letter
-			if (!isalpha(name[index++]))
-				return false;
-
-			size_t len = 0;
-			for (len = 0; len < 32; ++len, ++index)
-			{
-				auto ch = name[index];
-				if (ch == '\0')
-					break;
-				if (!isWordChar(ch))
-					return false;
-			}
-			if (len == 32)
-			{
-				return false;
-			}
-
-			return true;			
+		{
+			const char * out = TextParser::ReadGateName(name);
+			return (out != nullptr) && (*out == '\0');		
 		}
 
 		void GateBase::ValidateGateName(const char * name)

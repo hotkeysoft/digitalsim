@@ -4,12 +4,8 @@
 #include "Core/GateBase.h"
 #include "Core/CompositeGate.h"
 #include <cctype>
-#include <regex>
 #include <fstream>
 #include "PartsBin.h"
-
-#define PART_DEF_REGEX "^([A-Za-z](?:\\w){0,31})\\s+([A-Za-z](?:\\w){0,31})$"
-#define COMMENT_REGEX "#.*"
 
 namespace DigiLib {
 	namespace Parser {
@@ -251,18 +247,27 @@ namespace DigiLib {
 
 		TextParser::PartDefType TextParser::ExtractPartDef(const std::string & in)
 		{
-			static std::regex pinRegex(PART_DEF_REGEX);
+			char partType[40];
+			const char* endPos = ExtractGateName(in.c_str(), partType, 40);
+			if (endPos == nullptr || *endPos == '\0')
+				throw std::invalid_argument("invalid part definition");
 
-			std::smatch base_match;
-			if (!std::regex_match(in, base_match, pinRegex))
+			// Skip spaces
+			endPos = SkipSpaces(endPos);
+			if (endPos == nullptr || *endPos == '\0')
 			{
 				throw std::invalid_argument("invalid part definition");
 			}
 
-			assert(base_match[1].matched);
-			assert(base_match[2].matched);
+			char partName[40];
+			endPos = TextParser::ExtractGateName(endPos, partName, 40);
 
-			return std::make_tuple(base_match[1], base_match[2]);
+			if (endPos && *endPos == '\0')
+			{
+				return std::make_tuple(partType, partName);
+			}
+
+			throw std::invalid_argument("invalid part definition");
 		}
 
 		void TextParser::ParseInputsSection(const char * in)
@@ -357,9 +362,23 @@ namespace DigiLib {
 
 		std::string TextParser::RemoveComments(const std::string & in)
 		{
-			static std::regex commentRegex(COMMENT_REGEX);
+			std::string out = in;
+			size_t pos;
+			while((pos = out.find_first_of('#')) != std::string::npos)
+			{
+				size_t endPos = out.find_first_of("\n", pos);
+				if (endPos == std::string::npos)
+				{
+					out.erase(pos);
+					break;
+				}
+				else
+				{
+					out.erase(pos, endPos-pos);
+				}
+			}
 
-			return std::regex_replace(in, commentRegex, std::string(""));
+			return out;
 		}
 
 		TextParser::SectionElement TextParser::ParseSection(const char * in)
@@ -391,6 +410,17 @@ namespace DigiLib {
 			}
 
 			return section;
+		}
+
+		const char * TextParser::ExtractGateName(const char * in, char * out, size_t outSize)
+		{
+			const char *endpos = ReadGateName(in);
+			if (endpos == nullptr)
+				return nullptr;
+
+			strncpy_s(out, outSize, in, endpos - in);
+
+			return endpos;
 		}
 
 		const char * TextParser::ExtractPinName(const char * in, char * out, size_t outSize)
@@ -525,6 +555,49 @@ namespace DigiLib {
 			}
 
 			return in + index;
+		}
+
+		const char * TextParser::ReadGateName(const char * in)
+		{
+			if (in == nullptr)
+			{
+				return nullptr;
+			}
+
+			size_t index = 0;
+
+			if (in[index] == '\0')
+			{
+				return nullptr;
+			}
+
+			// first character = letter
+			if (!isalpha(in[index++]))
+				return nullptr;
+
+			size_t len;
+			for (len = 0; len < 32; ++len, ++index)
+			{
+				auto ch = in[index];
+				if (ch == '\0' || !isWordChar(ch))
+					break;
+			}
+			if (len == 32)
+			{
+				return nullptr;
+			}
+
+			return in + index;
+		}
+
+		const char * TextParser::SkipSpaces(const char * in)
+		{
+			const char * pos = in;
+			while (*pos && isspace(*pos))
+			{
+				++pos;
+			}
+			return pos;
 		}
 	}
 }
