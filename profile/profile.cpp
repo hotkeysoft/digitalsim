@@ -270,6 +270,7 @@ int main()
 	//TestAdder16();
 	for (int i = 0; i < 500; ++i)
 	{
+		std::cout << "Load " << i << std::endl;
 		TestLoadFromFile();
 	}
 
