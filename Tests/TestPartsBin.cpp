@@ -1,15 +1,14 @@
 #include "pch.h"
 #pragma warning( disable:4251 )
 
-#include "TestCommon.h"
 #include "Core/IOState.h"
 #include "Core/GateBase.h"
 #include "Core/Simulator.h"
-#include "BasicGates\ANDGate.h"
-#include "BasicGates\ORGate.h"
-#include "BasicGates\BufferGate.h"
-#include "Parser\TextParser.h"
-#include "Parser\PartsBin.h"
+#include "BasicGates/ANDGate.h"
+#include "BasicGates/ORGate.h"
+#include "BasicGates/BufferGate.h"
+#include "Parser/TextParser.h"
+#include "Parser/PartsBin.h"
 
 namespace UnitTests
 {

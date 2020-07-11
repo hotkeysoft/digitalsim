@@ -1,13 +1,12 @@
 #include "pch.h"
 #pragma warning( disable:4251 )
 
-#include "TestCommon.h"
 #include "Core/GateBase.h"
 #include "Core/CompositeGate.h"
-#include "BasicGates\NOTGate.h"
-#include "BasicGates\WireGate.h"
-#include "BasicGates\BufferGate.h"
-#include "Tools\LogicTools.h"
+#include "BasicGates/NOTGate.h"
+#include "BasicGates/WireGate.h"
+#include "BasicGates/BufferGate.h"
+#include "Tools/LogicTools.h"
 
 namespace UnitTests
 {

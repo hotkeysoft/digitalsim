@@ -16,21 +16,12 @@ namespace UnitTests
 	GatePtr Build74163Counter();
 }
 
-namespace testing
-{
-	namespace internal
-	{
-		enum GTestColor {
-			COLOR_DEFAULT,
-			COLOR_RED,
-			COLOR_GREEN,
-			COLOR_YELLOW
-		};
+static constexpr const char* COLOR_RESET = "\033[m";
+static constexpr const char* COLOR_RED = "\033[0;31m";
+static constexpr const char* COLOR_GREEN = "\033[0;32m";
+static constexpr const char* COLOR_YELLOW = "\033[0;33m";
 
-		extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
-	}
-}
-#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+#define PRINTF(...) do { printf("%s[          ] %s", COLOR_GREEN, COLOR_YELLOW); printf(__VA_ARGS__); printf(COLOR_RESET); } while (0)
 
 // C++ stream interface
 class TestCout : public std::stringstream

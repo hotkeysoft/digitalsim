@@ -1,19 +1,18 @@
 #include "pch.h"
 #pragma warning( disable:4251 )
 
-#include "TestCommon.h"
 #include "Core/GateBase.h"
 #include "Core/CompositeGate.h"
-#include "BasicGates\NOTGate.h"
-#include "BasicGates\ANDGate.h"
-#include "BasicGates\NANDGate.h"
-#include "BasicGates\ORGate.h"
-#include "BasicGates\XORGate.h"
-#include "BasicGates\WireGate.h"
-#include "BasicGates\BufferGate.h"
-#include "BasicGates\DFlipFLop.h"
-#include "BasicGates\TFlipFLop.h"
-#include "Tools\LogicTools.h"
+#include "BasicGates/NOTGate.h"
+#include "BasicGates/ANDGate.h"
+#include "BasicGates/NANDGate.h"
+#include "BasicGates/ORGate.h"
+#include "BasicGates/XORGate.h"
+#include "BasicGates/WireGate.h"
+#include "BasicGates/BufferGate.h"
+#include "BasicGates/DFlipFLop.h"
+#include "BasicGates/TFlipFLop.h"
+#include "Tools/LogicTools.h"
 
 namespace UnitTests
 {		
