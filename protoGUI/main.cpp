@@ -13,6 +13,7 @@
 #include "Widgets/Menu.h"
 #include "Widgets/MenuItem.h"
 #include "Widgets/Toolbar.h"
+#include "Widgets/Component.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -164,6 +165,23 @@ void OnMenuItemSelected(MainWindowPtr & win, MenuItemRef w2)
 	}
 }
 
+void AddComponentsWindow(RendererPtr & ren, WindowPtr mainWnd)
+{
+	Rect client = mainWnd->GetClientRect();
+	WINMGR().AddWindow("components", mainWnd, { 20, 20, client.w - 400, client.h - 200 })->SetText("Components");
+
+	WindowPtr wnd = WINMGR().FindWindow("components");
+
+	wnd->GetGrid().SetSize(40);
+	wnd->GetGrid().Show(true);
+	wnd->GetGrid().Snap(true);
+	
+	wnd->AddControl(Component::Create("c1", ren.get(), Rect(100, 30, 100, 100), "LS123"));
+	wnd->AddControl(Component::Create("c2", ren.get(), Rect(300, 100, 50, 50), "LS138"));
+	wnd->AddControl(Component::Create("c3", ren.get(), Rect(50, 200, 70, 230), "LS74"));
+
+}
+
 int main(int argc, char ** argv)
 {
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
@@ -296,8 +314,6 @@ int main(int argc, char ** argv)
 		}	
 		
 		WindowPtr e2 = WINMGR().FindWindow("edit.2");
-//		WINMGR().AddWindow("e22", e2, Rect(10, 10, 100, 100));
-
 		e2->AddControl(CoreUI::Button::Create("b1", ren.get(), Rect(100, 30, 60, 24), "Button"));
 		e2->AddControl(CoreUI::Button::Create("b2", ren.get(), Rect(50, 60, 115, 24), "Another Button"));
 		e2->AddControl(CoreUI::Button::Create("b3", ren.get(), Rect(225, 30, 100, 70), "A Big Button"));
@@ -404,6 +420,8 @@ int main(int argc, char ** argv)
 		WINMGR().FindWindow("edit.1.8")->SetBackgroundColor(Color::C_WHITE);
 		WINMGR().FindWindow("edit.1.9")->SetBackgroundColor(Color::C_DARK_GREY);
 
+		AddComponentsWindow(ren, mainWnd);
+
 		Render(ren);
 
 		SDL_StartTextInput();
@@ -485,7 +503,6 @@ int main(int argc, char ** argv)
 				}	
 			}
 			SDL_WaitEvent(nullptr);
-//			SDL_Delay(2);
 		}
 
 		WINMGR().Dispose();
