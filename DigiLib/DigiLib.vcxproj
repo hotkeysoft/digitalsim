@@ -159,6 +159,7 @@
     <ClInclude Include="BasicGates\ANDGate.h" />
     <ClInclude Include="BasicGates\BufferGate.h" />
     <ClInclude Include="BasicGates\DFlipFlop.h" />
+    <ClInclude Include="BasicGates\DFlipFlopSR.h" />
     <ClInclude Include="BasicGates\DLatch.h" />
     <ClInclude Include="BasicGates\JKFlipFlop.h" />
     <ClInclude Include="BasicGates\NANDGate.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="BasicGates\ANDGate.cpp" />
     <ClCompile Include="BasicGates\BufferGate.cpp" />
     <ClCompile Include="BasicGates\DFlipFlop.cpp" />
+    <ClCompile Include="BasicGates\DFlipFlopSR.cpp" />
     <ClCompile Include="BasicGates\DLatch.cpp" />
     <ClCompile Include="BasicGates\JKFlipFlop.cpp" />
     <ClCompile Include="BasicGates\NANDGate.cpp" />

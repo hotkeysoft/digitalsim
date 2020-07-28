@@ -15,6 +15,7 @@
 #include "BasicGates/WireGate.h"
 #include "BasicGates/BufferGate.h"
 #include "BasicGates/DFlipFlop.h"
+#include "BasicGates/DFlipFlopSR.h"
 #include "BasicGates/JKFlipFlop.h"
 #include "BasicGates/TFlipFlop.h"
 #include "Tools/LogicTools.h"
@@ -407,6 +408,39 @@ namespace UnitTests
 		//	sim->GetGate("dflip")->GetPin("q") }, 340, 2);
 
 		ASSERT_LT(sim->Run(500), 340);
+	}
+
+	TEST(TestSimulator, DFlipFLopSR)
+	{
+		SimulatorPtr sim = Simulator::Create("sim");
+		CompositeGatePtr dflip = std::dynamic_pointer_cast<CompositeGate>(BasicGates::DFlipFlopSR::Create());
+		sim->AddGate("dflip", dflip);
+
+		sim->PostEvent({ IOState::LOW, sim->GetGate("dflip")->GetPin("/set") });
+		sim->PostEvent({ IOState::HI, sim->GetGate("dflip")->GetPin("/reset") });
+		sim->PostEvent({ IOState::LOW, sim->GetGate("dflip")->GetPin("d") });
+		sim->PostEvent({ IOState::LOW, sim->GetGate("dflip")->GetPin("clk") });
+
+		sim->PostEvent({ IOState::HI, sim->GetGate("dflip")->GetPin("/set") }, 20);
+
+		// p459 fig.7-13
+		sim->Pulse(sim->GetGate("dflip")->GetPin("d"), 2 * 5, 2 * 17);
+		sim->Pulse(sim->GetGate("dflip")->GetPin("d"), 2 * 33, 2 * 39);
+		sim->Pulse(sim->GetGate("dflip")->GetPin("d"), 2 * 50, 2 * 65);
+		sim->Pulse(sim->GetGate("dflip")->GetPin("d"), 2 * 106, 2 * 140);
+				
+		sim->Clock(sim->GetGate("dflip")->GetPin("clk"), 2 * 6, 2 * 6, 2 * 17, 2 * 1500);
+
+		std::cout << Tools::LogicTools::LogicAnalyser(sim, {
+			sim->GetGate("dflip")->GetPin("/set"),
+			sim->GetGate("dflip")->GetPin("/reset"),
+			sim->GetGate("dflip")->GetPin("d"),
+			sim->GetGate("dflip")->GetPin("clk"),
+			nullptr,
+			sim->GetGate("dflip")->GetPin("q"), 
+			sim->GetGate("dflip")->GetPin("/q") }, 340, 4);
+
+		ASSERT_LT(sim->Run(1500), 1500);
 	}
 
 	TEST(TestSimulator, DFlipFlopOscillation)

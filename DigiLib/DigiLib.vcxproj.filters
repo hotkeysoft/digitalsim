@@ -105,6 +105,9 @@
     <ClInclude Include="Parser\PartsBin.h">
       <Filter>Parser</Filter>
     </ClInclude>
+    <ClInclude Include="BasicGates\DFlipFlopSR.h">
+      <Filter>BasicGates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -184,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="Parser\PartsBin.cpp">
       <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGates\DFlipFlopSR.cpp">
+      <Filter>BasicGates</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
